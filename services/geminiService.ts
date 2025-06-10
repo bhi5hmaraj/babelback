@@ -8,13 +8,16 @@ let ai: GoogleGenAI | null = null;
 let apiKeyResolved: string | undefined = undefined;
 
 try {
-  console.log(JSON.stringify(process));
+  // TODO: Move Gemini API calling to server
   if (typeof process !== 'undefined' && process.env && typeof process.env.GEMINI_API_KEY === 'string') {
     apiKeyResolved = process.env.GEMINI_API_KEY;
   }
   if (typeof process !== 'undefined' && process.env && typeof process.env.API_KEY === 'string') {
     apiKeyResolved = process.env.API_KEY;
   }
+  if (import.meta.env.VITE_GEMINI_API_KEY !== 'undefined' && typeof import.meta.env.VITE_GEMINI_API_KEY  === 'string') {
+      apiKeyResolved = import.meta.env.VITE_GEMINI_API_KEY;
+    }
 } catch (e) {
   console.error("[geminiService.ts Global] Error accessing process.env.API_KEY:", e);
 }
