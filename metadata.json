@@ -1,0 +1,8 @@
+{
+  "name": "Babelback: Synced Lyric Explorer",
+  "description": "Babelback unlocks music across languages with synchronized lyrics. Upload audio, play it, and see verse-level transcriptions, translations, transliterations, and nuanced explanations update in real-time, powered by AI.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "prompt": ""
+}
