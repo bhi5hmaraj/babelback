@@ -15,8 +15,10 @@ try {
   if (typeof process !== 'undefined' && process.env && typeof process.env.API_KEY === 'string') {
     apiKeyResolved = process.env.API_KEY;
   }
-  if (import.meta.env.VITE_GEMINI_API_KEY !== 'undefined' && typeof import.meta.env.VITE_GEMINI_API_KEY  === 'string') {
-      apiKeyResolved = import.meta.env.VITE_GEMINI_API_KEY;
+  // Ensure Vite client types are included in tsconfig.json (e.g., "types": ["vite/client"]) for proper import.meta.env typing
+  const viteEnv = (import.meta as any).env;
+  if (viteEnv && viteEnv.VITE_GEMINI_API_KEY !== 'undefined' && typeof viteEnv.VITE_GEMINI_API_KEY  === 'string') {
+      apiKeyResolved = viteEnv.VITE_GEMINI_API_KEY;
     }
 } catch (e) {
   console.error("[geminiService.ts Global] Error accessing process.env.API_KEY:", e);
@@ -99,10 +101,11 @@ export const fetchSongDataFromGemini = async (
   enableKaraokeMode: boolean,
   onProgress?: (message: string) => void
 ): Promise<SongData> => {
+  console.log(`[geminiService.ts fetchSongDataFromGemini] Called. apiKeyResolved: ${apiKeyResolved ? 'set (' + apiKeyResolved.substring(0,5) + '...)' : 'NOT SET'}, ai instance: ${ai ? 'exists' : 'null'}`);
   // console.log('[geminiService.ts fetchSongDataFromGemini] Initiating song data fetch. File:', audioFile.name, 'Target Lang:', targetLanguage, 'Karaoke:', enableKaraokeMode);
   if (!ai) {
-    console.error("[geminiService.ts fetchSongDataFromGemini] Gemini API client not initialized.");
-    throw new Error("Gemini API client is not initialized. API_KEY might be missing or inaccessible.");
+    console.error("[geminiService.ts fetchSongDataFromGemini] Gemini API client not initialized at function call. This is unexpected if global init succeeded.");
+    throw new Error("Gemini API client is not initialized. API_KEY might be missing or inaccessible at the time of function call.");
   }
 
   let uploadedFileUri: string | undefined;
@@ -110,6 +113,7 @@ export const fetchSongDataFromGemini = async (
 
   try {
     if (onProgress) onProgress("Securely uploading your audio...");
+    console.log("[geminiService.ts fetchSongDataFromGemini] About to call ai.files.upload. ai instance:", ai ? 'exists' : 'null');
     // console.log("[geminiService.ts fetchSongDataFromGemini] Uploading audio file...");
     const uploadResult = await ai.files.upload({
         file: audioFile,
@@ -174,6 +178,10 @@ Please analyze this complete audio file according to the system instructions.`
 
     // console.log("[geminiService.ts fetchSongDataFromGemini] Raw AI response text (first 500 chars):", geminiApiResponse.text?.substring(0, 500));
 
+    if (!geminiApiResponse.text) {
+      console.error("[geminiService.ts fetchSongDataFromGemini] Gemini API response text is undefined.");
+      throw new Error("Gemini API response text is undefined.");
+    }
     let jsonStr = geminiApiResponse.text.trim();
     const fenceRegex = /^```(?:json)?\s*\n?(.*?)\n?\s*```$/s;
     const match = jsonStr.match(fenceRegex);
@@ -402,7 +410,7 @@ export const fetchSingingFeedback = async (
       console.error("[geminiService.ts fetchSingingFeedback] No response or empty response text received from Gemini API.");
       throw new Error("No response or empty response text received from Gemini API for singing feedback.");
     }
-
+    // geminiApiResponse.text is now guaranteed to be a string due to the check above
     let jsonStr = geminiApiResponse.text.trim();
     const fenceRegex = /^```(?:json)?\s*\n?(.*?)\n?\s*```$/s;
     const match = jsonStr.match(fenceRegex);
