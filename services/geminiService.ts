@@ -8,6 +8,10 @@ let ai: GoogleGenAI | null = null;
 let apiKeyResolved: string | undefined = undefined;
 
 try {
+  console.log(JSON.stringify(process));
+  if (typeof process !== 'undefined' && process.env && typeof process.env.GEMINI_API_KEY === 'string') {
+    apiKeyResolved = process.env.GEMINI_API_KEY;
+  }
   if (typeof process !== 'undefined' && process.env && typeof process.env.API_KEY === 'string') {
     apiKeyResolved = process.env.API_KEY;
   }
