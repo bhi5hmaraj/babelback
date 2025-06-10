@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Babelback: Synced Lyric Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/css/phosphor.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* A nice default sans-serif font */
+    }
+    /* Custom scrollbar for better aesthetics */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1e293b; /* slate-800 */
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569; /* slate-600 */
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b; /* slate-500 */
+    }
+
+    /* Style for HTML5 audio player controls to make them more visible on dark backgrounds */
+    audio::-webkit-media-controls-panel {
+      background-color: #334155; /* slate-700, or a slightly lighter shade for contrast */
+      border-radius: 8px; /* Match app's rounded corners */
+    }
+    audio::-webkit-media-controls-play-button,
+    audio::-webkit-media-controls-timeline,
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display,
+    audio::-webkit-media-controls-mute-button,
+    audio::-webkit-media-controls-volume-slider,
+    audio::-webkit-media-controls-fullscreen-button { /* Though fullscreen might not be typical for audio */
+      filter: invert(1) brightness(1.5) contrast(1.5) saturate(0); /* Make icons white/light */
+    }
+     audio::-webkit-media-controls-timeline {
+       background-color: #475569; /* slate-600 */
+       border-radius: 4px;
+     }
+    /* Style the thumb (scrubber) on the timeline for WebKit browsers */
+    audio::-webkit-media-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        background: #0ea5e9; /* sky-500 */
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    /* Karaoke Mode Highlighting Styles - Segments are now block elements */
+    .translit-segment, .translation-segment {
+      display: block; /* Each segment takes its own line */
+      margin-bottom: 4px; /* Space between stacked segments */
+      /* border-radius: 3px; */ /* Can be added to active if desired for highlight */
+      transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+      /* line-height can be inherited or set on parent if specific spacing is needed */
+    }
+    .active-translit-segment {
+      color: #f0e6ff; 
+      font-weight: 700; 
+      background-color: #7e22ce;
+      padding: 0.1em 0.25em; /* Minimal padding for the highlight itself */
+      border-radius: 3px; /* Slight rounding for the highlight */
+    }
+    .active-translation-segment {
+      color: #eef2ff; 
+      font-weight: 600; 
+      background-color: #6d28d9; 
+      padding: 0.1em 0.25em; /* Minimal padding for the highlight itself */
+      border-radius: 3px; /* Slight rounding for the highlight */
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.4.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-slate-900 text-slate-100">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
