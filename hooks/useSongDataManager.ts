@@ -65,17 +65,17 @@ export const useSongDataManager = ({
   const currentSongDurationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    let funMessageIntervalId: NodeJS.Timeout | null = null;
-    let timerIntervalId: NodeJS.Timeout | null = null;
+    let funMessageIntervalId: number | null = null; // Changed NodeJS.Timeout to number
+    let timerIntervalId: number | null = null; // Changed NodeJS.Timeout to number
 
     if (isLoading) {
       setFunLoadingMessage(AI_THOUGHTS_AND_JOKES[Math.floor(Math.random() * AI_THOUGHTS_AND_JOKES.length)]);
-      funMessageIntervalId = setInterval(() => {
+      funMessageIntervalId = window.setInterval(() => { // Use window.setInterval
         setFunLoadingMessage(AI_THOUGHTS_AND_JOKES[Math.floor(Math.random() * AI_THOUGHTS_AND_JOKES.length)]);
       }, 3500);
       
       setElapsedLoadingTime(0);
-      timerIntervalId = setInterval(() => {
+      timerIntervalId = window.setInterval(() => { // Use window.setInterval
         setElapsedLoadingTime(prevTime => prevTime + 1);
       }, 1000);
     } else {

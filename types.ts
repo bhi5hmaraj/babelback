@@ -104,3 +104,18 @@ export interface AudioDevice {
   label: string;
   kind: 'audioinput' | 'audiooutput';
 }
+
+// For Practice History
+export interface PracticeAttempt {
+  id: number; // Auto-incremented primary key from IndexedDB
+  librarySongId: number; // Foreign key linking to LibraryEntry.id
+  songTitleForReference: string; // Title of the song at the time of practice
+  timestamp: number; // Date.now() when the practice was completed and scored
+  targetLanguage: Language; // Language practiced in
+  practicedVerseNumbers: number[]; // Array of verse numbers from the original SongData
+  userAudioBlob: Blob; // The user's recorded audio
+  userAudioFileName: string; // e.g., "Practice - [SongTitle] - V1,2 - [Timestamp].webm"
+  userAudioFileType: string; // e.g., "audio/webm"
+  singingScore: SingingScore; // The detailed score object received from AI
+  recordingDurationSeconds: number; // Duration of the user's audio recording
+}
