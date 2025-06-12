@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types'; // Added SingingScore type
-import { INITIAL_PANEL_VISIBILITY } from './constants';
+import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types'; 
+import { INITIAL_PANEL_VISIBILITY, AVAILABLE_MODELS, DEFAULT_MODEL_ID } from './constants';
 import AudioUpload from './components/AudioUpload';
 import AudioPlayer from './components/AudioPlayer';
 import LanguageSelector from './components/LanguageSelector';
@@ -17,11 +17,13 @@ import Icon from './components/Icon';
 import AboutBabelback from './components/AboutBabelback';
 import LibraryView from './components/LibraryView';
 import DeviceSelector from './components/DeviceSelector';
+import ModelSelector from './components/ModelSelector'; 
 import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
 import { addSongToLibrary, deleteSongFromLibrary, deleteAllPracticeAttemptsForSongFromDB } from './db';
-import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; // Added UseSingingPracticeReturn
+import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; 
+import { initializeAiClient } from './services/geminiService'; // Import AI client initializer
 
 import { useAppInitializer } from './hooks/useAppInitializer';
 import { useLibraryManager } from './hooks/useLibraryManager';
@@ -41,10 +43,18 @@ const App: React.FC = () => {
   const [showRecordingHelpBanner, setShowRecordingHelpBanner] = useState<boolean>(false);
   const [appError, setAppError] = useState<string | null>(null);
   const [showDeviceConfig, setShowDeviceConfig] = useState<boolean>(false);
+  const [selectedModelId, setSelectedModelId] = useState<string>(DEFAULT_MODEL_ID);
 
 
   // --- Core Hooks ---
-  const { apiKeyMissing, initializationError: rawInitializationError, isInitializing: isAppInitializing } = useAppInitializer();
+  const { apiKeyMissing, initializationError: rawInitializationError, isInitializing: isAppInitializing, resolvedApiKey } = useAppInitializer();
+
+  // Initialize AI Client once resolvedApiKey is available
+  useEffect(() => {
+    if (resolvedApiKey && !apiKeyMissing) {
+      initializeAiClient(resolvedApiKey);
+    }
+  }, [resolvedApiKey, apiKeyMissing]);
 
   const deviceManager = useDeviceManager();
   const {
@@ -64,17 +74,17 @@ const App: React.FC = () => {
     toggleLibraryView
   } = useLibraryManager();
 
-  // singingPracticeHooksRef needs to be defined before useSongDataManager if its callback uses it.
   const singingPracticeHooksRef = useRef<UseSingingPracticeReturn | null>(null);
 
   const songManager = useSongDataManager({
-    apiKeyMissing,
+    apiKeyMissing, // Pass apiKeyMissing status
+    selectedModelId, 
     refreshLibraryCallback: refreshLibrary,
     practiceExitCallback: (resetGlobalConsent?: boolean) => {
         singingPracticeHooksRef.current?.exitPractice(resetGlobalConsent);
     },
   });
-  // Destructure after songManager is defined
+
   const {
     audioFile, audioSrc, targetLanguage, songData, isLoading: isLoadingSongData, loadingMessage,
     funLoadingMessage, elapsedLoadingTime, error: songProcessingError, isKaraokeMode,
@@ -87,15 +97,12 @@ const App: React.FC = () => {
     clearCurrentSong: smClearCurrentSong,
   } = songManager;
 
-  // playbackManager depends on songData from songManager
   const playbackManager = useAudioPlaybackManager({ songData, audioPlayerRef });
-  // Destructure after playbackManager is defined
   const {
     currentVerseIndex, playbackTime, handleTimeUpdate, seekToVerse,
     handleNextVerse, handlePrevVerse, setCurrentVerseIndex, setPlaybackTime
   } = playbackManager;
 
-  // singingPractice hook depends on many states defined above
   const singingPractice = useSingingPractice({
     songData: songData,
     targetLanguage: targetLanguage,
@@ -105,12 +112,12 @@ const App: React.FC = () => {
     initialHasEarphoneConsent: globalHasEarphoneConsent,
     onEarphoneConsentGlobalUpdate: setGlobalHasEarphoneConsent,
     isKaraokeMode: isKaraokeMode,
-    selectedInputDeviceId, // From deviceManager
+    selectedInputDeviceId, 
     playbackTime: playbackTime,
     currentLibrarySongId: currentLibraryEntryId,
+    selectedModelId, 
   });
 
-  // Update the ref after singingPractice is defined
   useEffect(() => {
     singingPracticeHooksRef.current = singingPractice;
   }, [singingPractice]);
@@ -118,12 +125,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (rawInitializationError) setAppError(rawInitializationError);
-    else if (rawDeviceError && currentPage === 'main') setAppError(rawDeviceError); // Only show device error on main page if relevant
+    else if (rawDeviceError && currentPage === 'main') setAppError(rawDeviceError); 
     else if (songProcessingError) setAppError(songProcessingError);
     else if (!rawInitializationError && !rawDeviceError && !songProcessingError) setAppError(null);
   }, [rawInitializationError, rawDeviceError, songProcessingError, currentPage]);
   
-  // Clear device error if permission gets granted later or device config is hidden
   useEffect(() => {
     if (devicePermissionGranted || !showDeviceConfig) {
       if (appError === rawDeviceError) setAppError(null);
@@ -138,6 +144,15 @@ const App: React.FC = () => {
     }
   }, [singingPractice.practiceVerseStatus]);
 
+  const prevSelectedModelIdRef = useRef(selectedModelId);
+  useEffect(() => {
+    if (prevSelectedModelIdRef.current !== selectedModelId && audioFile && !isLoadingSongData) {
+      console.log(`Model changed from ${prevSelectedModelIdRef.current} to ${selectedModelId}. Re-processing current song.`);
+      handleLanguageChange(targetLanguage); 
+    }
+    prevSelectedModelIdRef.current = selectedModelId;
+  }, [selectedModelId, audioFile, targetLanguage, isLoadingSongData, smHandleLanguageChange]);
+
 
   const handlePanelToggle = useCallback((panel: keyof PanelVisibility) => {
     setPanelVisibility(prev => ({ ...prev, [panel]: !prev[panel] }));
@@ -146,6 +161,10 @@ const App: React.FC = () => {
   const toggleDeviceConfig = () => setShowDeviceConfig(prev => !prev);
 
   const handleAudioSubmit = async (file: File) => {
+    if (apiKeyMissing) {
+      setAppError(rawInitializationError || "Cannot process audio: API Key is missing.");
+      return;
+    }
     if (audioPlayerRef.current) {
       audioPlayerRef.current.pause();
       audioPlayerRef.current.currentTime = 0;
@@ -154,11 +173,11 @@ const App: React.FC = () => {
     setPlaybackTime(0);
     setCurrentLibraryEntryId(null);
     const result: SongProcessingResult | null = await smHandleAudioSubmit(file);
-    if (result && result.songData) {
+    if (result && result.songData && result.modelIdUsed) {
        const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
           title: result.songData.title || file.name,
           originalLanguage: result.songData.originalLanguage,
-          targetLanguage: targetLanguage, // Use targetLanguage from songManager state
+          targetLanguage: targetLanguage, 
           timestamp: Date.now(),
           audioFileBlob: file,
           audioFileName: file.name,
@@ -166,6 +185,7 @@ const App: React.FC = () => {
           songData: result.songData,
           processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
           songDurationSeconds: result.songDuration ? parseFloat(result.songDuration.toFixed(1)) : undefined,
+          modelIdUsed: result.modelIdUsed,
         };
         try {
             const newId = await addSongToLibrary(newLibraryEntry);
@@ -179,15 +199,19 @@ const App: React.FC = () => {
   };
 
   const handleLanguageChange = async (newLanguage: Language) => {
+    if (apiKeyMissing) {
+      setAppError(rawInitializationError || "Cannot process language change: API Key is missing.");
+      return;
+    }
     if (audioPlayerRef.current) {
         audioPlayerRef.current.pause();
         audioPlayerRef.current.currentTime = 0;
     }
     setCurrentVerseIndex(0);
     setPlaybackTime(0);
-    setCurrentLibraryEntryId(null);
+    setCurrentLibraryEntryId(null); 
     const result: SongProcessingResult | null = await smHandleLanguageChange(newLanguage);
-     if (result && result.songData && audioFile) { // audioFile from songManager state
+     if (result && result.songData && audioFile && result.modelIdUsed) { 
        const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
           title: result.songData.title || audioFile.name,
           originalLanguage: result.songData.originalLanguage,
@@ -199,10 +223,11 @@ const App: React.FC = () => {
           songData: result.songData,
           processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
           songDurationSeconds: result.songDuration ? parseFloat(result.songDuration.toFixed(1)) : undefined,
+          modelIdUsed: result.modelIdUsed, 
         };
         try {
             const newId = await addSongToLibrary(newLibraryEntry);
-            setCurrentLibraryEntryId(newId);
+            setCurrentLibraryEntryId(newId); 
             await refreshLibrary();
         } catch (dbError) {
             console.error("[App.tsx handleLanguageChange] Failed to add to library:", dbError);
@@ -221,6 +246,7 @@ const App: React.FC = () => {
     setCurrentVerseIndex(0);
     setPlaybackTime(0);
     setCurrentLibraryEntryId(entry.id);
+    setSelectedModelId(entry.modelIdUsed || DEFAULT_MODEL_ID); 
     setCurrentPage('main');
   };
 
@@ -232,7 +258,12 @@ const App: React.FC = () => {
         await deleteAllPracticeAttemptsForSongFromDB(id);
         await refreshLibrary();
 
-        if (songData && entryToDelete && audioFile && entryToDelete.audioFileName === audioFile.name && entryToDelete.targetLanguage === targetLanguage) {
+        if (songData && entryToDelete && audioFile && entryToDelete.audioFileName === audioFile.name && entryToDelete.targetLanguage === targetLanguage && entryToDelete.modelIdUsed === selectedModelId) {
+             smClearCurrentSong(audioPlayerRef);
+             setCurrentVerseIndex(0);
+             setPlaybackTime(0);
+             setCurrentLibraryEntryId(null);
+        } else if (currentLibraryEntryId === id) { 
              smClearCurrentSong(audioPlayerRef);
              setCurrentVerseIndex(0);
              setPlaybackTime(0);
@@ -246,25 +277,29 @@ const App: React.FC = () => {
   };
 
   const handlePracticeModeGlobalToggle = async () => {
-    if (!isPracticeModeGloballyEnabled) { // Trying to enable practice mode
+    if (!isPracticeModeGloballyEnabled) { 
       let hasPermission = devicePermissionGranted;
       if (!hasPermission) {
         hasPermission = await requestDevicePermissions();
       }
       if (hasPermission && selectedInputDeviceId) {
-        setAppError(null); // Clear previous permission errors
+        setAppError(null); 
         setIsPracticeModeGloballyEnabled(true);
       } else {
         setAppError(rawDeviceError || "Microphone access and a selected input device are required for Practice Mode. Please grant permission and check device settings.");
-        setIsPracticeModeGloballyEnabled(false); // Ensure it's off if permission failed
+        setIsPracticeModeGloballyEnabled(false); 
       }
-    } else { // Trying to disable practice mode
+    } else { 
       setIsPracticeModeGloballyEnabled(false);
-      singingPracticeHooksRef.current?.exitPractice(true); // resetGlobalConsent = true
+      singingPracticeHooksRef.current?.exitPractice(true); 
     }
   };
   
   const handleInitiatePracticeForVerse = async (verse: Verse) => {
+    if (apiKeyMissing) {
+      setAppError(rawInitializationError || "Cannot start practice: API Key is missing.");
+      return;
+    }
     let hasPermission = devicePermissionGranted;
     if (!hasPermission) {
       hasPermission = await requestDevicePermissions();
@@ -325,7 +360,6 @@ const App: React.FC = () => {
       return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><TechDetailsPage onNavigateBack={() => handleNavigate('main')} /></div>;
     }
 
-    // Main App UI
     if (showLibraryView && !apiKeyMissing) {
       return (
         <div className="w-full max-w-3xl bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6">
@@ -353,7 +387,7 @@ const App: React.FC = () => {
           {apiKeyMissing && (
               <div className="my-6 p-4 bg-red-800/80 border border-red-600 text-red-100 rounded-lg shadow text-center">
                   <Icon name="warning-octagon" weight="bold" className="inline-block mr-2 text-red-300" size="lg"/>
-                  <strong>Configuration Error:</strong> {appError}
+                  <strong>Configuration Error:</strong> {appError || "Gemini API Key is missing or invalid."}
               </div>
           )}
 
@@ -379,43 +413,55 @@ const App: React.FC = () => {
                         permissionGranted={devicePermissionGranted}
                         isLoading={isLoadingDevices}
                         disabled={globalIsLoading || isPracticeActive}
-                        error={rawDeviceError} // Display specific device errors here
+                        error={rawDeviceError} 
                     />
                   )}
+                  <ModelSelector
+                    selectedModelId={selectedModelId}
+                    onModelChange={setSelectedModelId}
+                    disabled={globalIsLoading || isPracticeActive}
+                  />
                   <AudioUpload
                       onAudioSubmit={handleAudioSubmit}
                       isLoading={isLoadingSongData}
-                      disabled={globalIsLoading || isPracticeActive || !selectedInputDeviceId && !showDeviceConfig} // Also disable if device config isn't shown and no input device is selected
+                      disabled={globalIsLoading || isPracticeActive || !selectedInputDeviceId && !showDeviceConfig || apiKeyMissing} 
                   />
                   <LanguageSelector
                       selectedLanguage={targetLanguage}
                       onLanguageChange={handleLanguageChange}
-                      disabled={globalIsLoading || isPracticeActive}
+                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
                   />
                   <KaraokeModeToggle
                       isKaraokeMode={isKaraokeMode}
                       onToggle={handleKaraokeModeToggleApp}
-                      disabled={globalIsLoading || isPracticeActive}
+                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
                   />
                   <PracticeModeToggle
                       isPracticeModeEnabled={isPracticeModeGloballyEnabled}
                       onToggle={handlePracticeModeGlobalToggle}
-                      disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) }
+                      disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) || apiKeyMissing }
                   />
               </>
           )}
 
           {isLoadingSongData && <LoadingSpinner message={loadingMessage || undefined} funMessage={funLoadingMessage} elapsedTime={elapsedLoadingTime} />}
-          {appError && !isLoadingSongData && !apiKeyMissing && (
+          {appError && !isLoadingSongData && !apiKeyMissing && ( // Show appError only if not API key missing error and not loading
             <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
               <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
               <strong>Error:</strong> {appError}
             </div>
           )}
+          {appError && apiKeyMissing && !rawInitializationError?.includes("Gemini API Key is missing") && ( // Show appError if API key related but not the primary missing message
+             <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
+              <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
+              <strong>Error:</strong> {appError}
+            </div>
+          )}
+
 
           <RecordingInfoBanner isVisible={showRecordingHelpBanner} />
 
-          {isPracticeActive && (
+          {isPracticeActive && !apiKeyMissing && (
               <PracticeVersePanel
                   practiceTargetVerses={singingPractice.activePracticeVerses}
                   status={singingPractice.practiceVerseStatus}
@@ -457,8 +503,8 @@ const App: React.FC = () => {
                                     !audioPlayerRef.current ||
                                     !currentSongDurationRef.current ||
                                     currentSongDurationRef.current <= 0 ||
-                                    (!selectedInputDeviceId && !devicePermissionGranted) || // Ensure mic is ready or permission can be asked
-                                    !currentLibraryEntryId
+                                    (!selectedInputDeviceId && !devicePermissionGranted) || 
+                                    !currentLibraryEntryId || apiKeyMissing
                                    }
                       >
                           <Icon name="waveform" weight="bold" className="mr-2" /> Practice this Verse
@@ -495,7 +541,7 @@ const App: React.FC = () => {
               />
           )}
 
-          {!songData && !isLoadingSongData && !appError && !apiKeyMissing && !showLibraryView && !isPracticeActive && ( <div className="text-center py-10 text-slate-400"> <Icon name="music-notes-simple" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">Configure audio devices, then upload audio and select language to begin.</p> <p className="text-xs mt-2">Enable Karaoke Mode for word-by-word synchronized transliteration!</p> </div> )}
+          {!songData && !isLoadingSongData && !appError && !apiKeyMissing && !showLibraryView && !isPracticeActive && ( <div className="text-center py-10 text-slate-400"> <Icon name="music-notes-simple" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">Configure audio devices & AI model, then upload audio and select language to begin.</p> <p className="text-xs mt-2">Enable Karaoke Mode for word-by-word synchronized transliteration!</p> </div> )}
         </div>
         <EarphoneConsentModal
           isOpen={singingPractice.showEarphoneModal}

@@ -56,6 +56,7 @@ export interface LibraryEntry {
   songData: SongData; // The full AI analysis associated with this audio and target language
   processingTimeSeconds?: number; // Time taken by AI to process the song
   songDurationSeconds?: number;   // Total duration of the audio file
+  modelIdUsed: string; // ID of the Gemini model used for this analysis
 }
 
 // For Singing Practice Mode
@@ -119,3 +120,20 @@ export interface PracticeAttempt {
   singingScore: SingingScore; // The detailed score object received from AI
   recordingDurationSeconds: number; // Duration of the user's audio recording
 }
+
+// Raw types from AI response before parsing
+export type RawSegment = { text: string; startTime: string; endTime: string };
+
+export type RawVerse = Omit<Verse, 'startTime' | 'endTime' | 'transliterationSegments' | 'translationSegments' | 'transliteration' | 'translation' | 'verseNumber'> & {
+    verseNumber?: number; // verseNumber from AI might be optional or unreliable, we re-assign it
+    startTime: string;
+    endTime: string;
+    transliteration?: string;
+    translation?: string;
+    transliterationSegments?: RawSegment[];
+    translationSegments?: RawSegment[];
+};
+
+export type RawSongData = Omit<SongData, 'verses'> & { 
+  verses: RawVerse[]; 
+};

@@ -5,6 +5,7 @@ import Icon from './Icon';
 import { getPracticeAttemptsForSongFromDB, deletePracticeAttemptFromDB } from '../db';
 import ScoreDisplay from './ScoreDisplay'; // For showing detailed score in a modal
 import LoadingSpinner from './LoadingSpinner';
+import { AVAILABLE_MODELS } from '../constants'; // For displaying model names
 
 interface LibraryViewProps {
   entries: LibraryEntry[];
@@ -105,7 +106,6 @@ const LibraryView: React.FC<LibraryViewProps> = ({ entries, onLoadSong, onDelete
         setPracticeHistories(prev => ({ ...prev, [entryId]: attempts }));
       } catch (error) {
         console.error("Failed to load practice history for song " + entryId, error);
-        // Optionally set an error state per song
       } finally {
         setIsLoadingHistory(prev => ({ ...prev, [entryId]: false }));
       }
@@ -117,7 +117,6 @@ const LibraryView: React.FC<LibraryViewProps> = ({ entries, onLoadSong, onDelete
     if (window.confirm("Delete this practice recording? This action cannot be undone.")) {
       try {
         await deletePracticeAttemptFromDB(attemptId);
-        // Refresh history for this song
         const updatedAttempts = await getPracticeAttemptsForSongFromDB(songId);
         setPracticeHistories(prev => ({ ...prev, [songId]: updatedAttempts }));
       } catch (error) {
@@ -160,6 +159,12 @@ const LibraryView: React.FC<LibraryViewProps> = ({ entries, onLoadSong, onDelete
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
+  const getModelDisplayName = (modelIdUsed?: string): string => {
+    if (!modelIdUsed) return "Unknown";
+    const modelInfo = AVAILABLE_MODELS.find(m => m.id === modelIdUsed);
+    return modelInfo ? modelInfo.name : modelIdUsed;
+  };
+
   return (
     <div className="py-6">
       <h2 className="text-2xl font-semibold text-sky-300 mb-6 text-center">My Song Library</h2>
@@ -186,6 +191,10 @@ const LibraryView: React.FC<LibraryViewProps> = ({ entries, onLoadSong, onDelete
                   <span className="text-purple-300">
                     <Icon name="hourglass-medium" weight="bold" className="mr-1" />
                     AI Time: {entry.processingTimeSeconds ? `${entry.processingTimeSeconds.toFixed(1)}s` : 'N/A'}
+                  </span>
+                  <span className="text-teal-300">
+                    <Icon name="cpu" weight="bold" className="mr-1" />
+                    Model: {getModelDisplayName(entry.modelIdUsed)}
                   </span>
                 </div>
               </div>
@@ -250,7 +259,7 @@ const LibraryView: React.FC<LibraryViewProps> = ({ entries, onLoadSong, onDelete
                 </button>
             </div>
             <p className="text-sm text-slate-300 mb-3">Song: <span className="font-semibold">{selectedScoreSongTitle}</span></p>
-            <ScoreDisplay score={selectedScore} originalSongData={null} /> {/* We don't pass originalSongData here as it's complex to retrieve for modal, focus on score */}
+            <ScoreDisplay score={selectedScore} originalSongData={null} /> 
           </div>
         </div>
       )}

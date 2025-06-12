@@ -2,7 +2,7 @@
 import { LibraryEntry, PracticeAttempt } from './types';
 
 const DB_NAME = 'BabelbackLibraryDB';
-const DB_VERSION = 2; // Incremented version for schema update
+const DB_VERSION = 3; // Incremented version for schema update (added modelIdUsed)
 const SONGS_STORE_NAME = 'songs';
 const PRACTICE_ATTEMPTS_STORE_NAME = 'practiceAttempts';
 
@@ -30,17 +30,28 @@ export const initDB = (): Promise<IDBDatabase> => {
 
     request.onupgradeneeded = (event) => {
       const tempDb = request.result;
+      let store;
       if (!tempDb.objectStoreNames.contains(SONGS_STORE_NAME)) {
-        const store = tempDb.createObjectStore(SONGS_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        store = tempDb.createObjectStore(SONGS_STORE_NAME, { keyPath: 'id', autoIncrement: true });
         store.createIndex('timestamp', 'timestamp', { unique: false });
         store.createIndex('title', 'title', { unique: false });
-        console.log('IndexedDB: Songs object store created.');
+        // Add modelIdUsed index when store is first created
+        store.createIndex('modelIdUsed', 'modelIdUsed', { unique: false });
+        console.log('IndexedDB: Songs object store created with modelIdUsed index.');
+      } else {
+        // Store exists, check if modelIdUsed index needs to be added (for upgrades from version < 3)
+        store = request.transaction!.objectStore(SONGS_STORE_NAME);
+        if (!store.indexNames.contains('modelIdUsed')) {
+          store.createIndex('modelIdUsed', 'modelIdUsed', { unique: false });
+          console.log('IndexedDB: Added modelIdUsed index to existing Songs store.');
+        }
       }
 
+
       if (!tempDb.objectStoreNames.contains(PRACTICE_ATTEMPTS_STORE_NAME)) {
-        const store = tempDb.createObjectStore(PRACTICE_ATTEMPTS_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-        store.createIndex('librarySongId', 'librarySongId', { unique: false });
-        store.createIndex('timestamp', 'timestamp', { unique: false });
+        const practiceStore = tempDb.createObjectStore(PRACTICE_ATTEMPTS_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        practiceStore.createIndex('librarySongId', 'librarySongId', { unique: false });
+        practiceStore.createIndex('timestamp', 'timestamp', { unique: false });
         console.log('IndexedDB: PracticeAttempts object store created.');
       }
     };

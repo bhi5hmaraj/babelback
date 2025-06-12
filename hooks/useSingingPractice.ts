@@ -15,7 +15,8 @@ interface UseSingingPracticeProps {
   isKaraokeMode: boolean;
   selectedInputDeviceId: string | null;
   playbackTime: number;
-  currentLibrarySongId: number | null; // New prop for linking practice attempts
+  currentLibrarySongId: number | null; 
+  selectedModelId: string; // Added to pass to fetchSingingFeedback
 }
 
 export interface UseSingingPracticeReturn {
@@ -46,13 +47,11 @@ export const useSingingPractice = ({
   songData,
   targetLanguage,
   audioPlayerRef,
-  // currentSongDurationRef, // Not directly used in this hook after changes, but kept for App.tsx
   initialHasEarphoneConsent,
   onEarphoneConsentGlobalUpdate,
-  // isKaraokeMode, // Not directly used in this hook for now
   selectedInputDeviceId,
-  // playbackTime, // Not directly used in this hook for now
-  currentLibrarySongId, // Added prop
+  currentLibrarySongId, 
+  selectedModelId, // Destructure
 }: UseSingingPracticeProps): UseSingingPracticeReturn => {
   const [practiceVerseStatus, setPracticeVerseStatus] = useState<PracticeModeStatus>(PracticeModeStatus.IDLE);
   const [activePracticeVerses, setActivePracticeVerses] = useState<Verse[]>([]);
@@ -193,13 +192,18 @@ export const useSingingPractice = ({
       setPracticeVerseStatus(PracticeModeStatus.ERROR);
       return;
     }
+    if (!selectedModelId) {
+      setPracticeError("AI Model not selected for scoring. Please ensure a model is chosen in settings.");
+      setPracticeVerseStatus(PracticeModeStatus.ERROR);
+      return;
+    }
+
     setPracticeVerseStatus(PracticeModeStatus.SCORING);
     try {
-      const score = await fetchSingingFeedback(audioBlobToProcess, versesToScore, targetLanguage);
+      const score = await fetchSingingFeedback(audioBlobToProcess, versesToScore, targetLanguage, selectedModelId);
       setPracticeScore(score);
       setPracticeVerseStatus(PracticeModeStatus.SHOWING_SCORE);
 
-      // Save practice attempt to DB
       if (currentLibrarySongId && songData) {
         const newPracticeAttempt: Omit<PracticeAttempt, 'id'> = {
           librarySongId: currentLibrarySongId,
@@ -218,7 +222,6 @@ export const useSingingPractice = ({
           console.log("[useSingingPractice] Practice attempt saved to DB.");
         } catch (dbError: any) {
           console.error("[useSingingPractice] Failed to save practice attempt:", dbError);
-          // Non-critical error for the user flow, so just log it.
           setPracticeError(prev => prev ? `${prev} (Note: Failed to save this practice to history.)` : "Failed to save this practice to history.");
         }
       }
@@ -227,7 +230,7 @@ export const useSingingPractice = ({
       setPracticeError(e.message || "Failed to get feedback from AI.");
       setPracticeVerseStatus(PracticeModeStatus.ERROR);
     }
-  }, [targetLanguage, currentLibrarySongId, songData, actualRecordingDuration]);
+  }, [targetLanguage, currentLibrarySongId, songData, actualRecordingDuration, selectedModelId]);
 
 
   const startRecording = useCallback(async () => {
@@ -299,7 +302,7 @@ export const useSingingPractice = ({
         if (recordingStartTimeRef.current) {
             const endTime = Date.now();
             setActualRecordingDuration(Math.max(0, (endTime - recordingStartTimeRef.current) / 1000));
-            recordingStartTimeRef.current = null; // Reset for next recording
+            recordingStartTimeRef.current = null; 
         }
 
 
@@ -337,7 +340,7 @@ export const useSingingPractice = ({
             if (audioBlob.size > 0 && versesActuallyRecorded.length > 0) {
                 setPracticeVerseStatus(PracticeModeStatus.AWAITING_REVIEW);
             } else if (audioBlob.size === 0) {
-                const recordingDurationCheck = recordingTimer; // Use the stateful timer for this check
+                const recordingDurationCheck = recordingTimer; 
                 let errorMsg = "Recording failed: No audio data captured. Please try again.";
                 if (recordingDurationCheck < 1 && audioChunksRef.current.length === 0) {
                      errorMsg = "Recording was very short and no audio was captured. Try recording for a bit longer or check your microphone."
