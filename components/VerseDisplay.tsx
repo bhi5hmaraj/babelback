@@ -24,7 +24,7 @@ const VerseDisplayCard: React.FC<VerseDisplayCardProps> = ({ title, content, lan
       {typeof content === 'string' ? (
         <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-base">{content || "N/A"}</p>
       ) : (
-        <div className="text-slate-200 whitespace-pre-wrap leading-relaxed text-base">{content || "N/A"}</div>
+        <div className="text-slate-200 leading-relaxed text-base">{content || "N/A"}</div>
       )}
     </div>
   );
@@ -53,28 +53,39 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
 
   const renderSegments = (
     segments: TransliterationSegment[] | TranslationSegment[] | undefined, 
-    activeSegmentClass: string,
-    baseSegmentClass: string = 'text-slate-300' // Default color for inactive segments
+    activeSegmentClassSuffix: string // e.g., 'active-translit-segment'
   ) => {
     if (!segments || segments.length === 0) return null;
+    
+    const baseSegmentClass = activeSegmentClassSuffix.includes('translit') ? 'translit-segment' : 'translation-segment';
+
     return (
-      <div>
+      <>
         {segments.map((segment, index) => {
           const isActive = currentTime >= segment.startTime && currentTime < segment.endTime;
-          // Reverted: Content is always segment.text. Highlighting is done by class.
-          const content = segment.text; 
+          const words = segment.text.split(' ').filter(word => word.length > 0);
 
           return (
-            <span
-              key={index}
-              className={`${baseSegmentClass} ${isActive ? activeSegmentClass : ''} ${activeSegmentClass.includes('translit') ? 'translit-segment' : 'translation-segment'}`}
+            <div // Use div for block-level segment container
+              key={`${baseSegmentClass}-phrase-${index}`}
+              className={`${baseSegmentClass} ${isActive ? activeSegmentClassSuffix : ''}`}
               aria-current={isActive ? "time" : undefined}
             >
-              {content}
-            </span>
+              {words.map((word, wordIndex) => (
+                <span
+                  key={`word-${index}-${wordIndex}`}
+                  className="lyric-word"
+                >
+                  {word}
+                </span>
+              ))}
+              {words.length === 0 && segment.text.trim() === "" && (
+                 <span className="lyric-word">&nbsp;</span> // Placeholder for empty segments
+              )}
+            </div>
           );
         })}
-      </div>
+      </>
     );
   };
 
@@ -82,7 +93,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
 
   let transliterationDisplayContent;
   if (isKaraokeMode && verse.transliterationSegments && verse.transliterationSegments.length > 0) {
-    transliterationDisplayContent = renderSegments(verse.transliterationSegments, 'active-translit-segment', 'text-slate-100');
+    transliterationDisplayContent = renderSegments(verse.transliterationSegments, 'active-translit-segment');
   } else if (isInstrumentalSong && (!verse.transliteration || verse.transliteration.trim() === "")) {
     transliterationDisplayContent = verse.original || "Instrumental Section";
   } else {
@@ -91,7 +102,7 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
 
   let translationDisplayContent;
   if (isKaraokeMode && verse.translationSegments && verse.translationSegments.length > 0) {
-    translationDisplayContent = renderSegments(verse.translationSegments, 'active-translation-segment', 'text-slate-300');
+    translationDisplayContent = renderSegments(verse.translationSegments, 'active-translation-segment');
   } else if (isInstrumentalSong && (!verse.translation || verse.translation.trim() === "")) {
     translationDisplayContent = verse.original || "Instrumental Section"; 
   } else {
@@ -117,16 +128,48 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
              <span className="text-xs text-slate-400 ml-1"> (to {targetLanguage})</span>
           </h3>
           <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-            <div className="flex-1 min-w-0"> {/* Transliteration Column */}
-              <h4 className="text-xs font-medium text-purple-300 mb-1">Transliteration (of Original in {targetLanguage} Script)</h4>
-              <div className="text-slate-200 whitespace-pre-wrap leading-relaxed text-base p-3 bg-slate-700/50 rounded-md min-h-[60px]">
-                {transliterationDisplayContent}
+            {/* Transliteration Column */}
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-medium text-purple-300 mb-2">Transliteration (of Original in {targetLanguage} Script)</h4>
+              <div className="rounded-md min-h-[60px]">
+                {typeof transliterationDisplayContent === 'string' ? (
+                  isInstrumentalSong && transliterationDisplayContent.includes("Instrumental") ? (
+                     <div className="translit-segment"><span className="lyric-word">{transliterationDisplayContent}</span></div>
+                  ) : transliterationDisplayContent.split('\n').map((line, lineIdx) => (
+                    <div key={`tlit-line-${lineIdx}`} className="translit-segment">
+                      {line.split(' ').filter(w => w.length > 0).map((word, wordIdx) => (
+                        <span key={`tlit-word-${lineIdx}-${wordIdx}`} className="lyric-word">
+                          {word}
+                        </span>
+                      ))}
+                       {line.trim() === "" && line.split(' ').filter(w => w.length > 0).length === 0 && <span className="lyric-word">&nbsp;</span>}
+                    </div>
+                  ))
+                ) : (
+                  transliterationDisplayContent
+                )}
               </div>
             </div>
-            <div className="flex-1 min-w-0"> {/* Translation Column */}
-              <h4 className="text-xs font-medium text-indigo-300 mb-1">Translation (to {targetLanguage})</h4>
-              <div className="text-slate-200 whitespace-pre-wrap leading-relaxed text-base p-3 bg-slate-700/50 rounded-md min-h-[60px]">
-                {translationDisplayContent}
+            {/* Translation Column */}
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-medium text-indigo-300 mb-2">Translation (to {targetLanguage})</h4>
+              <div className="rounded-md min-h-[60px]">
+                {typeof translationDisplayContent === 'string' ? (
+                   isInstrumentalSong && translationDisplayContent.includes("Instrumental") ? (
+                     <div className="translation-segment"><span className="lyric-word">{translationDisplayContent}</span></div>
+                   ) : translationDisplayContent.split('\n').map((line, lineIdx) => (
+                    <div key={`tlat-line-${lineIdx}`} className="translation-segment">
+                      {line.split(' ').filter(w => w.length > 0).map((word, wordIdx) => (
+                        <span key={`tlat-word-${lineIdx}-${wordIdx}`} className="lyric-word">
+                          {word}
+                        </span>
+                      ))}
+                      {line.trim() === "" && line.split(' ').filter(w => w.length > 0).length === 0 && <span className="lyric-word">&nbsp;</span>}
+                    </div>
+                  ))
+                ) : (
+                  translationDisplayContent
+                )}
               </div>
             </div>
           </div>

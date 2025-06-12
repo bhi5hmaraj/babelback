@@ -6,6 +6,7 @@ import { fetchSongDataFromGemini } from '../services/geminiService';
 
 export interface UseSongDataManagerProps {
   apiKeyMissing: boolean;
+  selectedModelId: string; // Added selectedModelId
   refreshLibraryCallback: () => Promise<void>;
   practiceExitCallback: (resetGlobalConsent?: boolean) => void;
 }
@@ -14,6 +15,7 @@ export interface SongProcessingResult {
   songData: SongData;
   processingTimeSeconds: number | undefined;
   songDuration: number | null;
+  modelIdUsed: string; // Added to result
 }
 
 export interface UseSongDataManagerReturn {
@@ -47,6 +49,7 @@ export interface UseSongDataManagerReturn {
 
 export const useSongDataManager = ({
   apiKeyMissing,
+  selectedModelId, // Destructure selectedModelId
   refreshLibraryCallback,
   practiceExitCallback,
 }: UseSongDataManagerProps): UseSongDataManagerReturn => {
@@ -65,17 +68,17 @@ export const useSongDataManager = ({
   const currentSongDurationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    let funMessageIntervalId: number | null = null; // Changed NodeJS.Timeout to number
-    let timerIntervalId: number | null = null; // Changed NodeJS.Timeout to number
+    let funMessageIntervalId: number | null = null; 
+    let timerIntervalId: number | null = null; 
 
     if (isLoading) {
       setFunLoadingMessage(AI_THOUGHTS_AND_JOKES[Math.floor(Math.random() * AI_THOUGHTS_AND_JOKES.length)]);
-      funMessageIntervalId = window.setInterval(() => { // Use window.setInterval
+      funMessageIntervalId = window.setInterval(() => { 
         setFunLoadingMessage(AI_THOUGHTS_AND_JOKES[Math.floor(Math.random() * AI_THOUGHTS_AND_JOKES.length)]);
       }, 3500);
       
       setElapsedLoadingTime(0);
-      timerIntervalId = window.setInterval(() => { // Use window.setInterval
+      timerIntervalId = window.setInterval(() => { 
         setElapsedLoadingTime(prevTime => prevTime + 1);
       }, 1000);
     } else {
@@ -89,46 +92,40 @@ export const useSongDataManager = ({
     };
   }, [isLoading]);
 
-  const handleFetchSongDataInternal = useCallback(async (file: File, lang: Language, karaokeEnabled: boolean): Promise<SongProcessingResult | null> => {
+  const handleFetchSongDataInternal = useCallback(async (file: File, lang: Language, karaokeEnabled: boolean, modelToUse: string): Promise<SongProcessingResult | null> => {
     if (apiKeyMissing) return null;
     if (!file) return null;
+    if (!modelToUse) {
+        setError("AI Model not selected. Please choose a model.");
+        return null;
+    }
 
     setIsLoading(true);
     setLoadingMessage("Initializing process...");
     setError(null);
-    setSongData(null); // Clear previous song data
+    setSongData(null); 
     processingStartTimeRef.current = Date.now();
 
     const onProgressUpdate = (message: string) => setLoadingMessage(message);
 
     try {
-      const data = await fetchSongDataFromGemini(file, lang, karaokeEnabled, onProgressUpdate);
+      const data = await fetchSongDataFromGemini(file, lang, karaokeEnabled, modelToUse, onProgressUpdate);
       const processingTimeSeconds = processingStartTimeRef.current ? (Date.now() - processingStartTimeRef.current) / 1000 : undefined;
       const durationToSave = currentSongDurationRef.current;
 
       if (data && (data.verses?.length > 0 || data.originalLanguage === "Instrumental")) {
         setSongData(data);
         if (data.originalLanguage === "Instrumental" && data.verses.length === 0) setError(null);
-        
-        // Library addition is now handled in App.tsx after this call resolves
-        // but we need to await refreshLibraryCallback if it's called from here for consistency,
-        // however, addSongToLibrary itself is not here anymore.
-        // This simplifies the hook: it just fetches and sets data. App.tsx coordinates library.
-
       } else {
         const errorMsg = data?.verses?.length === 0 ? "AI found no lyrical verses. It might be instrumental." : "No valid song data received from AI.";
         setError(errorMsg);
-        setSongData(data); // Set even if partial or just instrumental
+        setSongData(data); 
       }
-      // Ensure data is not null before constructing the result.
-      // If data is null due to an early exit or major AI error, this part shouldn't be reached
-      // or should handle 'data' being potentially null if AI could return null for SongData.
-      // fetchSongDataFromGemini is typed to return SongData, so data should be SongData here.
-      return { songData: data, processingTimeSeconds, songDuration: durationToSave };
+      return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: modelToUse };
     } catch (e: any) {
       setError(e.message || "An unexpected error occurred.");
       setSongData(null);
-      return null; // Indicate failure
+      return null; 
     } finally {
       setIsLoading(false);
       setLoadingMessage(null);
@@ -138,37 +135,33 @@ export const useSongDataManager = ({
 
 
   const handleAudioSubmit = useCallback(async (file: File): Promise<SongProcessingResult | null> => {
-    // Player reset is handled in App.tsx
     setAudioFile(file);
     const newObjectUrl = URL.createObjectURL(file);
-    setAudioSrc(newObjectUrl); // Old URL revoked in App.tsx's effect
+    setAudioSrc(newObjectUrl); 
     setSongData(null);
-    // currentVerseIndex and playbackTime reset handled in App.tsx via playbackManager
     currentSongDurationRef.current = null;
     setError(null);
     practiceExitCallback(false);
     
-    return handleFetchSongDataInternal(file, targetLanguage, isKaraokeMode);
-  }, [targetLanguage, isKaraokeMode, practiceExitCallback, handleFetchSongDataInternal]);
+    return handleFetchSongDataInternal(file, targetLanguage, isKaraokeMode, selectedModelId);
+  }, [targetLanguage, isKaraokeMode, selectedModelId, practiceExitCallback, handleFetchSongDataInternal]);
 
   const handleLanguageChange = useCallback(async (newLanguage: Language): Promise<SongProcessingResult | null> => {
     setTargetLanguage(newLanguage);
     if (audioFile && !apiKeyMissing) {
-      // Player reset handled in App.tsx
       setSongData(null);
-      // currentVerseIndex and playbackTime reset handled in App.tsx
       setError(null);
-      currentSongDurationRef.current = null;
+      currentSongDurationRef.current = null; 
       practiceExitCallback(false);
-      return handleFetchSongDataInternal(audioFile, newLanguage, isKaraokeMode);
+      return handleFetchSongDataInternal(audioFile, newLanguage, isKaraokeMode, selectedModelId);
     }
     return null;
-  }, [audioFile, apiKeyMissing, isKaraokeMode, practiceExitCallback, handleFetchSongDataInternal]);
+  }, [audioFile, apiKeyMissing, isKaraokeMode, selectedModelId, practiceExitCallback, handleFetchSongDataInternal]);
   
   const handleKaraokeModeToggle = useCallback(() => {
     const newKaraokeMode = !isKaraokeMode;
     setIsKaraokeMode(newKaraokeMode);
-    if (songData && audioFile) { // If a song is loaded
+    if (songData && audioFile) { 
         setError("Karaoke mode changed. Re-process audio (e.g., change language or re-upload) for this setting to apply to the current song's detailed timings.");
     }
   }, [isKaraokeMode, songData, audioFile]);
@@ -185,7 +178,7 @@ export const useSongDataManager = ({
     const loadedFile = new File([entry.audioFileBlob], entry.audioFileName, { type: entry.audioFileType });
     setAudioFile(loadedFile);
     const newObjectUrl = URL.createObjectURL(loadedFile);
-    setAudioSrc(newObjectUrl); // Old URL revoked in App.tsx's effect
+    setAudioSrc(newObjectUrl); 
     setSongData(entry.songData);
     setTargetLanguage(entry.targetLanguage);
     currentSongDurationRef.current = entry.songDurationSeconds ?? null;
@@ -194,6 +187,9 @@ export const useSongDataManager = ({
     setError(null);
     setIsLoading(false);
     practiceExitCallback(false);
+    // Note: The selectedModelId in App.tsx is NOT changed here.
+    // If the user wants to re-process this library song with a different model,
+    // they would change the model in ModelSelector, then trigger re-processing (e.g., by changing language).
   }, [practiceExitCallback]);
 
   const clearCurrentSong = useCallback((audioPlayerRef: React.RefObject<HTMLAudioElement | null>) => {
@@ -203,10 +199,9 @@ export const useSongDataManager = ({
     }
     setSongData(null);
     setAudioFile(null);
-    // audioSrc revocation handled by App.tsx's useEffect on audioSrc change
     setAudioSrc(null); 
     currentSongDurationRef.current = null;
-    practiceExitCallback(true); // Reset global consent as well
+    practiceExitCallback(true); 
   }, [practiceExitCallback]);
 
 
