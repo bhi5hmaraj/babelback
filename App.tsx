@@ -124,17 +124,28 @@ const App: React.FC = () => {
 
 
   useEffect(() => {
-    if (rawInitializationError) setAppError(rawInitializationError);
-    else if (rawDeviceError && currentPage === 'main') setAppError(rawDeviceError); 
-    else if (songProcessingError) setAppError(songProcessingError);
-    else if (!rawInitializationError && !rawDeviceError && !songProcessingError) setAppError(null);
-  }, [rawInitializationError, rawDeviceError, songProcessingError, currentPage]);
+    if (rawInitializationError) {
+      setAppError(rawInitializationError);
+    } else if (songProcessingError) {
+      setAppError(songProcessingError);
+    } else if (rawDeviceError && !rawDeviceError.includes("Microphone permission not granted")) {
+      // Only set device error as appError if it's NOT the specific permission informational message.
+      setAppError(rawDeviceError);
+    } else if (!rawInitializationError && !songProcessingError && (!rawDeviceError || rawDeviceError.includes("Microphone permission not granted"))) {
+      // If other errors are clear, and deviceError is either null or just the permission info, clear appError.
+      setAppError(null);
+    }
+  }, [rawInitializationError, songProcessingError, rawDeviceError]);
   
   useEffect(() => {
     if (devicePermissionGranted || !showDeviceConfig) {
-      if (appError === rawDeviceError) setAppError(null);
+      // If permission is now granted, or device config is hidden,
+      // and the current appError was specifically the "permission not granted" message, clear it.
+      if (appError && appError.includes("Microphone permission not granted")) {
+        setAppError(null);
+      }
     }
-  }, [devicePermissionGranted, showDeviceConfig, appError, rawDeviceError]);
+  }, [devicePermissionGranted, showDeviceConfig, appError]);
 
   useEffect(() => {
     if (singingPractice.practiceVerseStatus === PracticeModeStatus.RECORDING) {
@@ -424,7 +435,7 @@ const App: React.FC = () => {
                   <AudioUpload
                       onAudioSubmit={handleAudioSubmit}
                       isLoading={isLoadingSongData}
-                      disabled={globalIsLoading || isPracticeActive || !selectedInputDeviceId && !showDeviceConfig || apiKeyMissing} 
+                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing} // Simplified disabled logic
                   />
                   <LanguageSelector
                       selectedLanguage={targetLanguage}
@@ -445,13 +456,13 @@ const App: React.FC = () => {
           )}
 
           {isLoadingSongData && <LoadingSpinner message={loadingMessage || undefined} funMessage={funLoadingMessage} elapsedTime={elapsedLoadingTime} />}
-          {appError && !isLoadingSongData && !apiKeyMissing && ( // Show appError only if not API key missing error and not loading
+          {appError && !isLoadingSongData && !apiKeyMissing && ( 
             <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
               <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
               <strong>Error:</strong> {appError}
             </div>
           )}
-          {appError && apiKeyMissing && !rawInitializationError?.includes("Gemini API Key is missing") && ( // Show appError if API key related but not the primary missing message
+          {appError && apiKeyMissing && !rawInitializationError?.includes("Gemini API Key is missing") && ( 
              <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
               <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
               <strong>Error:</strong> {appError}
