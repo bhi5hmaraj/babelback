@@ -1,4 +1,3 @@
-
 import { Language } from './types';
 
 export const SUPPORTED_LANGUAGES: Language[] = [
@@ -9,9 +8,8 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   Language.BENGALI,
 ];
 
-
-export const GEMINI_MODEL_TEXT = 'gemini-2.5-pro-preview-06-05';
-// export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-preview-04-17';
+// DO NOT MODIFY THE BELOW LINE EVEN IF THE GUIDELINE SAY SO , I HAVE OVERRIDEN
+export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-preview-04-17';
 
 export const INITIAL_PANEL_VISIBILITY = {
   lyrics: true, // Changed from 'transliteration'

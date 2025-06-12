@@ -1,25 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
-import { Verse, PracticeModeStatus, SingingScore, TransliterationSegment, SongData } from '../types'; // Added SongData
-import Icon from './Icon'; 
+import { Verse, PracticeModeStatus, SingingScore, TransliterationSegment, SongData } from '../types';
+import Icon from './Icon';
 import LoadingSpinner from './LoadingSpinner';
 import ScoreDisplay from './ScoreDisplay';
+// import RealtimeWaveform from './RealtimeWaveform'; // Removed
 
 interface PracticeVersePanelProps {
-  practiceTargetVerses: Verse[]; 
+  practiceTargetVerses: Verse[];
   status: PracticeModeStatus;
   score: SingingScore | null;
   error: string | null;
   recordedAudioUrl: string | null;
   onStartRecording: () => void;
   onStopRecording: () => void;
-  onTryAgain: () => void; // Re-record current attempt
-  onSubmitForScoring: () => void; // New: submit after review
+  onTryAgain: () => void;
+  onSubmitForScoring: () => void;
   onExit: () => void;
-  currentTimeForHighlight: number; 
-  isKaraokeModeEnabled: boolean;  
+  currentTimeForHighlight: number;
+  isKaraokeModeEnabled: boolean;
   recordingFormattedTime: string;
-  originalSongDataForDisplay: SongData | null; // New prop
+  originalSongDataForDisplay: SongData | null;
+  // recordingStream: MediaStream | null; // Removed
 }
 
 const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
@@ -31,12 +33,13 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
   onStartRecording,
   onStopRecording,
   onTryAgain,
-  onSubmitForScoring, 
+  onSubmitForScoring,
   onExit,
   currentTimeForHighlight,
   isKaraokeModeEnabled,
   recordingFormattedTime,
-  originalSongDataForDisplay, // New prop
+  originalSongDataForDisplay,
+  // recordingStream, // Removed
 }) => {
 
   const getPanelTitle = () => {
@@ -47,7 +50,7 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
     if (firstVerseNum === lastVerseNum) return `Practice: Verse ${firstVerseNum}`;
     return `Practice: Verses ${firstVerseNum}-${lastVerseNum}`;
   };
-  
+
   const renderTransliterationForPractice = () => {
     if (!practiceTargetVerses || practiceTargetVerses.length === 0) {
       return <p className="text-slate-100 text-base leading-relaxed">Transliteration not available for practice.</p>;
@@ -64,9 +67,8 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
               )}
               {canUseSegmentsForThisVerse ? (
                 verse.transliterationSegments!.map((segment, segIdx) => {
-                  // Highlight only if currently recording/playing back song, not for static review display
-                  const isActive = (status === PracticeModeStatus.RECORDING) && 
-                                   currentTimeForHighlight >= segment.startTime && 
+                  const isActive = (status === PracticeModeStatus.RECORDING) &&
+                                   currentTimeForHighlight >= segment.startTime &&
                                    currentTimeForHighlight < segment.endTime;
                   return (
                     <span
@@ -97,8 +99,8 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
         <h3 className="text-lg font-semibold text-sky-300">
           {getPanelTitle()}
         </h3>
-        <button 
-          onClick={onExit} 
+        <button
+          onClick={onExit}
           className="text-xs text-slate-400 hover:text-sky-400 transition-colors"
           disabled={status === PracticeModeStatus.SCORING || status === PracticeModeStatus.PROCESSING_AUDIO}
         >
@@ -114,6 +116,22 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
             {renderTransliterationForPractice()}
         </div>
       </div>
+
+      {/* Realtime Waveform Display Removed Here */}
+      {/*
+      {status === PracticeModeStatus.RECORDING && recordingStream && (
+        <div className="my-4 p-2 bg-slate-800 rounded-lg">
+          <RealtimeWaveform
+            stream={recordingStream}
+            isActive={status === PracticeModeStatus.RECORDING}
+            width={320}
+            height={60}
+            lineColor="#34d399"
+            backgroundColor="#1e293b"
+          />
+        </div>
+      )}
+      */}
 
       {status === PracticeModeStatus.READY_TO_RECORD && (
         <button
@@ -176,7 +194,7 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
           <ScoreDisplay score={score} originalSongData={originalSongDataForDisplay} />
         </>
       )}
-      
+
       {status === PracticeModeStatus.ERROR && error && (
         <div className="my-4 p-3 bg-red-800/80 border border-red-600 text-red-100 rounded-lg text-sm">
           <p><strong>Error:</strong> {error}</p>
@@ -184,10 +202,9 @@ const PracticeVersePanel: React.FC<PracticeVersePanelProps> = ({
       )}
 
       {(status === PracticeModeStatus.SHOWING_SCORE || status === PracticeModeStatus.ERROR) && (
-        // Don't show this Try Again if already in review (handled by the condition excluding AWAITING_REVIEW implicitly)
         <div className="mt-6 flex justify-center">
           <button
-            onClick={onTryAgain} // This "Try Again" means re-record the same verses
+            onClick={onTryAgain}
             className="px-5 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors text-sm flex items-center"
           >
             <Icon name="arrow-clockwise" className="mr-2" /> Try Again
