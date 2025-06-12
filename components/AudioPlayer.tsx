@@ -67,12 +67,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   useEffect(() => {
     if (audioRef.current && src) {
       audioRef.current.load(); 
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.warn("Audio auto-play after src change was prevented:", error);
-        });
-      }
+      // Do not auto-play. User will use controls to start playback.
     } else if (audioRef.current && !src) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;

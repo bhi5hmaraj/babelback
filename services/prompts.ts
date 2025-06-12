@@ -32,6 +32,7 @@ export const getSongAnalysisSystemPrompt = (
   // console.log('[prompts.ts getSongAnalysisSystemPrompt] Generating with params:', { targetLanguage, enableKaraokeMode, audioFileName });
 
   const transliterationScriptInstruction = getTransliterationScriptInstruction(targetLanguage);
+  const contemporaryLanguageInstruction = `Use a colloquial, contemporary, and natural-sounding style for all ${targetLanguage} text, as if explaining to a friend. Avoid overly formal or archaic language.`;
 
   const karaokeInstructions = `
 c. 'transliterationSegments': REQUIRED. Array of objects for SUNG PHRASES from 'original' lyrics.
@@ -41,16 +42,16 @@ c. 'transliterationSegments': REQUIRED. Array of objects for SUNG PHRASES from '
    - Each object: { 'text': string, 'startTime': "MM:SS.sss", 'endTime': "MM:SS.sss" }.
 d. 'translationSegments': REQUIRED. Array of objects for TRANSLATED SUNG PHRASES (into ${targetLanguage} native script).
    - Each 'translationSegment' MUST correspond EXACTLY in timing and phrasing to a 'transliterationSegment'.
-   - The 'text' is the translation of the phrase from the corresponding 'transliterationSegment', written in ${targetLanguage} native script.
+   - The 'text' is the translation of the phrase from the corresponding 'transliterationSegment', written in ${targetLanguage} native script. ${contemporaryLanguageInstruction}
    - Each object: { 'text': string, 'startTime': "MM:SS.sss", 'endTime': "MM:SS.sss" }. Timings MUST match corresponding transliterationSegment.
-e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}).
+e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
 If Karaoke Mode is NOT active, provide 'transliteration' (single string, phonetically representing original lyrics as per the rule above) and 'translation' (single string) per verse instead of 'transliterationSegments' and 'translationSegments'.
 `;
 
   const standardTransliterationInstruction = `
 c. 'transliteration': Phonetic representation of 'original' lyrics, ${transliterationScriptInstruction}.
-d. 'translation': Full translation of the verse into ${targetLanguage} native script.
-e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}).
+d. 'translation': Full translation of the verse into ${targetLanguage} native script. ${contemporaryLanguageInstruction}
+e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
 `;
 
 const fullPrompt = `You are an expert multilingual music lyric analyst and translator.
@@ -59,14 +60,14 @@ For each verse, provide 'startTime' and 'endTime' ("MM:SS").
 For each verse, also provide:
     a. 'original': Verbatim transcribed lyrics.
     ${enableKaraokeMode ? karaokeInstructions : standardTransliterationInstruction}
-Provide 'summary' and 'detailedAnalysis' in ${targetLanguage} native script.
+Provide 'summary' and 'detailedAnalysis' in ${targetLanguage} native script. These also MUST follow: ${contemporaryLanguageInstruction}
 
 Respond ONLY with valid JSON (no markdown \`\`\`json). Structure:
 {
   "title": "Song Title",
   "originalLanguage": "Detected language",
-  "summary": "Summary...",
-  "detailedAnalysis": "Analysis...",
+  "summary": "Summary in contemporary ${targetLanguage}...",
+  "detailedAnalysis": "Analysis in contemporary ${targetLanguage}...",
   "verses": [
     {
       "verseNumber": 1,
@@ -79,12 +80,12 @@ Respond ONLY with valid JSON (no markdown \`\`\`json). Structure:
              { "text": "Phonetic phrase 2 (per instruction)", "startTime": "00:03.500", "endTime": "00:05.900" }
            ],
            "translationSegments": [
-             { "text": "Translated phrase 1 (in ${targetLanguage})", "startTime": "00:01.123", "endTime": "00:03.456" },
-             { "text": "Translated phrase 2 (in ${targetLanguage})", "startTime": "00:03.500", "endTime": "00:05.900" }
+             { "text": "Translated phrase 1 (in contemporary ${targetLanguage})", "startTime": "00:01.123", "endTime": "00:03.456" },
+             { "text": "Translated phrase 2 (in contemporary ${targetLanguage})", "startTime": "00:03.500", "endTime": "00:05.900" }
            ],`
         : `"transliteration": "Full verse phonetic transliteration (per instruction)...",
-           "translation": "Full verse translation (in ${targetLanguage})...",`}
-      "meaning": "Meaning (in ${targetLanguage})..."
+           "translation": "Full verse translation (in contemporary ${targetLanguage})...",`}
+      "meaning": "Meaning (in contemporary ${targetLanguage})..."
     }
   ]
 }
@@ -96,7 +97,7 @@ GUIDELINES:
     - 'transliterationSegments' & 'translationSegments' 'startTime'/'endTime': "MM:SS.sss".
     - Segments are sung phrases (3-5 words). AVOID single words.
     - 'transliterationSegments.text' MUST follow the specific transliteration instruction provided (considering target language script and phonetic guidance for English speakers if target is English).
-- All user-facing text (translation, meaning, summary, analysis): ${targetLanguage} native script.
+- All user-facing text (translation, meaning, summary, analysis): ${targetLanguage} native script, following the contemporary and colloquial style requested.
 - Instrumental: "originalLanguage": "Instrumental", "summary": "Instrumental.", "detailedAnalysis": "N/A.", "verses": [].
 - "verseNumber" sequential from 1. All fields mandatory based on Karaoke Mode.
 `;

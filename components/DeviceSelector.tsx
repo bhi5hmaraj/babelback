@@ -10,10 +10,10 @@ interface DeviceSelectorProps {
   selectedOutputDeviceId: string | null;
   onSelectInputDevice: (deviceId: string) => void;
   onSelectOutputDevice: (deviceId: string) => void;
-  onRequestPermissions?: () => void; // Optional: callback to trigger permission prompt
-  permissionGranted?: boolean; // Optional: status of microphone permission
+  onRequestPermissions?: () => Promise<boolean | void>; // Can be async
+  permissionGranted?: boolean; 
   isLoading: boolean;
-  disabled: boolean; // General disable for the component
+  disabled: boolean; 
   error?: string | null;
 }
 
@@ -30,9 +30,9 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   disabled,
   error
 }) => {
-  const renderDeviceOptions = (devices: AudioDevice[]) => {
+  const renderDeviceOptions = (devices: AudioDevice[], type: 'input' | 'output') => {
     if (!devices || devices.length === 0) {
-      return <option value="">No devices found</option>;
+      return <option value="">No {type === 'input' ? 'microphones' : 'speakers'} found</option>;
     }
     return devices.map(device => (
       <option key={device.deviceId} value={device.deviceId}>
@@ -42,21 +42,20 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   };
 
   return (
-    <div className="my-6 p-4 bg-slate-800/80 rounded-lg shadow-md backdrop-blur-sm">
+    <div className="my-6 p-4 bg-slate-800/70 rounded-lg shadow-md backdrop-blur-sm transition-all duration-300 ease-in-out">
       <h3 className="text-md font-semibold text-slate-300 mb-3">Audio Device Configuration</h3>
       {isLoading && (
-        <div className="flex items-center text-slate-400">
+        <div className="flex items-center text-slate-400 text-sm">
           <Icon name="spinner-gap" className="animate-spin mr-2" />
           Loading audio devices...
         </div>
       )}
       {error && !isLoading && <p className="text-xs text-red-400 mb-2">{error}</p>}
       
-      {!isLoading && !permissionGranted && onRequestPermissions && (
+      {!isLoading && !permissionGranted && onRequestPermissions && !disabled && (
          <button
           onClick={onRequestPermissions}
           className="mb-3 px-3 py-1.5 text-xs bg-sky-600 text-white rounded hover:bg-sky-700 transition-colors flex items-center"
-          disabled={disabled}
         >
           <Icon name="lock-key-open" className="mr-2" /> Grant Mic Permission for Device Names
         </button>
@@ -74,8 +73,9 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               onChange={(e) => onSelectInputDevice(e.target.value)}
               disabled={disabled || isLoading || inputDevices.length === 0}
               className="w-full p-2.5 border border-slate-600 rounded-lg shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-slate-700 text-slate-100 appearance-none pr-10 transition-colors"
+              aria-label="Select input device"
             >
-              {renderDeviceOptions(inputDevices)}
+              {renderDeviceOptions(inputDevices, 'input')}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
               <Icon name="caret-down" size="sm" />
@@ -94,8 +94,9 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               onChange={(e) => onSelectOutputDevice(e.target.value)}
               disabled={disabled || isLoading || outputDevices.length === 0}
               className="w-full p-2.5 border border-slate-600 rounded-lg shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-slate-700 text-slate-100 appearance-none pr-10 transition-colors"
+              aria-label="Select output device"
             >
-              {renderDeviceOptions(outputDevices)}
+              {renderDeviceOptions(outputDevices, 'output')}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
               <Icon name="caret-down" size="sm" />
@@ -104,7 +105,8 @@ const DeviceSelector: React.FC<DeviceSelectorProps> = ({
         </div>
       </div>
        <p className="mt-3 text-xs text-slate-400">
-        Ensure you've granted microphone permissions in your browser for full functionality. Output selection might require specific browser support (e.g., Chrome, Edge).
+        {!permissionGranted ? "Grant microphone permission to see full device names and enable recording features. " : ""}
+        Output selection primarily affects the main song player and may require specific browser support (e.g., Chrome, Edge).
       </p>
     </div>
   );
