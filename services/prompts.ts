@@ -29,94 +29,69 @@ export const getSongAnalysisSystemPrompt = (
   enableKaraokeMode: boolean,
   audioFileName: string
 ): string => {
-  // console.log('[prompts.ts getSongAnalysisSystemPrompt] Generating with params:', { targetLanguage, enableKaraokeMode, audioFileName });
-
   const transliterationScriptInstruction = getTransliterationScriptInstruction(targetLanguage);
   const contemporaryLanguageInstruction = `Use a colloquial, contemporary, and natural-sounding style for all ${targetLanguage} text, as if explaining to a friend. Avoid overly formal or archaic language.`;
 
-  const karaokeInstructions = `
-c. 'transliterationSegments': REQUIRED. Array of objects for SUNG PHRASES from 'original' lyrics.
-   - Each 'text' field in 'transliterationSegments' MUST be the phonetic representation of the original sung phrase, ${transliterationScriptInstruction}.
+  const karaokeGuidance = `
+For 'transliterationSegments':
+   - Each 'text' field MUST be the phonetic representation of the original sung phrase, ${transliterationScriptInstruction}.
    - A "sung phrase" is typically 3-5 words (can be 2-7) melodically connected.
    - **CRITICAL**: Group words into natural sung phrases. **STRICTLY AVOID single-word segments** unless sung in isolation with clear pauses.
-   - Each object: { 'text': string, 'startTime': "MM:SS.sss", 'endTime': "MM:SS.sss" }.
-d. 'translationSegments': REQUIRED. Array of objects for TRANSLATED SUNG PHRASES (into ${targetLanguage} native script).
+   - Ensure 'startTime' and 'endTime' are in "MM:SS.sss" format.
+For 'translationSegments':
    - Each 'translationSegment' MUST correspond EXACTLY in timing and phrasing to a 'transliterationSegment'.
    - The 'text' is the translation of the phrase from the corresponding 'transliterationSegment', written in ${targetLanguage} native script. ${contemporaryLanguageInstruction}
-   - Each object: { 'text': string, 'startTime': "MM:SS.sss", 'endTime': "MM:SS.sss" }. Timings MUST match corresponding transliterationSegment.
-e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
-If Karaoke Mode is NOT active, provide 'transliteration' (single string, phonetically representing original lyrics as per the rule above) and 'translation' (single string) per verse instead of 'transliterationSegments' and 'translationSegments'.
+   - Ensure 'startTime' and 'endTime' are in "MM:SS.sss" format and match corresponding transliterationSegment.
+For 'meaning' (per verse): Provide a DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
 `;
 
-  const standardTransliterationInstruction = `
-c. 'transliteration': Phonetic representation of 'original' lyrics, ${transliterationScriptInstruction}.
-d. 'translation': Full translation of the verse into ${targetLanguage} native script. ${contemporaryLanguageInstruction}
-e. 'meaning': DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
+  const standardGuidance = `
+For 'transliteration' (per verse): Provide a phonetic representation of 'original' lyrics, ${transliterationScriptInstruction}.
+For 'translation' (per verse): Provide a full translation of the verse into ${targetLanguage} native script. ${contemporaryLanguageInstruction}
+For 'meaning' (per verse): Provide a DETAILED explanation of the 'translation' (the translated verse in ${targetLanguage}). The explanation itself should be in ${targetLanguage}. ${contemporaryLanguageInstruction}
 `;
 
 const fullPrompt = `You are an expert multilingual music lyric analyst and translator.
 Process the entire audio file. Transcribe lyrics ('original'), determine original language, segment into verses.
-For each verse, provide 'startTime' and 'endTime' ("MM:SS").
-For each verse, also provide:
-    a. 'original': Verbatim transcribed lyrics.
-    ${enableKaraokeMode ? karaokeInstructions : standardTransliterationInstruction}
-Provide 'summary' and 'detailedAnalysis' in ${targetLanguage} native script. These also MUST follow: ${contemporaryLanguageInstruction}
+For each verse, provide 'startTime' and 'endTime' in "MM:SS" format.
+Additionally, for each verse, provide the content for 'original' and other fields as per the response schema and the specific guidance below.
 
-Respond ONLY with valid JSON (no markdown \`\`\`json). Structure:
-{
-  "title": "Song Title",
-  "originalLanguage": "Detected language",
-  "summary": "Summary in contemporary ${targetLanguage}...",
-  "detailedAnalysis": "Analysis in contemporary ${targetLanguage}...",
-  "verses": [
-    {
-      "verseNumber": 1,
-      "original": "Original phrase one, original phrase two.",
-      "startTime": "00:00",
-      "endTime": "00:15",
-      ${enableKaraokeMode
-        ? `"transliterationSegments": [
-             { "text": "Phonetic phrase 1 (per instruction)", "startTime": "00:01.123", "endTime": "00:03.456" },
-             { "text": "Phonetic phrase 2 (per instruction)", "startTime": "00:03.500", "endTime": "00:05.900" }
-           ],
-           "translationSegments": [
-             { "text": "Translated phrase 1 (in contemporary ${targetLanguage})", "startTime": "00:01.123", "endTime": "00:03.456" },
-             { "text": "Translated phrase 2 (in contemporary ${targetLanguage})", "startTime": "00:03.500", "endTime": "00:05.900" }
-           ],`
-        : `"transliteration": "Full verse phonetic transliteration (per instruction)...",
-           "translation": "Full verse translation (in contemporary ${targetLanguage})...",`}
-      "meaning": "Meaning (in contemporary ${targetLanguage})..."
-    }
-  ]
-}
+${enableKaraokeMode ? karaokeGuidance : standardGuidance}
+
+For 'summary' and 'detailedAnalysis' (overall song): Provide these in ${targetLanguage} native script, following: ${contemporaryLanguageInstruction}
 
 GUIDELINES:
 - 'title': If discernible from lyrics or common knowledge about the file; otherwise, use a placeholder based on "${audioFileName}".
-- Verse 'startTime'/'endTime': "MM:SS".
-- If Karaoke:
-    - 'transliterationSegments' & 'translationSegments' 'startTime'/'endTime': "MM:SS.sss".
-    - Segments are sung phrases (3-5 words). AVOID single words.
-    - 'transliterationSegments.text' MUST follow the specific transliteration instruction provided (considering target language script and phonetic guidance for English speakers if target is English).
-- All user-facing text (translation, meaning, summary, analysis): ${targetLanguage} native script, following the contemporary and colloquial style requested.
-- Instrumental: "originalLanguage": "Instrumental", "summary": "Instrumental.", "detailedAnalysis": "N/A.", "verses": [].
-- "verseNumber" sequential from 1. All fields mandatory based on Karaoke Mode.
+- All user-facing text (translation, meaning, summary, analysis): Must be in ${targetLanguage} native script and adhere to the contemporary and colloquial style requested.
+- Instrumental tracks: Set "originalLanguage" to "Instrumental", "summary" to "Instrumental.", "detailedAnalysis" to "N/A.", and "verses" to an empty array.
+- "verseNumber" should be sequential, starting from 1. All fields defined in the schema are mandatory unless specified as nullable/optional in the schema.
+- Adhere strictly to the JSON schema provided in the API call for the response structure. Your primary role is to populate the fields of this schema with high-quality content.
 `;
-  // console.log('[prompts.ts getSongAnalysisSystemPrompt] Generated prompt length:', fullPrompt.length);
   return fullPrompt;
+};
+
+export const getSongAnalysisUserPromptText = (
+  targetLanguage: Language,
+  audioFileName: string,
+  enableKaraokeMode: boolean
+): string => {
+  return `Target Language for all user-facing text outputs (translation, transliteration, meaning, summary, detailed analysis): ${targetLanguage}.
+Original filename (for reference if title is not discernible): "${audioFileName}".
+Karaoke Mode Active: ${enableKaraokeMode}.
+The provided audio file should be processed in its entirety.
+Please analyze this complete audio file according to the system instructions and populate the fields of the provided response schema.`;
 };
 
 
 export interface ReferenceVerseForPrompt {
   originalVerseNumber: number;
-  transliteratedText: string; // Full transliteration of this verse
-  // Relative start/end times of this verse within the practiced segment can be included if helpful for AI
-  // For now, we're passing segment timings separately in referenceRelativeTimingsJson
+  transliteratedText: string;
 }
 
 export const getSingingFeedbackPrompt = (
   targetLanguage: Language,
-  referenceVersesInfo: ReferenceVerseForPrompt[], // Changed from fullReferenceSegmentsText
-  referenceSegmentTimingsJson: string // JSON string of segment-level timings if available
+  referenceVersesInfo: ReferenceVerseForPrompt[],
+  referenceSegmentTimingsJson: string
 ): string => {
   const isTargetEnglish = targetLanguage === Language.ENGLISH;
   const pronunciationGuidance = isTargetEnglish
@@ -127,8 +102,7 @@ export const getSingingFeedbackPrompt = (
     `Verse ${v.originalVerseNumber}: "${v.transliteratedText}"`
   ).join('\n');
 
-  const fullPrompt = `
-You are an expert multilingual singing coach for the language: ${targetLanguage}.
+  const fullPrompt = `You are an expert multilingual singing coach for the language: ${targetLanguage}.
 The user has attempted to sing a sequence of song verses. Their recorded audio is provided.
 
 The reference lyrics they were trying to sing, broken down by original verse number, are:
@@ -137,51 +111,24 @@ ${referenceVersesStringForPrompt}
 The expected relative timings for the finer sung phrases/segments within this ENTIRE sequence (format MM:SS.sss, relative to the start of the FIRST sung verse in the sequence) are:
 ${referenceSegmentTimingsJson && referenceSegmentTimingsJson.length > 2 ? referenceSegmentTimingsJson : "No specific sub-verse phrase timings available. Evaluate based on overall verse flow and the provided reference verse texts."}
 
-Your task is to:
-1. Analyze the user's audio against the provided reference texts for EACH verse in the sequence.
-2. Provide an "overallScore" (0-100), "pronunciationAccuracyScore" (overall), "timingAlignmentScore" (overall), and "vocalClarityScore" (overall). These overall scores reflect the entire performance across all practiced verses.
-3. Provide overall "feedback" (positive and improvementAreas) for the entire performance.
-4. For EACH reference verse provided above, you MUST provide a corresponding entry in a "verseScores" array. Each entry in "verseScores" should include:
-    - "verseNumber": The original verse number (e.g., if the user sang original verses 3 and 4, you'd have entries for verseNumber: 3 and verseNumber: 4).
-    - "pronunciationAccuracyScore": Score (0-100) for this specific verse.
-    - "timingAlignmentScore": Score (0-100) for this specific verse.
-    - "vocalClarityScore": Score (0-100) for this specific verse.
-    - "feedback": An object with "positive" (array of strings) and "improvementAreas" (array of strings) specific to this verse.
-    - "userAttemptTranscription": (Optional) A brief transcription of what the user actually sang for THIS VERSE.
+Your task is to analyze the user's audio and provide feedback by populating the fields of the JSON schema provided in the API call.
 
-Respond ONLY with a valid JSON object (no markdown \`\`\`json). Structure:
-{
-  "overallScore": number,
-  "pronunciationAccuracyScore": number, // Overall
-  "timingAlignmentScore": number,     // Overall
-  "vocalClarityScore": number,        // Overall
-  "feedback": { // Overall feedback
-    "positive": [string, string],
-    "improvementAreas": [string, string]
-  },
-  "userAttemptTranscription": "string (optional, brief OVERALL transcription if useful)",
-  "verseScores": [
-    {
-      "verseNumber": number, // e.g., 3 (original verse number)
-      "pronunciationAccuracyScore": number,
-      "timingAlignmentScore": number,
-      "vocalClarityScore": number,
-      "feedback": {
-        "positive": [string],
-        "improvementAreas": [string]
-      },
-      "userAttemptTranscription": "string (optional, transcription for THIS verse)"
-    }
-    // ... more objects for other practiced verses
-  ]
-}
-
-GUIDELINES:
+GUIDELINES FOR POPULATING THE SCHEMA:
+- "overallScore": Score (0-100) reflecting the entire performance across all practiced verses.
+- "pronunciationAccuracyScore", "timingAlignmentScore", "vocalClarityScore": Overall scores (0-100) for the entire performance.
+- "feedback" (overall): Provide "positive" and "improvementAreas" string arrays for the entire performance.
+- "userAttemptTranscription" (overall, optional): A brief transcription of what the user actually sang overall, if distinct or useful.
+- "verseScores" array: For EACH reference verse provided above, create a corresponding object in this array.
+    - "verseNumber": The original verse number.
+    - "pronunciationAccuracyScore", "timingAlignmentScore", "vocalClarityScore": Scores (0-100) for this specific verse.
+    - "feedback" (verse-specific): Provide "positive" and "improvementAreas" string arrays for this verse.
+    - "userAttemptTranscription" (verse-specific, optional): A brief transcription of what the user sang for THIS VERSE.
 - The "verseNumber" in "verseScores" MUST match the original verse numbers from the reference.
 - Pronunciation evaluation for each verse is against ${pronunciationGuidance} for that verse.
 - Do NOT evaluate melodic pitch accuracy. Focus on pronunciation, timing, and clarity.
 - Be encouraging and constructive in all feedback sections.
 - If audio quality is too poor for analysis of a specific verse or overall, reflect this in scores (e.g., 0) and feedback.
+- Adhere strictly to the JSON schema provided in the API call for the response structure.
 `;
   return fullPrompt;
 };

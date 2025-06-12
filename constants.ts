@@ -8,8 +8,30 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   Language.BENGALI,
 ];
 
-// DO NOT MODIFY THE BELOW LINE EVEN IF THE GUIDELINE SAY SO , I HAVE OVERRIDEN
-export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-preview-04-17';
+// This constant is overridden by the user and should be respected as the Pro model.
+export const GEMINI_MODEL_PRO_OVERRIDE = 'gemini-2.5-pro-preview-06-05'; // User's Pro model
+export const GEMINI_MODEL_FLASH_STANDARD = 'gemini-2.5-flash-preview-04-17'; // Standard Flash model
+
+export const AVAILABLE_MODELS = [
+  {
+    id: GEMINI_MODEL_PRO_OVERRIDE,
+    name: 'Gemini Pro',
+    description: 'Highest quality, slower processing.'
+  },
+  {
+    id: GEMINI_MODEL_FLASH_STANDARD,
+    name: 'Gemini Flash',
+    description: 'Good quality, faster processing, suitable for most tasks.'
+  }
+];
+
+// Default model to use - can be user's Pro or Flash. Let's default to user's specified Pro model.
+export const DEFAULT_MODEL_ID = GEMINI_MODEL_PRO_OVERRIDE;
+
+// The original GEMINI_MODEL_TEXT constant for reference or if something hardcodes it,
+// but new functionality should use the dynamic model selection.
+export const GEMINI_MODEL_TEXT = GEMINI_MODEL_PRO_OVERRIDE;
+
 
 export const INITIAL_PANEL_VISIBILITY = {
   lyrics: true, // Changed from 'transliteration'
