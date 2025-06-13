@@ -54,15 +54,54 @@
         cursor: pointer;
     }
 
-    /* Lyric Display Box Styling */
+    /* Styles for new VerseDisplay layout */
+    .current-verse-display-wrapper { /* Applied to the main VerseDisplay container */
+      border: 2px solid #2dd4bf; /* teal-400 */
+      box-shadow: 0 0 15px rgba(45, 212, 191, 0.3);
+    }
+
+    .lyrics-scroll-container {
+      max-height: 45vh; /* Use viewport height for dynamic sizing, was 350px */
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid #374151; /* slate-700 */
+      border-radius: 6px;
+      background-color: #111827; /* Very dark blue-gray, almost black */
+    }
+
+    .lyric-line-pair {
+      padding: 10px;
+      border: 1px solid #4b5563; /* slate-600 */
+      border-radius: 6px;
+      margin-bottom: 12px;
+      background-color: #1f2937; /* slate-800 */
+      transition: box-shadow 0.2s ease-in-out;
+    }
+    .lyric-line-pair:last-child {
+      margin-bottom: 0;
+    }
+    
+    .lyric-line-transliteration, 
+    .lyric-line-translation {
+      display: block; /* Ensure they are on new lines */
+      color: #d1d5db; /* slate-300 */
+      padding: 2px 0; /* Minimal vertical padding */
+      line-height: 1.6;
+    }
+    .lyric-line-transliteration:not(:last-child) {
+        margin-bottom: 4px; /* Space between translit and translat within a pair */
+    }
+
+
+    /* Lyric Segment Display Box Styling (individual lines) */
     .translit-segment, .translation-segment {
-      display: block; /* Each segment (line/phrase) takes its own line */
-      margin-bottom: 8px; /* Space between line boxes */
-      padding: 6px 8px; /* Padding for the line box */
-      border: 1px solid #374151; /* slate-700 for line box border */
-      border-radius: 6px; /* Rounded corners for the line box */
+      /* display: block; Already handled by lyric-line-transliteration/translation */
+      /* margin-bottom: 8px; Removed, margin handled by lyric-line-pair */
+      padding: 6px 8px; /* Padding for the line box content */
+      border: 1px solid transparent; /* Default transparent border, active state will color it */
+      border-radius: 4px; /* Slightly smaller radius for lines within pair */
       transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-      background-color: #1f2937; /* slate-800 slightly lighter for contrast with words */
+      /* background-color: #1f2937; Now on lyric-line-pair, active state will override for segment */
     }
 
     .lyric-word {
@@ -77,12 +116,12 @@
       transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
     }
 
-    /* Active Karaoke Mode Highlighting Styles */
+    /* Active Karaoke Mode Highlighting Styles for individual lines */
     .active-translit-segment {
-      font-weight: 700; /* Applied to line, words inherit or can be overridden */
-      background-color: #7e22ce; /* Purple for translit line */
-      border-color: #a855f7; /* Brighter purple border for active line */
-      color: #f0e6ff; /* Text color for active line, words will inherit */
+      font-weight: 700;
+      background-color: #7e22ce !important; /* Purple for translit line */
+      border-color: #a855f7 !important; /* Brighter purple border for active line */
+      color: #f0e6ff !important; /* Text color for active line */
     }
     .active-translit-segment .lyric-word {
       background-color: #7e22ce; /* Match parent active background */
@@ -91,10 +130,10 @@
     }
 
     .active-translation-segment {
-      font-weight: 600; /* Applied to line */
-      background-color: #6d28d9; /* Indigo for translation line */
-      border-color: #8b5cf6; /* Brighter indigo border for active line */
-      color: #eef2ff; /* Text color for active line */
+      font-weight: 600;
+      background-color: #6d28d9 !important; /* Indigo for translation line */
+      border-color: #8b5cf6 !important; /* Brighter indigo border for active line */
+      color: #eef2ff !important; /* Text color for active line */
     }
     .active-translation-segment .lyric-word {
       background-color: #6d28d9; /* Match parent active background */

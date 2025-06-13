@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types'; 
+import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types.ts'; 
 import { INITIAL_PANEL_VISIBILITY, AVAILABLE_MODELS, DEFAULT_MODEL_ID } from './constants';
 import AudioUpload from './components/AudioUpload';
 import AudioPlayer from './components/AudioPlayer';
@@ -21,6 +21,7 @@ import ModelSelector from './components/ModelSelector';
 import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
+import ChangelogPage from './components/ChangelogPage'; // Import ChangelogPage
 import { addSongToLibrary, deleteSongFromLibrary, deleteAllPracticeAttemptsForSongFromDB } from './db';
 import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; 
 import { initializeAiClient } from './services/geminiService'; // Import AI client initializer
@@ -31,7 +32,7 @@ import { useSongDataManager, type SongProcessingResult } from './hooks/useSongDa
 import { useAudioPlaybackManager } from './hooks/useAudioPlaybackManager';
 import { useDeviceManager } from './hooks/useDeviceManager';
 
-type CurrentAppPage = 'main' | 'about' | 'techDetails';
+type CurrentAppPage = 'main' | 'about' | 'techDetails' | 'changelog'; // Add 'changelog'
 
 const App: React.FC = () => {
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
@@ -361,7 +362,7 @@ const App: React.FC = () => {
 
   const globalIsLoading = isLoadingSongData || isLoadingDevices || isAppInitializing;
 
-  const mainContentMaxWidth = currentPage === 'main' && songData ? 'max-w-4xl' : 'max-w-2xl';
+  const mainContentMaxWidth = currentPage === 'main' && songData ? 'max-w-4xl' : 'max-w-3xl'; // Adjusted for changelog
 
   const renderMainContent = () => {
     if (currentPage === 'about') {
@@ -370,6 +371,10 @@ const App: React.FC = () => {
     if (currentPage === 'techDetails') {
       return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><TechDetailsPage onNavigateBack={() => handleNavigate('main')} /></div>;
     }
+    if (currentPage === 'changelog') {
+      return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><ChangelogPage onNavigateBack={() => handleNavigate('main')} /></div>;
+    }
+
 
     if (showLibraryView && !apiKeyMissing) {
       return (
@@ -573,27 +578,34 @@ const App: React.FC = () => {
         </div>
         <p className="text-slate-300 text-md md:text-lg mb-3">Upload audio, play, and explore lyrics in sync.</p>
 
-        <div className="mb-3 space-x-3">
+        <div className="mb-3 space-x-2 sm:space-x-3 flex flex-wrap justify-center">
             <button
               onClick={() => handleNavigate('main')}
-              className={`text-xs px-3 py-1 rounded-md transition-colors
+              className={`text-xs px-2.5 py-1.5 sm:px-3 sm:py-1 rounded-md transition-colors my-1
                           ${currentPage === 'main' ? 'bg-sky-600 text-white font-semibold' : 'bg-slate-700 hover:bg-sky-700 text-sky-300 hover:text-white'}`}
             >
-              <Icon name="house" weight="bold" className="mr-1.5" />Main App
+              <Icon name="house" weight="bold" className="mr-1 sm:mr-1.5" />Main App
             </button>
             <button
               onClick={() => handleNavigate('about')}
-              className={`text-xs px-3 py-1 rounded-md transition-colors
+              className={`text-xs px-2.5 py-1.5 sm:px-3 sm:py-1 rounded-md transition-colors my-1
                           ${currentPage === 'about' ? 'bg-purple-600 text-white font-semibold' : 'bg-slate-700 hover:bg-purple-700 text-purple-300 hover:text-white'}`}
             >
-              <Icon name="info" weight="bold" className="mr-1.5" />About
+              <Icon name="info" weight="bold" className="mr-1 sm:mr-1.5" />About
             </button>
             <button
               onClick={() => handleNavigate('techDetails')}
-              className={`text-xs px-3 py-1 rounded-md transition-colors
+              className={`text-xs px-2.5 py-1.5 sm:px-3 sm:py-1 rounded-md transition-colors my-1
                           ${currentPage === 'techDetails' ? 'bg-teal-600 text-white font-semibold' : 'bg-slate-700 hover:bg-teal-700 text-teal-300 hover:text-white'}`}
             >
-              <Icon name="code" weight="bold" className="mr-1.5" />Tech Details
+              <Icon name="code" weight="bold" className="mr-1 sm:mr-1.5" />Tech Details
+            </button>
+            <button
+              onClick={() => handleNavigate('changelog')}
+              className={`text-xs px-2.5 py-1.5 sm:px-3 sm:py-1 rounded-md transition-colors my-1
+                          ${currentPage === 'changelog' ? 'bg-orange-600 text-white font-semibold' : 'bg-slate-700 hover:bg-orange-700 text-orange-300 hover:text-white'}`}
+            >
+              <Icon name="megaphone" weight="bold" className="mr-1 sm:mr-1.5" />Changelog
             </button>
         </div>
 
