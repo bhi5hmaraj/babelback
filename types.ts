@@ -137,3 +137,11 @@ export type RawVerse = Omit<Verse, 'startTime' | 'endTime' | 'transliterationSeg
 export type RawSongData = Omit<SongData, 'verses'> & { 
   verses: RawVerse[]; 
 };
+
+// For Changelog
+export interface ChangelogEntry {
+  version: string;
+  date: string; // e.g., "YYYY-MM-DD" or "Month Day, Year"
+  title: string;
+  description: string[]; // Array of strings for bullet points
+}
