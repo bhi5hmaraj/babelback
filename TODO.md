@@ -14,6 +14,10 @@
   - `GET /api/analysis/:id`, `/api/analysis` (list)
   - `GET /api/practice/:id`, `/api/practice` (list)
   - `POST /api/webhooks/yt-complete` (HMAC verification)
+    - Verify HMAC-SHA256 signature + timestamp skew window
+    - Idempotent handling (ignore terminal jobs), dedup child analysis job
+    - On success: attach metadata to `jobs.output`, enqueue `analysis` job
+    - Structured logs + metrics; keep handler fast, offload heavy work
 - Extract AI logic from FE into server modules (Gemini SDK, prompts, parsing, normalization).
 - Add a worker process (Node script) for polling `jobs` with `FOR UPDATE SKIP LOCKED` to run analysis/practice tasks.
 - Document env: NEXTAUTH_SECRET, DB URL, S3 creds, Gemini API key, webhook secret.
@@ -24,6 +28,7 @@
 - Use yt‑dlp + ffmpeg to normalize (mono/48k Opus or 16k WAV).
 - Upload to S3; update job via DB write or call `/api/webhooks/yt-complete` with HMAC.
 - Chain to `analysis` job on success; apply retries/backoff on failures.
+- Webhook client: sign payload with HMAC (secret + `${timestamp}.${body}`), include `X-Timestamp`/`X-Signature`, retry non‑2xx with backoff; log jobId and response.
 
 ## Phase 3 — Client integration
 - Replace FE calls with Next.js API endpoints; add TanStack Query for server state.
@@ -41,6 +46,26 @@
 - Rate limiting (Redis or DB sliding window) and quotas by plan tier.
 - Observability: structured logs, Sentry, metrics for job durations and failures.
 - Caching/dedup: audio hash + youtube_id param set; idempotency keys on job creation.
+
+## Future Considerations — Event‑Driven Architecture
+- Approach: Start with a Postgres Outbox Pattern
+  - `events` table writes in the same transaction as state changes (e.g., job created/updated).
+  - Small publisher worker polls `events where status='pending' for update skip locked`, publishes to in‑process consumers; later swap to SNS/SQS/Redis without changing producers.
+  - Consumers subscribe to event types (`job.created.analysis`, `yt_ingest.completed`, `analysis.completed`, `practice.scored`) and must be idempotent.
+- Pros
+  - Decoupling: Python ingest, analysis/scoring workers, and API evolve independently.
+  - Reliability: Retries, DLQs, and replay improve robustness for flaky steps.
+  - Extensibility: Add features (notifications, analytics, billing) without touching producers.
+  - Auditability: Durable trail of “what happened” across jobs/users.
+- Cons
+  - Complexity: Event schemas, idempotency, DLQs, and ordering to manage.
+  - Observability: Need correlation/causation IDs, tracing, and metrics.
+  - Consistency: Eventual consistency; UI must tolerate intermediate states.
+  - Ops overhead: A publisher/queue to run and monitor (even with outbox).
+- With the current approach (direct API + jobs):
+  - Simpler to ship v1 quickly; fewer moving parts; easier debugging.
+  - Tighter coupling across components; adding new side effects requires code changes in producers.
+  - Limited fan‑out and replay; retries handled per job, not per event.
 
 ## Decisions
 - Auth: NextAuth (not tied to Supabase). Providers: Email magic link + Google/GitHub initially.

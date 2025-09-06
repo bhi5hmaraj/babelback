@@ -297,3 +297,139 @@ Row-Level Security (recommended)
 
 This v1 plan prioritizes correctness, durability, and clear ownership boundaries across FE, API, and workers while keeping room for scalable features (realtime, quotas, dedup, admin tooling).
 
+---
+
+### Architecture Diagram (Mermaid)
+
+```mermaid
+flowchart LR
+    subgraph Client
+      FE[Frontend (React)]
+    end
+
+    subgraph API[API Backend (Hono/Next.js)]
+      Auth[Auth/Users (NextAuth + Postgres)]
+      Routes[REST/Route Handlers]
+    end
+
+    subgraph Infra
+      DB[(Postgres)]
+      Storage[(Object Storage\nSupabase/S3-compatible)]
+    end
+
+    subgraph Workers
+      YT[Python FastAPI\nyt-dlp Ingest]
+      W1[Analysis/Scoring Worker\n(Node + Gemini)]
+    end
+
+    LLM[Gemini API]
+    YTSource[(YouTube)]
+
+    %% Upload flow
+    FE -- init upload --> Routes
+    Routes -- presigned PUT --> Storage
+    FE -- PUT audio --> Storage
+    FE -- create analysis job --> Routes
+    Routes -- insert job --> DB
+    W1 -- claim job --> DB
+    W1 -- read audio --> Storage
+    W1 -- analyze --> LLM
+    W1 -- save SongData --> DB
+    FE -- job status/results --> Routes
+    Routes -- read --> DB
+
+    %% YouTube ingest
+    FE -- create yt_ingest job --> Routes
+    Routes -- insert yt job --> DB
+    YT -- claim yt job --> DB
+    YT -- download --> YTSource
+    YT -- transcode+upload --> Storage
+    YT -- webhook: yt-complete --> Routes
+    Routes -- mark yt job + enqueue analysis --> DB
+
+    %% Practice scoring
+    FE -- init practice upload --> Routes
+    FE -- PUT practice blob --> Storage
+    FE -- create practice job --> Routes
+    Routes -- insert job --> DB
+    W1 -- claim job --> DB
+    W1 -- score with SongData --> LLM
+    W1 -- save SingingScore --> DB
+```
+
+---
+
+### ER Diagram (Mermaid)
+
+```mermaid
+erDiagram
+  PROFILES ||--o{ JOBS : owns
+  PROFILES ||--o{ SONG_ANALYSIS : owns
+  PROFILES ||--o{ SONG_PRACTICE : owns
+  PROMPTS  ||--o{ SONG_ANALYSIS : "used by"
+  SONG_ANALYSIS ||--o{ SONG_PRACTICE : referenced
+
+  PROFILES {
+    uuid user_id PK
+    text plan_tier
+    int  quota_daily_jobs
+    timestamptz created_at
+  }
+
+  PROMPTS {
+    uuid id PK
+    text name
+    int  version
+    text kind
+    text body
+    jsonb variables
+    uuid created_by FK
+    timestamptz created_at
+  }
+
+  JOBS {
+    uuid id PK
+    uuid user_id FK
+    text type
+    text status
+    jsonb input
+    jsonb output
+    int attempts
+    int max_attempts
+    jsonb error
+    timestamptz available_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  SONG_ANALYSIS {
+    uuid id PK
+    uuid user_id FK
+    text object_key
+    text source
+    text youtube_id
+    text target_language
+    text original_language
+    text model_id
+    bool karaoke_enabled
+    numeric duration_seconds
+    numeric processing_time_seconds
+    jsonb result_json
+    uuid prompt_id FK
+    int  prompt_version
+    text prompt_snapshot
+    timestamptz created_at
+  }
+
+  SONG_PRACTICE {
+    uuid id PK
+    uuid user_id FK
+    uuid song_analysis_id FK
+    text model_id
+    int[] verses_practiced
+    text attempt_object_key
+    numeric recording_duration_seconds
+    jsonb score_json
+    timestamptz created_at
+  }
+```
