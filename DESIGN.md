@@ -426,3 +426,11 @@ erDiagram
 - Updated `vite.config.ts` to proxy `/api/*` to the Vercel dev server and to honor `HOST`/`PORT` from `vercel dev`, preventing the CLI from timing out when it assigns random ports.
 - Relaxed `tsconfig.json` (switch to `moduleResolution: "node"`, drop unsupported flags) and removed `.ts` import suffixes so the build pipeline works both locally and in Vercel’s TypeScript runtime.
 - Local workflow: run `npx vercel dev --listen 3000 --debug` (starts Vite on the injected port), then hit `http://localhost:3000/api/echo?message=test` or use the Echo Tester to confirm end-to-end connectivity before wiring real Gemini endpoints.
+
+### Server-Side Gemini Migration (September 2025)
+
+- Introduced shared helper `api/_lib/gemini.ts` (dotenv bootstrap, cached `GoogleGenAI` client, model resolution) so all API routes consistently load keys from `.env.local`/environment.
+- Added `api/song-analysis.ts` to handle song processing requests: accepts base64 audio plus metadata, uploads to Gemini, reuses existing prompt/verse parsing utilities, and returns normalized `SongData` with timing info.
+- Added `api/singing-feedback.ts` to accept practice recordings and verse context, call Gemini with structured schema, and respond with `SingingScore` objects identical to the prior client-side implementation.
+- Refactored the browser `services/geminiService.ts` to delegate to the new endpoints via `fetch`, removing direct SDK usage from the frontend while preserving progress messaging hooks.
+- Kept the Echo tester for quick sanity checks; it now runs on top of the shared helper, mirroring the production Gemini setup.

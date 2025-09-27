@@ -5,6 +5,8 @@ interface EchoResponse {
   receivedAt: string;
   method: string;
   hasBody: boolean;
+  modelId?: string;
+  geminiText?: string;
 }
 
 const EchoTester: React.FC = () => {
@@ -45,7 +47,7 @@ const EchoTester: React.FC = () => {
 
       const data: EchoResponse = await res.json();
       setResponse(data);
-      const summary = `Success: ${data.method} echoed "${data.message ?? ''}" at ${data.receivedAt}`;
+      const summary = `Success: ${data.method} via ${data.modelId ?? 'unknown model'}`;
       setStatusMessage(summary);
       console.log('[EchoTester] Received response from /api/echo', data);
     } catch (err) {
@@ -74,7 +76,7 @@ const EchoTester: React.FC = () => {
       }
       const data: EchoResponse = await res.json();
       setResponse(data);
-      const summary = `Success: ${data.method} echoed "${data.message ?? ''}" at ${data.receivedAt}`;
+      const summary = `Success: ${data.method} via ${data.modelId ?? 'unknown model'}`;
       setStatusMessage(summary);
       console.log('[EchoTester] Received response from /api/echo', data);
     } catch (err) {
@@ -139,8 +141,14 @@ const EchoTester: React.FC = () => {
         <div className="p-3 bg-slate-800/80 border border-slate-700 rounded-md text-sm text-slate-200">
           <p><span className="font-semibold text-sky-300">Message:</span> {response.message ?? '<null>'}</p>
           <p><span className="font-semibold text-sky-300">Method:</span> {response.method}</p>
+          {response.modelId && (
+            <p><span className="font-semibold text-sky-300">Model:</span> {response.modelId}</p>
+          )}
           <p><span className="font-semibold text-sky-300">Received At:</span> {response.receivedAt}</p>
           <p><span className="font-semibold text-sky-300">Body Sent:</span> {response.hasBody ? 'yes' : 'no'}</p>
+          {response.geminiText && (
+            <p className="mt-2"><span className="font-semibold text-sky-300">Gemini Output:</span> {response.geminiText}</p>
+          )}
         </div>
       )}
     </div>
