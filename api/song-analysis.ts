@@ -1,6 +1,6 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { Buffer } from 'node:buffer';
-import { getGeminiClient, resolveModelId } from './_lib/gemini';
+import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
 import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText } from '../services/prompts';
 import { parseSongVerses } from '../services/verseParser';
 import { Language, RawSongData, RawVerse, SongData, Verse } from '../types';

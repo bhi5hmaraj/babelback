@@ -1,5 +1,5 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
-import { getGeminiClient, resolveModelId } from './_lib/gemini';
+import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
 
 interface VercelRequest {
   method?: string;

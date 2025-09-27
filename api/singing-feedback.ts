@@ -1,5 +1,5 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
-import { getGeminiClient, resolveModelId } from './_lib/gemini';
+import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
 import { getSingingFeedbackPrompt } from '../services/prompts';
 import { Language, SingingScore, Verse } from '../types';
 
