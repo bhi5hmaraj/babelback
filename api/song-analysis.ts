@@ -1,9 +1,8 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { Buffer } from 'node:buffer';
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
-import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText } from '../services/prompts';
-import { parseSongVerses } from '../services/verseParser';
-import { Language, RawSongData, RawVerse, SongData, Verse } from '../types';
+import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText, Language } from './_lib/prompts.js';
+import { parseSongVerses, RawVerse, Verse } from './_lib/verseParser.js';
 
 interface VercelRequest {
   method?: string;
@@ -31,6 +30,16 @@ interface SongAnalysisSuccessResponse {
 }
 
 const SUPPORTED_LANGUAGES = new Set<string>(Object.values(Language));
+
+type SongData = {
+  title: string;
+  originalLanguage: string;
+  summary: string;
+  detailedAnalysis: string;
+  verses: Verse[];
+};
+
+type RawSongData = Omit<SongData, 'verses'> & { verses: RawVerse[] };
 
 const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
   if (!body) {
@@ -79,7 +88,9 @@ const coerceLanguage = (value: string): Language => {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if ((req.method ?? 'GET').toUpperCase() !== 'POST') {
+  const method = (req.method ?? 'GET').toUpperCase();
+  try { console.log('[song-analysis] request start', { method }); } catch {}
+  if (method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
     return;
   }
@@ -89,6 +100,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     parsedBody = parseRequestBody(req.body);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid request body';
+    try { console.error('[song-analysis] bad body', { error: message }); } catch {}
     res.status(400).json({ error: message });
     return;
   }
@@ -99,6 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     targetLanguage = coerceLanguage(parsedBody.targetLanguage as string);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid target language';
+    try { console.error('[song-analysis] invalid language', { value: parsedBody.targetLanguage }); } catch {}
     res.status(400).json({ error: message });
     return;
   }
@@ -110,8 +123,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (audioData.byteLength === 0) {
       throw new Error('Decoded audio buffer is empty');
     }
+    try { console.log('[song-analysis] decoded audio', { bytes: audioData.byteLength, mimeType, fileName, enableKaraokeMode, requestedModelId }); } catch {}
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to decode audio data';
+    try { console.error('[song-analysis] decode error', { error: message }); } catch {}
     res.status(400).json({ error: `Invalid audioBase64 payload: ${message}` });
     return;
   }
@@ -121,6 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     geminiClient = getGeminiClient();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Gemini client initialization failed';
+    try { console.error('[song-analysis] client init error', { error: message }); } catch {}
     res.status(500).json({ error: message });
     return;
   }
@@ -129,10 +145,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const startedAt = Date.now();
 
   try {
+    const audioBlob = new Blob([audioData], { type: mimeType || 'audio/mpeg' });
+
+    try { console.log('[song-analysis] uploading to gemini'); } catch {}
     const uploadResult = await geminiClient.files.upload({
-      file: {
-        data: audioData,
-        mimeType: mimeType || 'audio/mpeg',
+      file: audioBlob,
+      config: {
+        mimeType: audioBlob.type || 'audio/mpeg',
         displayName: fileName || 'uploaded-audio',
       },
     });
@@ -140,6 +159,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!uploadResult.uri || !uploadResult.mimeType) {
       throw new Error('File upload failed; Gemini response missing uri or mimeType');
     }
+    try { console.log('[song-analysis] upload ok', { uri: uploadResult.uri, mimeType: uploadResult.mimeType }); } catch {}
 
     const userPrompt = getSongAnalysisUserPromptText(targetLanguage, fileName ?? 'uploaded-audio', enableKaraokeMode);
     const parts: Part[] = [
@@ -201,6 +221,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       required: ['title', 'originalLanguage', 'summary', 'detailedAnalysis', 'verses'],
     } as const;
 
+    try { console.log('[song-analysis] generating', { model: resolvedModelId }); } catch {}
     const generationResponse: GenerateContentResponse = await geminiClient.models.generateContent({
       model: resolvedModelId,
       contents: [{ role: 'user', parts }],
@@ -227,6 +248,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const finalVerses: Verse[] = parseSongVerses(parsed.verses as RawVerse[], enableKaraokeMode, targetLanguage);
+    try { console.log('[song-analysis] parsed', { verses: finalVerses.length, title: parsed.title }); } catch {}
 
     const songData: SongData = {
       title: parsed.title,
@@ -245,7 +267,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
-    console.error('[api/song-analysis] Error', error);
+    try { console.error('[song-analysis] error', message); } catch {}
     res.status(502).json({ error: message });
   }
 }

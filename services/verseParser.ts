@@ -1,5 +1,5 @@
 
-import { Verse, RawVerse, RawSegment, TransliterationSegment, TranslationSegment, Language } from '../types';
+import { Verse, RawVerse, Language } from '../types';
 
 export const MIN_SEGMENT_DURATION = 0.3; // 300ms, a more visible minimum duration for highlighting
 

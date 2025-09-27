@@ -9,19 +9,19 @@ export const SUPPORTED_LANGUAGES: Language[] = [
 ];
 
 // This constant is overridden by the user and should be respected as the Pro model.
-export const GEMINI_MODEL_PRO_OVERRIDE = 'gemini-2.5-pro-preview-06-05'; // User's Pro model
-export const GEMINI_MODEL_FLASH_STANDARD = 'gemini-2.5-flash-preview-04-17'; // Standard Flash model
+export const GEMINI_MODEL_PRO_OVERRIDE = 'gemini-2.5-pro'; // Pro model (stable id)
+export const GEMINI_MODEL_FLASH_STANDARD = 'gemini-2.5-flash'; // Flash model (stable id)
 
 export const AVAILABLE_MODELS = [
   {
     id: GEMINI_MODEL_PRO_OVERRIDE,
-    name: 'Gemini Pro',
-    description: 'Highest quality, slower processing.'
+    name: 'Gemini 2.5 Pro',
+    description: 'Highest quality, multi-modal reasoning.'
   },
   {
     id: GEMINI_MODEL_FLASH_STANDARD,
-    name: 'Gemini Flash',
-    description: 'Good quality, faster processing, suitable for most tasks.'
+    name: 'Gemini 2.5 Flash',
+    description: 'Fast, cost‑efficient for most tasks.'
   }
 ];
 

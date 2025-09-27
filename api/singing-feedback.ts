@@ -1,7 +1,6 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
-import { getSingingFeedbackPrompt } from '../services/prompts';
-import { Language, SingingScore, Verse } from '../types';
+import { getSingingFeedbackPrompt, Language } from './_lib/prompts.js';
 
 interface VercelRequest {
   method?: string;
@@ -13,12 +12,21 @@ interface VercelResponse {
   json: (body: unknown) => void;
 }
 
+type APISegment = { text: string; startTime: number; endTime: number };
+type APIVerse = {
+  verseNumber: number;
+  transliteration?: string;
+  transliterationSegments?: APISegment[];
+  startTime: number;
+  endTime: number;
+};
+
 interface SingingFeedbackRequestBody {
   audioBase64: string;
   mimeType?: string;
   modelId?: string;
   targetLanguage: Language | string;
-  referenceVerses: Verse[];
+  referenceVerses: APIVerse[];
 }
 
 interface SingingFeedbackSuccessResponse {
@@ -95,7 +103,7 @@ const parseRequestBody = (body: unknown): SingingFeedbackRequestBody => {
 
   const audioBase64 = typeof record.audioBase64 === 'string' ? record.audioBase64 : undefined;
   const targetLanguage = typeof record.targetLanguage === 'string' ? record.targetLanguage : undefined;
-  const referenceVerses = Array.isArray(record.referenceVerses) ? (record.referenceVerses as Verse[]) : undefined;
+  const referenceVerses = Array.isArray(record.referenceVerses) ? (record.referenceVerses as APIVerse[]) : undefined;
 
   if (!audioBase64) {
     throw new Error('audioBase64 is required');
@@ -131,7 +139,9 @@ const formatSecondsToMMSSsss = (totalSeconds: number): string => {
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if ((req.method ?? 'GET').toUpperCase() !== 'POST') {
+  const method = (req.method ?? 'GET').toUpperCase();
+  try { console.log('[singing-feedback] request start', { method }); } catch {}
+  if (method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed. Use POST.' });
     return;
   }
@@ -141,6 +151,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     parsedBody = parseRequestBody(req.body);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid request body';
+    try { console.error('[singing-feedback] bad body', { error: message }); } catch {}
     res.status(400).json({ error: message });
     return;
   }
@@ -150,6 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     targetLanguage = coerceLanguage(parsedBody.targetLanguage as string);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid target language';
+    try { console.error('[singing-feedback] invalid language', { value: parsedBody.targetLanguage }); } catch {}
     res.status(400).json({ error: message });
     return;
   }
@@ -159,6 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     geminiClient = getGeminiClient();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Gemini client initialization failed';
+    try { console.error('[singing-feedback] client init error', { error: message }); } catch {}
     res.status(500).json({ error: message });
     return;
   }
@@ -169,6 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : parsedBody.audioBase64;
 
   const referenceVerses = parsedBody.referenceVerses;
+  try { console.log('[singing-feedback] refs', { count: referenceVerses.length, model: resolvedModelId }); } catch {}
   const baseStartTime = referenceVerses[0]?.startTime ?? 0;
 
   const referenceVersesInfo = referenceVerses.map((verse) => ({
@@ -212,6 +226,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const startedAt = Date.now();
 
   try {
+    try { console.log('[singing-feedback] generating', { model: resolvedModelId }); } catch {}
     const generationResponse: GenerateContentResponse = await geminiClient.models.generateContent({
       model: resolvedModelId,
       contents: [{ role: 'user', parts }],
@@ -245,10 +260,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       processingTimeMs: Date.now() - startedAt,
     };
 
+    try { console.log('[singing-feedback] parsed', { overall: parsedScore.overallScore, verses: parsedScore.verseScores?.length ?? 0 }); } catch {}
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Singing feedback generation failed';
-    console.error('[api/singing-feedback] Error', error);
+    try { console.error('[singing-feedback] error', message); } catch {}
     res.status(502).json({ error: message });
   }
+}
+interface SingingScore {
+  overallScore: number;
+  pronunciationAccuracyScore: number;
+  timingAlignmentScore: number;
+  vocalClarityScore: number;
+  feedback: { positive: string[]; improvementAreas: string[] };
+  userAttemptTranscription?: string;
+  verseScores: Array<{
+    verseNumber: number;
+    pronunciationAccuracyScore: number;
+    timingAlignmentScore: number;
+    vocalClarityScore: number;
+    feedback: { positive: string[]; improvementAreas: string[] };
+    userAttemptTranscription?: string;
+  }>;
 }

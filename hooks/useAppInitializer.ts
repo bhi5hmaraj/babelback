@@ -10,57 +10,15 @@ export interface UseAppInitializerReturn {
 }
 
 export const useAppInitializer = (): UseAppInitializerReturn => {
-  const [apiKeyMissing, setApiKeyMissing] = useState<boolean>(true); // Default to true
+  const [apiKeyMissing, setApiKeyMissing] = useState<boolean>(false);
   const [initializationError, setInitializationError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [resolvedApiKey, setResolvedApiKey] = useState<string | null>(null);
 
+  // API key now lives on the server; no client-side key is required.
   useEffect(() => {
-    let keyAvailable = false;
-    let keySource = "Unknown";
-    let actualKey: string | null = null;
-
-    try {
-      // Check process.env.GEMINI_API_KEY
-      if (typeof process !== 'undefined' && process.env && typeof process.env.GEMINI_API_KEY === 'string' && process.env.GEMINI_API_KEY.length > 0) {
-        actualKey = process.env.GEMINI_API_KEY;
-        keyAvailable = true;
-        keySource = "process.env.GEMINI_API_KEY";
-      }
-      // Else, check process.env.API_KEY
-      else if (typeof process !== 'undefined' && process.env && typeof process.env.API_KEY === 'string' && process.env.API_KEY.length > 0) {
-        actualKey = process.env.API_KEY;
-        keyAvailable = true;
-        keySource = "process.env.API_KEY";
-      }
-      
-      // Else, check import.meta.env.VITE_GEMINI_API_KEY (for Vite environments)
-      // Ensure Vite client types are included in tsconfig.json (e.g., "types": ["vite/client"]) for proper import.meta.env typing
-      if (!keyAvailable) {
-        // Check if import.meta.env exists and has VITE_GEMINI_API_KEY
-        // Using `as any` to avoid TypeScript errors if vite/client types aren't explicitly in tsconfig for the project this code is injected into.
-        const viteEnv = (typeof import.meta !== 'undefined' && (import.meta as any).env) ? (import.meta as any).env : null;
-        if (viteEnv && typeof viteEnv.VITE_GEMINI_API_KEY === 'string' && viteEnv.VITE_GEMINI_API_KEY.length > 0) {
-          actualKey = viteEnv.VITE_GEMINI_API_KEY;
-          keyAvailable = true;
-          keySource = "import.meta.env.VITE_GEMINI_API_KEY";
-        }
-      }
-    } catch (e) {
-      console.warn("[useAppInitializer useEffect API_KEY] Error accessing environment variables for API Key:", e);
-    }
-
-    if (keyAvailable && actualKey) {
-      setApiKeyMissing(false);
-      setResolvedApiKey(actualKey);
-      setInitializationError(null); // Clear any previous API key error if key is found
-      console.log(`[useAppInitializer useEffect API_KEY] Gemini API Key found via ${keySource}.`);
-    } else {
-      setApiKeyMissing(true);
-      setResolvedApiKey(null);
-      setInitializationError("Gemini API Key is missing. This application cannot function without it. Ensure GEMINI_API_KEY, API_KEY, or VITE_GEMINI_API_KEY is set.");
-      console.error("[useAppInitializer useEffect API_KEY] Gemini API Key is missing from all checked sources.");
-    }
+    setApiKeyMissing(false);
+    setResolvedApiKey(null);
   }, []);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 
-import { Language, Verse } from '../types';
+import { Language } from '../types';
 
 // Helper for transliteration instruction, exported for potential re-use or clarity if needed elsewhere,
 // but primarily used internally by getSongAnalysisSystemPrompt.

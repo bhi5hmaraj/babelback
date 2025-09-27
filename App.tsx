@@ -52,10 +52,9 @@ const App: React.FC = () => {
 
   // Initialize AI Client once resolvedApiKey is available
   useEffect(() => {
-    if (resolvedApiKey && !apiKeyMissing) {
-      initializeAiClient(resolvedApiKey);
-    }
-  }, [resolvedApiKey, apiKeyMissing]);
+    // Server handles Gemini calls now; client initialization is a no-op.
+    initializeAiClient('');
+  }, []);
 
   const deviceManager = useDeviceManager();
   const {

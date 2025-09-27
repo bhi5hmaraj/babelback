@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 
 dotenv.config({ path: '.env.local' });
 
-const FALLBACK_MODEL_ID = 'gemini-2.5-flash-preview-04-17';
+const FALLBACK_MODEL_ID = 'gemini-2.5-flash';
 
 let cachedClient: GoogleGenAI | null = null;
 
@@ -16,12 +16,13 @@ export const getGeminiClient = (): GoogleGenAI => {
   if (!apiKey) {
     throw new Error('Gemini API key is not configured. Set GEMINI_API_KEY or API_KEY.');
   }
-
+  try { console.log('[gemini] initializing client', { hasKey: Boolean(apiKey), keyLen: apiKey.length }); } catch {}
   cachedClient = new GoogleGenAI({ apiKey });
   return cachedClient;
 };
 
 export const resolveModelId = (preferred?: string): string => {
+  try { console.log('[gemini] resolveModelId called', { preferred, envModel: process.env.GEMINI_MODEL_ID, envDefault: process.env.GEMINI_DEFAULT_MODEL_ID }); } catch {}
   if (preferred && preferred.trim().length > 0) {
     return preferred.trim();
   }
