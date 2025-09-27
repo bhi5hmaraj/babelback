@@ -46,19 +46,19 @@ This document lays out a pragmatic v1 design to move AI and heavy logic to the b
 - FE tracks parent job → child job chain.
 
 3) Practice Scoring
-- FE → Hono: init upload for practice blob → signed URL.
-- FE PUTs practice audio → Hono `practice` job with `song_analysis_id`, verse selection, model_id, practice object key.
-- Node worker runs scoring LLM → stores `SingingScore` in `song_practice`, marks job done.
+- FE → API: POST `/v1/uploads/practice` with recording blob; API stores and returns `objectKey`.
+- FE → API: create `practice` job with `song_analysis_id`, verse selection, model_id, and `objectKey`.
+- Worker runs scoring LLM → stores `SingingScore` in `song_practice`, marks job done.
 - FE displays results; library shows practice history.
 
 ---
 
-### API (Hono) – v1 Surface
+### API (Next.js/Hono) – v1 Surface
 - Auth
   - `GET /v1/auth/me` → current user
-- Uploads
-  - `POST /v1/uploads/audio:init` → { signedUrl, objectKey, contentType }
-  - `POST /v1/uploads/practice:init` → { signedUrl, objectKey, contentType }
+- Uploads (server-side streaming)
+  - `POST /v1/uploads/audio` → multipart/binary upload; stores and returns `{ objectKey, contentType, size }`
+  - `POST /v1/uploads/practice` → multipart/binary upload; returns `{ objectKey, contentType, size }`
 - Jobs
   - `POST /v1/jobs/analysis` → create analysis job for an existing object key
   - `POST /v1/jobs/youtube` → create yt_ingest job { youtubeUrl, opts }
@@ -176,13 +176,13 @@ Row-Level Security (recommended)
 
 ---
 
-### Storage Layout (Supabase)
+### Storage Layout (Object Store)
 - Bucket: `media`
   - Upload audio: `users/{userId}/ingest/{uuid}_{origName}`
   - Normalized audio: `users/{userId}/normalized/{uuid}.opus` (or `.wav` 16kHz)
   - Practice: `users/{userId}/practice/{analysisId}/{timestamp}.webm`
   - Results (optional): `users/{userId}/results/{analysisId}.json`
-- Enforce storage policies via signed URLs from Hono.
+- No direct client writes: API owns credentials and streams uploads to storage. For downloads, serve time-limited signed GET URLs or proxy via API.
 
 ---
 
@@ -217,7 +217,7 @@ Row-Level Security (recommended)
 ---
 
 ### Security
-- Signed, time-limited upload URLs (size/type constraints).
+- Server-side uploads with size/type/content validation at API layer; use signed GET URLs for downloads if needed.
 - HMAC-signed webhooks between Python and Hono.
 - Rate limiting per user/IP (Redis or Postgres sliding window).
 - Secrets in managed secret store; never expose to client.
@@ -303,58 +303,32 @@ This v1 plan prioritizes correctness, durability, and clear ownership boundaries
 
 ```mermaid
 flowchart LR
-    subgraph Client
-      FE[Frontend (React)]
-    end
+  subgraph Client ["Client"]
+    FE["Frontend (React)"]
+  end
 
-    subgraph API[API Backend (Hono/Next.js)]
-      Auth[Auth/Users (NextAuth + Postgres)]
-      Routes[REST/Route Handlers]
-    end
+  subgraph Backend ["API (Next.js/Hono)"]
+    API["Route Handlers"]
+  end
 
-    subgraph Infra
-      DB[(Postgres)]
-      Storage[(Object Storage\nSupabase/S3-compatible)]
-    end
+  subgraph Infra ["Infra"]
+    Storage["Object Storage<br/>S3-compatible"]
+    DB["Postgres"]
+  end
 
-    subgraph Workers
-      YT[Python FastAPI\nyt-dlp Ingest]
-      W1[Analysis/Scoring Worker\n(Node + Gemini)]
-    end
+  subgraph Workers ["Workers"]
+    W1["Analysis Worker"]
+  end
 
-    LLM[Gemini API]
-    YTSource[(YouTube)]
+  LLM["Gemini API"]
 
-    %% Upload flow
-    FE -- init upload --> Routes
-    Routes -- presigned PUT --> Storage
-    FE -- PUT audio --> Storage
-    FE -- create analysis job --> Routes
-    Routes -- insert job --> DB
-    W1 -- claim job --> DB
-    W1 -- read audio --> Storage
-    W1 -- analyze --> LLM
-    W1 -- save SongData --> DB
-    FE -- job status/results --> Routes
-    Routes -- read --> DB
-
-    %% YouTube ingest
-    FE -- create yt_ingest job --> Routes
-    Routes -- insert yt job --> DB
-    YT -- claim yt job --> DB
-    YT -- download --> YTSource
-    YT -- transcode+upload --> Storage
-    YT -- webhook: yt-complete --> Routes
-    Routes -- mark yt job + enqueue analysis --> DB
-
-    %% Practice scoring
-    FE -- init practice upload --> Routes
-    FE -- PUT practice blob --> Storage
-    FE -- create practice job --> Routes
-    Routes -- insert job --> DB
-    W1 -- claim job --> DB
-    W1 -- score with SongData --> LLM
-    W1 -- save SingingScore --> DB
+  FE -- "1. Init upload" --> API
+  FE -- "2. Upload audio" --> Storage
+  FE -- "3. Create analysis job" --> API
+  API -- "4. Record job" --> DB
+  W1 -- "5. Process audio (fetch + Gemini)" --> LLM
+  W1 -- "6. Save result" --> DB
+  FE -- "7. Fetch status/results" --> API
 ```
 
 ---
@@ -363,11 +337,11 @@ flowchart LR
 
 ```mermaid
 erDiagram
-  PROFILES ||--o{ JOBS : owns
-  PROFILES ||--o{ SONG_ANALYSIS : owns
-  PROFILES ||--o{ SONG_PRACTICE : owns
+  PROFILES ||--o{ JOBS : "owns"
+  PROFILES ||--o{ SONG_ANALYSIS : "owns"
+  PROFILES ||--o{ SONG_PRACTICE : "owns"
   PROMPTS  ||--o{ SONG_ANALYSIS : "used by"
-  SONG_ANALYSIS ||--o{ SONG_PRACTICE : referenced
+  SONG_ANALYSIS ||--o{ SONG_PRACTICE : "referenced"
 
   PROFILES {
     uuid user_id PK
@@ -433,3 +407,22 @@ erDiagram
     timestamptz created_at
   }
 ```
+
+#### Numbered Flow (Life of a Song Analysis)
+1. Init upload: Client requests a signed URL/token from API to upload audio directly to object storage.
+2. Upload audio: Client uploads the audio file to storage using the signed URL.
+3. Create analysis job: Client asks API to analyze the uploaded object (model, language, flags).
+4. Record job: API persists a new job row in Postgres (status=pending).
+5. Process audio: Worker claims the job, fetches the audio from storage, and calls Gemini to analyze.
+6. Save result: Worker stores structured SongData in Postgres and marks the job succeeded.
+7. Fetch status/results: Client polls or queries API for job status and retrieves analysis results.
+
+---
+
+### Local Backend Scaffolding (September 2025)
+
+- Added a lightweight Vercel serverless handler at `api/echo.ts` to verify the browser → backend path before migrating Gemini calls. The handler logs the incoming method/query/body and responds with `{ message, method, receivedAt, hasBody }`.
+- Created `components/EchoTester.tsx`, rendered inside the Tech Details page, so contributors can POST/GET against `/api/echo`, see success notifications, and inspect console logs without leaving the UI.
+- Updated `vite.config.ts` to proxy `/api/*` to the Vercel dev server and to honor `HOST`/`PORT` from `vercel dev`, preventing the CLI from timing out when it assigns random ports.
+- Relaxed `tsconfig.json` (switch to `moduleResolution: "node"`, drop unsupported flags) and removed `.ts` import suffixes so the build pipeline works both locally and in Vercel’s TypeScript runtime.
+- Local workflow: run `npx vercel dev --listen 3000 --debug` (starts Vite on the injected port), then hit `http://localhost:3000/api/echo?message=test` or use the Echo Tester to confirm end-to-end connectivity before wiring real Gemini endpoints.
