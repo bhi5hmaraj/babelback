@@ -1,6 +1,7 @@
 
 import React from 'react';
 import Icon from './Icon';
+import EchoTester from './EchoTester';
 import { DEFAULT_MODEL_ID, AVAILABLE_MODELS } from '../constants'; // Import model constants
 
 interface TechDetailsPageProps {
@@ -82,6 +83,8 @@ const TechDetailsPage: React.FC<TechDetailsPageProps> = ({ onNavigateBack }) => 
           <li><strong>Modularity & Maintainability:</strong> Code is structured using React functional components and custom hooks for better organization.</li>
         </ul>
       </section>
+
+      <EchoTester />
     </div>
   );
 };

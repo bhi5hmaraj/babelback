@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types.ts'; 
+import { Language, SongData, Verse, PanelVisibility, LibraryEntry, PracticeModeStatus, SingingScore } from './types'; 
 import { INITIAL_PANEL_VISIBILITY, AVAILABLE_MODELS, DEFAULT_MODEL_ID } from './constants';
 import AudioUpload from './components/AudioUpload';
 import AudioPlayer from './components/AudioPlayer';
