@@ -1,7 +1,6 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { getJob, updateJob } from '../_lib/downloadJobs'
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET')
     return res.status(405).end('Method Not Allowed')
@@ -13,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!job) return res.status(404).json({ error: 'job not found' })
 
   // Poll Apify run status if we're still running and we have a run id
-  if (job.status === 'running' && job.apifyRunId && process.env.APIFY_TOKEN) {
+  if (job.status === 'working' && job.apifyRunId && process.env.APIFY_TOKEN) {
     try {
       const runUrl = `https://api.apify.com/v2/actor-runs/${encodeURIComponent(job.apifyRunId)}?token=${encodeURIComponent(process.env.APIFY_TOKEN!)}`
       const resp = await fetch(runUrl)

@@ -1,17 +1,7 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Storage } from '@google-cloud/storage'
-import crypto from 'node:crypto'
-import { getJob, newId, putJob, updateJob } from './_lib/downloadJobs'
+import { newId, putJob } from './_lib/downloadJobs'
 
-function absoluteUrl(req: VercelRequest, path: string) {
-  const base = process.env.BASE_URL
-  if (base) return `${base.replace(/\/$/, '')}${path}`
-  const proto = (req.headers['x-forwarded-proto'] as string) || 'https'
-  const host = (req.headers['x-forwarded-host'] as string) || (req.headers.host as string)
-  return `${proto}://${host}${path}`
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method === 'GET') {
     return res.status(200).json({ ok: true })
   }
@@ -98,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const runId: string | undefined = data?.data?.id
     putJob({
       id: jobId,
-      status: 'running',
+      status: 'working',
       workerUrl: 'apify',
       gcsObject: { bucket: bucketName, path: objectPath, contentType },
       url: getUrl,
