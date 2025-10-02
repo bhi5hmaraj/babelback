@@ -31,7 +31,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const objectPath = `downloads/${jobId}.${audioFormat}`
 
   // Mint V4 signed PUT + short-lived GET
-  const storage = new Storage()
+  // Use explicit credentials from env for Vercel (no files on disk)
+  let storage: Storage
+  const keyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
+  if (keyJson) {
+    try {
+      const sa = JSON.parse(keyJson)
+      storage = new Storage({
+        projectId: sa.project_id,
+        credentials: {
+          client_email: sa.client_email,
+          private_key: String(sa.private_key || '').replace(/\\n/g, '\n'),
+        },
+      })
+    } catch (e) {
+      return res.status(500).json({ error: 'Invalid GCP_SERVICE_ACCOUNT_KEY JSON' })
+    }
+  } else if (process.env.GCP_PROJECT_ID && process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
+    storage = new Storage({
+      projectId: process.env.GCP_PROJECT_ID,
+      credentials: {
+        client_email: process.env.GCP_CLIENT_EMAIL,
+        private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n'),
+      },
+    })
+  } else {
+    // Fallback to ADC if running locally with GOOGLE_APPLICATION_CREDENTIALS
+    storage = new Storage()
+  }
   const file = storage.bucket(bucketName).file(objectPath)
   const [uploadUrl] = await file.getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 30 * 60 * 1000, contentType })
   const [getUrl] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
@@ -83,4 +110,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(202).json({ jobId, statusUrl: `/api/downloads/${jobId}`, getUrl })
 }
-
