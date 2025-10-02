@@ -65,9 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const [uploadUrl] = await file.getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 30 * 60 * 1000, contentType })
   const [getUrl] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
 
-  // Prepare callback
-  const callbackSecret = process.env.CALLBACK_SECRET || ''
-  const callbackUrl = absoluteUrl(req, `/api/downloads/${jobId}/callback`)
+  // TODO(webhooks): When enabling webhooks/SSE, build a callbackUrl here and pass it to the actor.
 
   // Start Apify run
   const ACTOR = process.env.APIFY_ACTOR_ID
@@ -81,8 +79,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     formatExpr: 'bestaudio[ext=m4a]/140/234/bestaudio',
     proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'], apifyProxyCountry: country },
     uploadUrl,
-    callbackUrl,
-    callbackSecret,
     jobId,
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
   }
@@ -97,18 +93,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const text = await resp.text().catch(() => '')
       return res.status(502).json({ error: 'Apify start failed', status: resp.status, body: text })
     }
+    // Polling-first mode: capture runId for status checks
+    const data = await resp.json().catch(() => ({} as any))
+    const runId: string | undefined = data?.data?.id
+    putJob({
+      id: jobId,
+      status: 'running',
+      workerUrl: 'apify',
+      gcsObject: { bucket: bucketName, path: objectPath, contentType },
+      url: getUrl,
+      apifyRunId: runId,
+    })
   } catch (err) {
     return res.status(502).json({ error: 'Failed to contact Apify', details: String(err) })
   }
-
-  // Record job (in-memory for now)
-  putJob({
-    id: jobId,
-    status: 'running',
-    workerUrl: 'apify',
-    gcsObject: { bucket: bucketName, path: objectPath, contentType },
-    url: getUrl,
-  })
 
   return res.status(202).json({ jobId, statusUrl: `/api/downloads/${jobId}`, getUrl })
 }
