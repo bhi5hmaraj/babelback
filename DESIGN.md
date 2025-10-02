@@ -16,17 +16,14 @@ This document lays out a pragmatic v1 design to move AI and heavy logic to the b
 
 ### Architecture Overview
 - Frontend (React): Thin client. Auth, upload/initiation, progress UI, reads results. No secrets.
-- API (Hono on Node runtime):
-  - Auth verification, signed upload URLs, job creation, AI orchestration, results APIs.
-  - Uses `@google/genai` server-side; persists to Postgres and Supabase.
-- Python Ingest (FastAPI):
-  - Executes YouTube ingest jobs via yt-dlp, normalizes audio, uploads to Storage, updates job or calls back Hono via signed webhook.
+- API (Hono on Vercel):
+  - Edge routes: mint GCS signed URLs (PUT/GET), start jobs, SSE fan‑out.
+  - Node routes: receive webhooks/callbacks, handle larger I/O, persist job status.
+  - Uses `@google/genai` server‑side; persists to Postgres and Supabase.
+- Apify Actor (yt‑dlp): Runs downloads with proxy when needed. On success, uploads audio directly to GCS via a Hono‑minted signed PUT and calls back Hono.
 - Postgres (Supabase): Job queue + metadata/results.
-- Storage (Supabase): Audio blobs (originals/normalized), practice recordings, optional JSON result dumps.
-- Workers:
-  - YT worker pool (Python) for downloads/transcode.
-  - Analysis worker (Node) for Gemini analysis/scoring.
- - Realtime/Progress: SSE on Vercel Edge for the download→GCS workflow; elsewhere Supabase Realtime on `jobs` or FE polling for v1.
+- Storage (GCS): Audio blobs (private), practice recordings, optional JSON result dumps.
+- Realtime/Progress: SSE on Hono for the download→GCS workflow; elsewhere Supabase Realtime on `jobs` or FE polling for v1.
 
 ---
 
@@ -252,46 +249,43 @@ Row-Level Security (recommended)
 
 ---
 
-### Python Worker (FastAPI) – Outline
-- Claim: fetch next `yt_ingest` job (`pending`, `available_at <= now()`), mark `running`.
-- Run: yt-dlp → transcode (ffmpeg) → upload to Storage → fill `output` with object key + metadata.
-- Complete: mark `succeeded` OR enqueue/chain an `analysis` job.
-- Use HMAC-signed calls to Hono if using webhooks instead of direct DB writes.
+### (Historical) Python Worker
+Earlier drafts used a custom Python worker (Cloud Run/Functions). This has been replaced by the Apify Actor approach for simpler operations, proxy support, and no in‑house worker fleet.
 
 ---
 
-### YouTube Ingestion: Migrated to Google Cloud Functions (GCF)
+### Apify Actor Downloader (yt‑dlp)
 
-- The former Vercel Python route (`/api/youtube`) has been removed.
-- Use the GCF 2nd‑gen function under `gcp/ytdlp-function/` to ingest YouTube URLs and upload audio to Google Cloud Storage (GCS), returning a V4 signed URL suitable for `/api/song-analysis`.
-- See `gcp/ytdlp-function/README.md` for deploy, CORS, and curl examples.
+- Actor input: `{ youtubeUrl, audioFormat, formatExpr, proxyConfiguration, uploadUrl, callbackUrl, callbackSecret, jobId }`.
+- Behavior: yt‑dlp downloads audio, then PUTs the result to `uploadUrl` (GCS V4 signed URL minted by Hono Edge). On completion, POSTs `callbackUrl` with `{ jobId, status, bytes, contentType }` signed with HMAC if `callbackSecret` provided.
+- Fallback: if `uploadUrl` is missing or PUT fails, the actor stores `audio` in its Key‑Value Store for manual retrieval.
 
 ---
 
-### Async Download to GCS (Webhook + SSE on Vercel Edge)
+### Async Download to GCS (Apify Actor + SSE)
 
 Purpose
-- Download audio via a Python worker, upload to Google Cloud Storage (GCS), and deliver the final URL to the client in real time through Server‑Sent Events (SSE) hosted on Vercel Edge (Hono).
+- Download audio via an Apify Actor (yt‑dlp), upload directly to GCS using a signed PUT minted by Hono Edge, and deliver the final URL to the client in real time via SSE.
 
 Why SSE (vs polling)
 - Low‑latency push with fewer requests, built‑in ordered delivery and auto‑reconnect. Keep a light polling fallback (5–10s backoff) for backgrounded tabs or environments that terminate long‑lived connections.
 
 Flow (end‑to‑end)
 1) Client → Hono (Edge): `POST /api/downloads` with `{ sourceUrl, filename?, mime? }`.
-   - Response: `{ jobId, statusUrl, eventsUrl }`.
-   - Side effect: enqueue work for Python with `{ jobId, sourceUrl, callbackUrl }`.
-2) Python worker: downloads source, uploads to `gs://{bucket}/{object}`, derives URL (public or V4 signed).
-3) Python → Hono webhook: `POST /api/downloads/:jobId/callback` with HMAC‑signed `{ status, url?, gcsObject?, mime?, size?, error? }`.
-4) Hono updates durable store, publishes event to channel `downloads:events:{jobId}`.
-5) Client listens on `GET /api/downloads/:jobId/events` (SSE) and receives `progress` then `completed`/`failed`.
+   - Hono Edge mints a GCS V4 signed PUT (uploadUrl) and a short‑lived signed GET (optional for preview), returns `{ jobId, statusUrl, eventsUrl }`.
+   - Starts an Apify run: `{ youtubeUrl, audioFormat, proxyConfiguration, uploadUrl, callbackUrl, jobId }`.
+2) Apify Actor: downloads source via yt‑dlp (optionally with Apify Residential proxy), then PUTs audio to `uploadUrl`.
+3) Actor → Hono Node callback: `POST /api/downloads/:jobId/callback` with HMAC‑signed `{ jobId, status, bytes, contentType }` (and KVS fallback URL only if PUT failed).
+4) Hono records status and publishes an SSE `completed` event with the final signed GET URL.
+5) Client listens on `GET /api/downloads/:id/events` (SSE) for progress/completed; falls back to polling if needed.
 
-API surface (Hono on Vercel Edge)
+API surface (Hono)
 - `POST /api/downloads` → returns `{ jobId, statusUrl, eventsUrl }`.
 - `GET /api/downloads/:id` → `{ status, url?, gcsObject?, error? }` (polling fallback and resume).
 - `GET /api/downloads/:id/events` (SSE) → streams `progress` and final state.
 - `POST /api/downloads/:id/callback` (webhook) → verifies HMAC, upserts state, publishes event; idempotent.
 
-SSE handler notes (Edge)
+SSE handler notes
 - Headers: `Content-Type: text/event-stream; charset=utf-8`, `Cache-Control: no-store`.
 - Heartbeats: write a comment line `:ping\n\n` every 15–30s to keep intermediaries alive.
 - Reconnects: include `id:` and optionally `retry: 5000` so the browser resumes with `Last-Event-ID`.
@@ -304,15 +298,14 @@ State, durability, and fan‑out
 - TTL: expire completed/failed download jobs after 24–48h.
 
 Security
-- HMAC: Python signs raw JSON body using `CALLBACK_SECRET` → `X-Signature` header (HMAC‑SHA256). Verify in Edge using Web Crypto on the raw body before parsing.
+- HMAC: Apify Actor signs raw JSON body using `CALLBACK_SECRET` → `X‑Signature` header (HMAC‑SHA256). Verify in Edge/Node before parsing.
 - AuthZ: Require a valid user session to create/listen to a job; scope records by `user_id`.
 - Bucket ACLs: Prefer private objects and return a short‑lived signed URL; only use public objects if distribution requires it.
 
-Python worker responsibilities
-- Robust downloads (yt‑dlp or requests) with retries/backoff.
-- GCS upload via `google-cloud-storage` with resumable uploads; set `contentType` and `Cache-Control`.
-- URL strategy: generate V4 signed URL (`GET`) with configurable TTL, or return the public URL.
-- Webhook retries: backoff on 5xx/timeouts; stop on 2xx; keep callbacks idempotent.
+Apify Actor responsibilities
+- Robust downloads (yt‑dlp) with Apify Proxy when needed; prefer m4a (AAC).
+- Direct GCS upload using the provided `uploadUrl` (PUT), with correct `Content‑Type` and `Content‑Length`.
+- Webhook retries on 5xx/timeouts with backoff; idempotent payloads keyed by `jobId`.
 
 Environment variables
 - `GCS_BUCKET`, `GCS_SIGNED_URL_TTL_SECONDS` (or `GCS_PUBLIC=true`)
@@ -370,55 +363,8 @@ Client snippet (conceptual)
 
 ---
 
-### Cloud Run Worker (yt-dlp + ffmpeg)
-
-Purpose
-- A dedicated containerized worker that downloads audio with yt‑dlp, optionally normalizes via ffmpeg, uploads the result to GCS, generates a signed URL, and calls back the Hono webhook. Deployed to Cloud Run for predictable deps and performance.
-
-Repo layout (monorepo)
-- `workers/ytdlp-worker/`
-  - `Dockerfile`, `.dockerignore`
-  - `requirements.txt` (yt-dlp, fastapi, uvicorn[standard], google-cloud-storage, requests)
-  - `src/main.py` (FastAPI app: `POST /download`, `GET /healthz`)
-  - `src/ytdlp_runner.py` (yt-dlp helpers, ffmpeg normalization stubs)
-  - `README.md` (envs, deploy commands)
-  - `tests/` (optional)
-
-FastAPI surface
-- `POST /download`
-  - Body: `{ jobId, sourceUrl, callbackUrl, objectName?, contentType?, audioFormat? }`
-  - Behavior: schedule background task; return `202 { jobId, started: true }` promptly.
-  - Task: download → upload to `gs://$GCS_BUCKET/$objectName` → generate V4 signed URL → POST webhook with HMAC.
-- `GET /healthz` → `200` for load balancers.
-
-Environment variables
-- `GCS_BUCKET` (required)
-- `GCS_SIGNED_URL_TTL_SECONDS` (default 7200)
-- `CALLBACK_SECRET` (required for webhook HMAC)
-- `BASE_URL` (optional if webhook URL is not passed per‑request)
-- `OBJECT_PREFIX` (optional: e.g., `users/{userId}/ingest`)
-- `YTDLP_NO_UPDATE=1`, `XDG_CACHE_HOME=/tmp/ytcache`
-
-Dockerfile (essentials)
-- Base: `python:3.11-slim`
-- Install ffmpeg via `apt-get`.
-- `pip install -r requirements.txt`
-- Entrypoint: `uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080}`
-
-Deploy (Artifact Registry + Cloud Run)
-- Build: `gcloud builds submit workers/ytdlp-worker --tag us-central1-docker.pkg.dev/PROJECT/containers/ytdlp-worker:$(git rev-parse --short HEAD)`
-- Deploy: `gcloud run deploy ytdlp-worker --image us-central1-docker.pkg.dev/PROJECT/containers/ytdlp-worker:HASH --region us-central1 --allow-unauthenticated --cpu 1 --memory 1Gi --max-instances 10 --set-env-vars GCS_BUCKET=...,CALLBACK_SECRET=...,GCS_SIGNED_URL_TTL_SECONDS=7200,YTDLP_NO_UPDATE=1,XDG_CACHE_HOME=/tmp/ytcache`
-- Service account: grant `roles/storage.objectCreator`, `roles/storage.objectViewer`, and `roles/iam.serviceAccountTokenCreator` (for V4 signing without key files).
-
-Operational notes
-- Concurrency: 1–2 (yt‑dlp/ffmpeg are CPU‑heavy).
-- Temp space: write to `/tmp`, upload, then unlink.
-- Idempotency: prefer deterministic `objectName` using `jobId` to avoid duplicates.
-- Errors: POST webhook with `{ status: 'failed', error }` and return non‑200 if invoked synchronously.
-
-Integration
-- Hono `POST /api/downloads` calls Cloud Run `POST /download` with `{ jobId, sourceUrl, callbackUrl }` and returns `jobId`/SSE URLs immediately.
-- The worker publishes `progress` (optional) and `completed` via the webhook to drive SSE.
+### Notes on former Cloud Run design
+The Cloud Run downloader was removed to simplify ops. Apify Actors provide managed job runs and proxy pools; Hono keeps GCS credentials centralized by minting signed PUT/GET URLs. If needed later, the Cloud Run approach can be resurrected from history.
 
 ---
 
