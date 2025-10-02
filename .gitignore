@@ -1,5 +1,5 @@
 # Local artifacts and secrets
-downloads/
+/downloads/
 *.m4a
 *.mp3
 yt_cookie.txt
