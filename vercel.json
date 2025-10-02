@@ -1,17 +1,14 @@
 {
   "functions": {
     "api/downloads.ts": {
-      "runtime": "nodejs20.x",
       "memory": 1024,
       "maxDuration": 60
     },
     "api/downloads/[id].ts": {
-      "runtime": "nodejs20.x",
       "memory": 512,
       "maxDuration": 30
     },
     "api/downloads/[id]/callback.ts": {
-      "runtime": "nodejs20.x",
       "memory": 512,
       "maxDuration": 30
     }

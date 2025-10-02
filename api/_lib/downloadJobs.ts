@@ -9,8 +9,10 @@ export interface JobRecord {
   gcsObject?: { bucket: string; path: string; contentType?: string; size?: number }
   error?: { message: string }
   workerUrl: string
+  apifyRunId?: string
 }
 
+// In-memory job store for download tasks. Dev/local only.
 const jobs = new Map<string, JobRecord>()
 
 export function newId() {
@@ -32,4 +34,3 @@ export function updateJob(id: string, patch: Partial<JobRecord>) {
   jobs.set(id, next)
   return next
 }
-

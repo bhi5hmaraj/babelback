@@ -15,7 +15,8 @@ interface VercelResponse {
 }
 
 interface SongAnalysisRequestBody {
-  audioBase64: string;
+  audioBase64?: string;
+  audioUrl?: string;
   fileName?: string;
   mimeType?: string;
   targetLanguage: Language | string;
@@ -57,11 +58,12 @@ const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
   const record = body as Record<string, unknown>;
 
   const audioBase64 = typeof record.audioBase64 === 'string' ? record.audioBase64 : undefined;
+  const audioUrl = typeof record.audioUrl === 'string' ? record.audioUrl : undefined;
   const targetLanguage = typeof record.targetLanguage === 'string' ? record.targetLanguage : undefined;
   const enableKaraokeMode = typeof record.enableKaraokeMode === 'boolean' ? record.enableKaraokeMode : undefined;
 
-  if (!audioBase64) {
-    throw new Error('audioBase64 is required');
+  if (!audioBase64 && !audioUrl) {
+    throw new Error('Either audioBase64 or audioUrl is required');
   }
   if (!targetLanguage) {
     throw new Error('targetLanguage is required');
@@ -72,6 +74,7 @@ const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
 
   return {
     audioBase64,
+    audioUrl,
     fileName: typeof record.fileName === 'string' ? record.fileName : 'uploaded-audio',
     mimeType: typeof record.mimeType === 'string' ? record.mimeType : 'audio/mpeg',
     targetLanguage,
@@ -116,19 +119,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  let audioData: Buffer;
-  try {
-    const base64Clean = audioBase64.includes(',') ? audioBase64.split(',').pop() ?? '' : audioBase64;
-    audioData = Buffer.from(base64Clean, 'base64');
-    if (audioData.byteLength === 0) {
-      throw new Error('Decoded audio buffer is empty');
+  let audioData: Buffer | null = null;
+  if (audioBase64) {
+    try {
+      const base64Clean = audioBase64.includes(',') ? audioBase64.split(',').pop() ?? '' : audioBase64;
+      audioData = Buffer.from(base64Clean, 'base64');
+      if (audioData.byteLength === 0) throw new Error('Decoded audio buffer is empty');
+      try { console.log('[song-analysis] decoded audio', { bytes: audioData.byteLength, mimeType, fileName, enableKaraokeMode, requestedModelId }); } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to decode audio data';
+      try { console.error('[song-analysis] decode error', { error: message }); } catch {}
+      res.status(400).json({ error: `Invalid audioBase64 payload: ${message}` });
+      return;
     }
-    try { console.log('[song-analysis] decoded audio', { bytes: audioData.byteLength, mimeType, fileName, enableKaraokeMode, requestedModelId }); } catch {}
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to decode audio data';
-    try { console.error('[song-analysis] decode error', { error: message }); } catch {}
-    res.status(400).json({ error: `Invalid audioBase64 payload: ${message}` });
-    return;
+  } else if (audioUrl) {
+    try {
+      const resp = await fetch(audioUrl);
+      if (!resp.ok) throw new Error(`fetch(${resp.status})`);
+      const arr = await resp.arrayBuffer();
+      audioData = Buffer.from(arr);
+      if (audioData.byteLength === 0) throw new Error('fetched zero bytes');
+      // if mimeType not provided, rely on server sniffing or response header
+      if (!mimeType) mimeType = resp.headers.get('content-type') || 'audio/mpeg';
+      try { console.log('[song-analysis] fetched audio url', { bytes: audioData.byteLength, mimeType, fileName, audioUrl }); } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch audio url';
+      try { console.error('[song-analysis] fetch url error', { error: message, audioUrl }); } catch {}
+      res.status(400).json({ error: `Invalid audioUrl payload: ${message}` });
+      return;
+    }
   }
 
   let geminiClient;

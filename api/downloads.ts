@@ -1,29 +1,58 @@
+import './_lib/loadEnv.js'
 import { Storage } from '@google-cloud/storage'
-import { newId, putJob } from './_lib/downloadJobs'
+import { newId, putJob } from './_lib/jobStore.js'
+import { updateJob } from './_lib/jobStore.js'
 
-export default async function handler(req: any, res: any) {
-  if (req.method === 'GET') {
-    return res.status(200).json({ ok: true })
-  }
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST, GET')
-    return res.status(405).end('Method Not Allowed')
+interface VercelRequest { method?: string; body?: unknown }
+interface VercelResponse { status: (code: number) => VercelResponse; json: (b: unknown) => void; setHeader?: (k: string, v: string) => void }
+
+type DownloadsRequestBody = {
+  youtubeUrl: string
+  audioFormat?: 'm4a' | 'mp3'
+  country?: string
+}
+
+const parseRequestBody = (body: unknown): DownloadsRequestBody => {
+  if (!body) throw new Error('Missing request body')
+  const obj = typeof body === 'string' ? JSON.parse(body) : body
+  if (typeof obj !== 'object' || obj == null) throw new Error('Invalid JSON body')
+  const r = obj as Record<string, unknown>
+  const youtubeUrl = typeof r.youtubeUrl === 'string' ? r.youtubeUrl : undefined
+  const audioFormat = typeof r.audioFormat === 'string' ? (r.audioFormat as 'm4a' | 'mp3') : 'm4a'
+  const country = typeof r.country === 'string' ? r.country : 'US'
+  if (!youtubeUrl) throw new Error('youtubeUrl required')
+  return { youtubeUrl, audioFormat, country }
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const method = (req.method ?? 'GET').toUpperCase()
+  try { console.log('[downloads] start', { method }) } catch {}
+  if (method !== 'POST') {
+    if (res.setHeader) res.setHeader('Allow', 'POST')
+    res.status(405).json({ error: 'Method not allowed. Use POST.' })
+    return
   }
 
-  const { youtubeUrl, audioFormat = 'm4a', country = 'US' } = req.body || {}
-  if (!youtubeUrl || typeof youtubeUrl !== 'string') {
-    return res.status(400).json({ error: 'youtubeUrl required' })
+  let payload: DownloadsRequestBody
+  try {
+    payload = parseRequestBody(req.body)
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Bad request'
+    try { console.error('[downloads] bad body', msg) } catch {}
+    res.status(400).json({ error: msg })
+    return
   }
 
   const jobId = newId()
   const bucketName = process.env.GCS_BUCKET
-  if (!bucketName) return res.status(500).json({ error: 'GCS_BUCKET not set' })
+  if (!bucketName) {
+    res.status(500).json({ error: 'GCS_BUCKET not set' })
+    return
+  }
+  const contentType = payload.audioFormat === 'mp3' ? 'audio/mpeg' : 'audio/mp4'
+  const objectPath = `downloads/${jobId}.${payload.audioFormat}`
 
-  const contentType = audioFormat === 'mp3' ? 'audio/mpeg' : 'audio/mp4'
-  const objectPath = `downloads/${jobId}.${audioFormat}`
-
-  // Mint V4 signed PUT + short-lived GET
-  // Use explicit credentials from env for Vercel (no files on disk)
+  // Mint V4 signed PUT + short-lived GET using env credentials (Vercel-friendly)
   let storage: Storage
   const keyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
   if (keyJson) {
@@ -36,8 +65,9 @@ export default async function handler(req: any, res: any) {
           private_key: String(sa.private_key || '').replace(/\\n/g, '\n'),
         },
       })
-    } catch (e) {
-      return res.status(500).json({ error: 'Invalid GCP_SERVICE_ACCOUNT_KEY JSON' })
+    } catch {
+      res.status(500).json({ error: 'Invalid GCP_SERVICE_ACCOUNT_KEY JSON' })
+      return
     }
   } else if (process.env.GCP_PROJECT_ID && process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
     storage = new Storage({
@@ -48,55 +78,59 @@ export default async function handler(req: any, res: any) {
       },
     })
   } else {
-    // Fallback to ADC if running locally with GOOGLE_APPLICATION_CREDENTIALS
     storage = new Storage()
   }
-  const file = storage.bucket(bucketName).file(objectPath)
-  const [uploadUrl] = await file.getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 30 * 60 * 1000, contentType })
-  const [getUrl] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
 
-  // TODO(webhooks): When enabling webhooks/SSE, build a callbackUrl here and pass it to the actor.
+  let uploadUrl: string, getUrl: string
+  try {
+    const file = storage.bucket(bucketName).file(objectPath)
+    ;[uploadUrl] = await file.getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 30 * 60 * 1000, contentType })
+    ;[getUrl] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    try { console.error('[downloads] sign url error', msg) } catch {}
+    res.status(500).json({ error: 'Failed to mint signed URLs', details: msg })
+    return
+  }
 
-  // Start Apify run
   const ACTOR = process.env.APIFY_ACTOR_ID
   const TOKEN = process.env.APIFY_TOKEN
-  if (!ACTOR || !TOKEN) return res.status(500).json({ error: 'APIFY_ACTOR_ID or APIFY_TOKEN not set' })
+  if (!ACTOR || !TOKEN) {
+    res.status(500).json({ error: 'APIFY_ACTOR_ID or APIFY_TOKEN not set' })
+    return
+  }
 
   const startUrl = `https://api.apify.com/v2/acts/${encodeURIComponent(ACTOR)}/runs?token=${encodeURIComponent(TOKEN)}`
   const actorInput = {
-    youtubeUrl,
-    audioFormat,
+    youtubeUrl: payload.youtubeUrl,
+    audioFormat: payload.audioFormat,
     formatExpr: 'bestaudio[ext=m4a]/140/234/bestaudio',
-    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'], apifyProxyCountry: country },
+    proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'], apifyProxyCountry: payload.country },
     uploadUrl,
     jobId,
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
   }
 
+  let runId: string | undefined
+  // Persist job immediately so first polls do not 404 during actor startup
+  await putJob({ id: jobId, status: 'queued', workerUrl: 'apify', gcsObject: { bucket: bucketName, path: objectPath, contentType }, url: getUrl })
+
   try {
-    const resp = await fetch(startUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(actorInput),
-    })
+    const resp = await fetch(startUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(actorInput) })
     if (!resp.ok) {
       const text = await resp.text().catch(() => '')
-      return res.status(502).json({ error: 'Apify start failed', status: resp.status, body: text })
+      res.status(502).json({ error: 'Apify start failed', status: resp.status, body: text })
+      return
     }
-    // Polling-first mode: capture runId for status checks
     const data = await resp.json().catch(() => ({} as any))
-    const runId: string | undefined = data?.data?.id
-    putJob({
-      id: jobId,
-      status: 'working',
-      workerUrl: 'apify',
-      gcsObject: { bucket: bucketName, path: objectPath, contentType },
-      url: getUrl,
-      apifyRunId: runId,
-    })
+    runId = data?.data?.id
+    await updateJob(jobId, { status: 'working', apifyRunId: runId })
   } catch (err) {
-    return res.status(502).json({ error: 'Failed to contact Apify', details: String(err) })
+    const msg = err instanceof Error ? err.message : String(err)
+    try { console.error('[downloads] apify start error', msg) } catch {}
+    res.status(502).json({ error: 'Failed to contact Apify', details: msg })
+    return
   }
 
-  return res.status(202).json({ jobId, statusUrl: `/api/downloads/${jobId}`, getUrl })
+  res.status(202).json({ jobId, statusUrl: `/api/downloads/${jobId}`, getUrl, apifyRunId: runId })
 }

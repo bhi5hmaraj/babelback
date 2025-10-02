@@ -1,4 +1,5 @@
 import { SongData, Language, Verse, SingingScore } from '../types';
+import { upload } from '@vercel/blob/client';
 
 const SONG_ANALYSIS_ENDPOINT = '/api/song-analysis';
 const SINGING_FEEDBACK_ENDPOINT = '/api/singing-feedback';
@@ -51,23 +52,26 @@ export const fetchSongDataFromGemini = async (
     throw new Error('AI Model ID is required for processing.');
   }
 
-  if (onProgress) onProgress('Encoding audio for upload...');
-  const audioBase64 = await blobToBase64(audioFile);
+  if (onProgress) onProgress('Uploading audio…');
+  const { url } = await upload(audioFile.name, audioFile, {
+    access: 'public',
+    contentType: audioFile.type || 'application/octet-stream',
+    handleUploadUrl: '/api/upload',
+    multipart: true,
+  });
 
-  const payload = {
-    audioBase64,
-    fileName: audioFile.name,
-    mimeType: audioFile.type,
-    targetLanguage,
-    enableKaraokeMode,
-    modelId,
-  };
-
-  if (onProgress) onProgress('Uploading audio to Babelback backend...');
+  if (onProgress) onProgress('Requesting song analysis…');
   const response = await fetch(SONG_ANALYSIS_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      audioUrl: url,
+      fileName: audioFile.name,
+      mimeType: audioFile.type,
+      targetLanguage,
+      enableKaraokeMode,
+      modelId,
+    }),
   });
 
   const { songData } = await parseJsonResponse<{ songData: SongData }>(response);

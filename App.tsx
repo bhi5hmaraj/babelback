@@ -18,6 +18,7 @@ import AboutBabelback from './components/AboutBabelback';
 import LibraryView from './components/LibraryView';
 import DeviceSelector from './components/DeviceSelector';
 import ModelSelector from './components/ModelSelector'; 
+import YouTubeDownloader from './components/YouTubeDownloader';
 import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
@@ -431,6 +432,7 @@ const App: React.FC = () => {
                         error={rawDeviceError} 
                     />
                   )}
+                  <YouTubeDownloader />
                   <ModelSelector
                     selectedModelId={selectedModelId}
                     onModelChange={setSelectedModelId}
