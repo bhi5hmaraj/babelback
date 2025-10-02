@@ -26,7 +26,7 @@ This document lays out a pragmatic v1 design to move AI and heavy logic to the b
 - Workers:
   - YT worker pool (Python) for downloads/transcode.
   - Analysis worker (Node) for Gemini analysis/scoring.
-- Realtime/Progress: Supabase Realtime on `jobs` or FE polling, whichever is simpler for v1.
+ - Realtime/Progress: SSE on Vercel Edge for the download→GCS workflow; elsewhere Supabase Realtime on `jobs` or FE polling for v1.
 
 ---
 
@@ -257,6 +257,168 @@ Row-Level Security (recommended)
 - Run: yt-dlp → transcode (ffmpeg) → upload to Storage → fill `output` with object key + metadata.
 - Complete: mark `succeeded` OR enqueue/chain an `analysis` job.
 - Use HMAC-signed calls to Hono if using webhooks instead of direct DB writes.
+
+---
+
+### YouTube Ingestion: Migrated to Google Cloud Functions (GCF)
+
+- The former Vercel Python route (`/api/youtube`) has been removed.
+- Use the GCF 2nd‑gen function under `gcp/ytdlp-function/` to ingest YouTube URLs and upload audio to Google Cloud Storage (GCS), returning a V4 signed URL suitable for `/api/song-analysis`.
+- See `gcp/ytdlp-function/README.md` for deploy, CORS, and curl examples.
+
+---
+
+### Async Download to GCS (Webhook + SSE on Vercel Edge)
+
+Purpose
+- Download audio via a Python worker, upload to Google Cloud Storage (GCS), and deliver the final URL to the client in real time through Server‑Sent Events (SSE) hosted on Vercel Edge (Hono).
+
+Why SSE (vs polling)
+- Low‑latency push with fewer requests, built‑in ordered delivery and auto‑reconnect. Keep a light polling fallback (5–10s backoff) for backgrounded tabs or environments that terminate long‑lived connections.
+
+Flow (end‑to‑end)
+1) Client → Hono (Edge): `POST /api/downloads` with `{ sourceUrl, filename?, mime? }`.
+   - Response: `{ jobId, statusUrl, eventsUrl }`.
+   - Side effect: enqueue work for Python with `{ jobId, sourceUrl, callbackUrl }`.
+2) Python worker: downloads source, uploads to `gs://{bucket}/{object}`, derives URL (public or V4 signed).
+3) Python → Hono webhook: `POST /api/downloads/:jobId/callback` with HMAC‑signed `{ status, url?, gcsObject?, mime?, size?, error? }`.
+4) Hono updates durable store, publishes event to channel `downloads:events:{jobId}`.
+5) Client listens on `GET /api/downloads/:jobId/events` (SSE) and receives `progress` then `completed`/`failed`.
+
+API surface (Hono on Vercel Edge)
+- `POST /api/downloads` → returns `{ jobId, statusUrl, eventsUrl }`.
+- `GET /api/downloads/:id` → `{ status, url?, gcsObject?, error? }` (polling fallback and resume).
+- `GET /api/downloads/:id/events` (SSE) → streams `progress` and final state.
+- `POST /api/downloads/:id/callback` (webhook) → verifies HMAC, upserts state, publishes event; idempotent.
+
+SSE handler notes (Edge)
+- Headers: `Content-Type: text/event-stream; charset=utf-8`, `Cache-Control: no-store`.
+- Heartbeats: write a comment line `:ping\n\n` every 15–30s to keep intermediaries alive.
+- Reconnects: include `id:` and optionally `retry: 5000` so the browser resumes with `Last-Event-ID`.
+- Distribution: do not depend on in‑memory connection maps; use a pub/sub (e.g., Upstash Redis REST Channels) so any Edge instance can forward events for a job.
+- On connect: emit a `ready` event and push the latest persisted state, then tail pub/sub.
+
+State, durability, and fan‑out
+- Truth: store job state in Postgres (table `downloads`) or reuse existing `jobs` with type `gcs_download`.
+- Realtime bus: Upstash Redis (KV + Pub/Sub) recommended for cross‑instance delivery under Edge.
+- TTL: expire completed/failed download jobs after 24–48h.
+
+Security
+- HMAC: Python signs raw JSON body using `CALLBACK_SECRET` → `X-Signature` header (HMAC‑SHA256). Verify in Edge using Web Crypto on the raw body before parsing.
+- AuthZ: Require a valid user session to create/listen to a job; scope records by `user_id`.
+- Bucket ACLs: Prefer private objects and return a short‑lived signed URL; only use public objects if distribution requires it.
+
+Python worker responsibilities
+- Robust downloads (yt‑dlp or requests) with retries/backoff.
+- GCS upload via `google-cloud-storage` with resumable uploads; set `contentType` and `Cache-Control`.
+- URL strategy: generate V4 signed URL (`GET`) with configurable TTL, or return the public URL.
+- Webhook retries: backoff on 5xx/timeouts; stop on 2xx; keep callbacks idempotent.
+
+Environment variables
+- `GCS_BUCKET`, `GCS_SIGNED_URL_TTL_SECONDS` (or `GCS_PUBLIC=true`)
+- `CALLBACK_SECRET`
+- `REDIS_URL`, `REDIS_TOKEN` (if using Upstash)
+- `PYTHON_UPLOADER_URL` (if invoking via HTTP)
+- `BASE_URL` (compose `callbackUrl`)
+
+Event shapes
+- `event: progress` → `data: { percent: number }`
+- `event: completed` → `data: { url: string, gcsObject: { bucket, path, contentType, size } }`
+- `event: failed` → `data: { error: { code, message } }`
+
+Minimal client usage
+- `const es = new EventSource(`/api/downloads/${jobId}/events`);`
+- Listen for `progress`, `completed`, and `error`; on completion, close the stream and use the URL.
+
+Notes
+- Keep SSE as the primary path; maintain `GET /api/downloads/:id` for fallback/refresh and to support mobile/background constraints.
+- This module is orthogonal to analysis/scoring jobs and can be reused for any long‑running worker → callback → client notification pattern.
+
+---
+
+### Playback Delivery
+
+Purpose
+- Define how clients play audio produced by the download→GCS flow and whether it’s stored locally.
+
+Default (no persistence)
+- Use direct GCS URLs for playback. On webhook completion, the server returns a signed URL; the client sets it as the `<audio>` `src` and streams via HTTP range requests.
+- GCS requirements: set `Content-Type` on upload (e.g., `audio/webm`, `audio/mpeg`), enable CORS for your origins, and allow `GET, HEAD, OPTIONS`.
+- Player hints: prefer `preload="metadata"`; switch to `auto` for smoother scrubbing on fast networks.
+- URL lifetime: issue signed URLs with TTL ≥ expected session (e.g., 1–2h). If the URL expires, mint a fresh one and resume playback.
+
+Refresh without proxying bytes
+- Add `GET /api/media/:objectKey` that responds `307` to a freshly minted signed GCS URL. This hides bucket paths and lets the browser fetch directly from GCS/CDN without Hono streaming the bytes.
+- Client recovery: on 401/403 from GCS, request `/api/media/:objectKey`, swap `audio.src`, and restore `audio.currentTime`.
+
+Optional offline/persistent modes
+- Service Worker + Cache Storage (recommended for offline):
+  - Stable app URL: `/media/:objectKey` (same 307 behavior online).
+  - “Save offline” prefetches and caches the full response. Offline, the SW serves from Cache Storage.
+  - Note: partial range caching is complex; prefer caching the full object for reliable offline seeks.
+- IndexedDB Blob (simpler but heavier):
+  - Fetch once, store as `Blob` in IndexedDB, and play via `URL.createObjectURL(blob)`.
+  - Watch storage quotas and memory use for large files; consider chunked writes.
+
+Security & cache control
+- Keep buckets private; use signed URLs or `/api/media/:objectKey` redirects.
+- Set reasonable `Cache-Control` on GCS objects (e.g., `private, max-age=0` for sensitive, or short `max-age` when acceptable). Signed URLs can still be cached by the browser/CDN per headers.
+
+Client snippet (conceptual)
+- On SSE `completed`: `audio.src = signedUrl; audio.load();`
+- On error 401/403: fetch `/api/media/:objectKey`, follow redirect, set new `src`, restore `currentTime`.
+
+---
+
+### Cloud Run Worker (yt-dlp + ffmpeg)
+
+Purpose
+- A dedicated containerized worker that downloads audio with yt‑dlp, optionally normalizes via ffmpeg, uploads the result to GCS, generates a signed URL, and calls back the Hono webhook. Deployed to Cloud Run for predictable deps and performance.
+
+Repo layout (monorepo)
+- `workers/ytdlp-worker/`
+  - `Dockerfile`, `.dockerignore`
+  - `requirements.txt` (yt-dlp, fastapi, uvicorn[standard], google-cloud-storage, requests)
+  - `src/main.py` (FastAPI app: `POST /download`, `GET /healthz`)
+  - `src/ytdlp_runner.py` (yt-dlp helpers, ffmpeg normalization stubs)
+  - `README.md` (envs, deploy commands)
+  - `tests/` (optional)
+
+FastAPI surface
+- `POST /download`
+  - Body: `{ jobId, sourceUrl, callbackUrl, objectName?, contentType?, audioFormat? }`
+  - Behavior: schedule background task; return `202 { jobId, started: true }` promptly.
+  - Task: download → upload to `gs://$GCS_BUCKET/$objectName` → generate V4 signed URL → POST webhook with HMAC.
+- `GET /healthz` → `200` for load balancers.
+
+Environment variables
+- `GCS_BUCKET` (required)
+- `GCS_SIGNED_URL_TTL_SECONDS` (default 7200)
+- `CALLBACK_SECRET` (required for webhook HMAC)
+- `BASE_URL` (optional if webhook URL is not passed per‑request)
+- `OBJECT_PREFIX` (optional: e.g., `users/{userId}/ingest`)
+- `YTDLP_NO_UPDATE=1`, `XDG_CACHE_HOME=/tmp/ytcache`
+
+Dockerfile (essentials)
+- Base: `python:3.11-slim`
+- Install ffmpeg via `apt-get`.
+- `pip install -r requirements.txt`
+- Entrypoint: `uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080}`
+
+Deploy (Artifact Registry + Cloud Run)
+- Build: `gcloud builds submit workers/ytdlp-worker --tag us-central1-docker.pkg.dev/PROJECT/containers/ytdlp-worker:$(git rev-parse --short HEAD)`
+- Deploy: `gcloud run deploy ytdlp-worker --image us-central1-docker.pkg.dev/PROJECT/containers/ytdlp-worker:HASH --region us-central1 --allow-unauthenticated --cpu 1 --memory 1Gi --max-instances 10 --set-env-vars GCS_BUCKET=...,CALLBACK_SECRET=...,GCS_SIGNED_URL_TTL_SECONDS=7200,YTDLP_NO_UPDATE=1,XDG_CACHE_HOME=/tmp/ytcache`
+- Service account: grant `roles/storage.objectCreator`, `roles/storage.objectViewer`, and `roles/iam.serviceAccountTokenCreator` (for V4 signing without key files).
+
+Operational notes
+- Concurrency: 1–2 (yt‑dlp/ffmpeg are CPU‑heavy).
+- Temp space: write to `/tmp`, upload, then unlink.
+- Idempotency: prefer deterministic `objectName` using `jobId` to avoid duplicates.
+- Errors: POST webhook with `{ status: 'failed', error }` and return non‑200 if invoked synchronously.
+
+Integration
+- Hono `POST /api/downloads` calls Cloud Run `POST /download` with `{ jobId, sourceUrl, callbackUrl }` and returns `jobId`/SSE URLs immediately.
+- The worker publishes `progress` (optional) and `completed` via the webhook to drive SSE.
 
 ---
 

@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "yt-audio-basic",
+  "title": "YouTube audio downloader (yt-dlp)",
+  "version": "0.1",
+  "buildTag": "latest",
+  "dockerfile": "Dockerfile",
+  "environmentVariables": {},
+  "defaultRunOptions": {
+    "memoryMbytes": 1024,
+    "timeoutSecs": 1800
+  },
+  "input": "./INPUT_SCHEMA.json"
+}

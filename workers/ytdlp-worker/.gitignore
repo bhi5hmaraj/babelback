@@ -1,0 +1,8 @@
+# Local environment and secrets (never commit)
+.env
+cookies.txt
+*.key.json
+*.service-account.json
+
+# Local outputs
+downloads/

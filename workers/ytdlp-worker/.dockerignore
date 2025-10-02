@@ -1,0 +1,10 @@
+**/__pycache__/
+**/*.pyc
+.venv/
+dist/
+build/
+*.log
+tests/
+README.md
+.git/
+node_modules/

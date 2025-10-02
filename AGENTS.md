@@ -171,6 +171,79 @@ Normalization rules (`services/verseParser.ts`)
 
 ---
 
+## Async Download to GCS (Webhook + SSE on Vercel Edge)
+
+Purpose
+- Store a downloaded song in Google Cloud Storage (GCS) via a Python worker and return the final URL to the client in real time using Server‑Sent Events (SSE).
+
+Architecture
+- Job start (client → Hono): Client posts a download request to Hono (running on Vercel Edge). Hono creates a `jobId`, persists `queued` status, and returns `statusUrl` and `eventsUrl` (SSE).
+- Work (Python): A Python service downloads the source, uploads to GCS (resumable), derives a public or signed URL.
+- Callback (Python → Hono webhook): Python posts the result to Hono with an HMAC‑signed payload. Hono verifies, updates job state, and publishes an event.
+- Notify (Hono → client via SSE): The client listens on `eventsUrl` to receive `progress` and a final `completed` or `failed` event with the URL.
+
+Endpoints (Hono)
+- `POST /api/downloads`
+  - Body: `{ sourceUrl, filename?, mime? }`
+  - Returns: `{ jobId, statusUrl, eventsUrl }`
+  - Side effect: enqueue work by calling the Python uploader or publishing to a queue with `{ jobId, sourceUrl, callbackUrl }`.
+- `GET /api/downloads/:id`
+  - Returns: `{ status: 'queued'|'working'|'completed'|'failed', url?, gcsObject?, error? }`.
+- `GET /api/downloads/:id/events` (SSE)
+  - Streams events: `progress`, `completed`, `failed`. Includes `id:` and optional `retry:` for resume.
+- `POST /api/downloads/:id/callback` (webhook)
+  - Headers: `X-Job-Id`, `X-Signature` = HMAC‑SHA256 of raw body with `CALLBACK_SECRET`.
+  - Body: `{ status: 'completed'|'failed', url?, gcsObject?, mime?, size?, error? }`.
+  - Behavior: verify HMAC, upsert status, publish SSE update, return 200. Idempotent per `jobId`.
+
+State and fan‑out
+- Use a durable store (e.g., Upstash Redis via Vercel KV) for job records: `downloads:{jobId}` with a 24–48h TTL.
+- For cross‑instance event delivery, publish to a channel `downloads:events:{jobId}`. The SSE handler subscribes and forwards messages to the client.
+- On client reconnect, serve the latest persisted state immediately, then continue streaming.
+
+Vercel Edge specifics (Hono)
+- Streaming: set `Content-Type: text/event-stream; charset=utf-8`, `Cache-Control: no-store`, and periodically send heartbeats (e.g., `:ping\n\n`) every 15–30s to avoid idle timeouts.
+- Do not rely on in‑memory connection maps for delivery; serverless instances are ephemeral. Use Redis pub/sub (REST Channels) or similar to reach whichever instance holds the SSE.
+- Use Web Crypto for HMAC verification (Edge runtime): compute HMAC over the raw request body before JSON parsing.
+- Keep the SSE handler simple: write initial `ready` event, emit heartbeats, proxy pub/sub messages, and close cleanly on abort.
+
+Python worker responsibilities
+- Download source and upload to GCS with a service account. Prefer resumable uploads for large files.
+- Decide URL strategy:
+  - Private object: generate a signed URL with a TTL (recommended for access control).
+  - Public object: return the public URL and set appropriate `Cache-Control`.
+- Callback payload example:
+  - `{ status: 'completed', url, gcsObject: { bucket, path, contentType, size } }` or `{ status: 'failed', error: { code, message } }`.
+- Reliability: retry webhook on 5xx/timeout with exponential backoff; stop on 2xx.
+
+SSE vs polling (quick take)
+- SSE pros: low latency push, fewer requests, ordered delivery, simpler than WebSockets.
+- SSE cons: long‑lived connections, infra idle limits, needs pub/sub to scale across instances.
+- Polling pros: stateless, CDN‑friendly, works under strict mobile/background limits.
+- Polling cons: higher cost or higher latency, thundering herd, stepped progress UX.
+- Recommendation: use SSE as primary; implement a 5–10s backoff polling fallback if SSE drops.
+
+Environment variables
+- `GCS_BUCKET`, `GCS_SIGNED_URL_TTL_SECONDS` (or `GCS_PUBLIC=true`)
+- `CALLBACK_SECRET` (HMAC for webhook)
+- `REDIS_URL`, `REDIS_TOKEN` (Upstash Redis/REST Channels)
+- `PYTHON_UPLOADER_URL` (if invoking worker via HTTP)
+- `BASE_URL` (to compose `callbackUrl` for the worker)
+
+Event shapes (examples)
+- `event: progress` → `data: { percent: 42 }`
+- `event: completed` → `data: { url, gcsObject }`
+- `event: failed` → `data: { error: { code, message } }`
+
+Sequence (end‑to‑end)
+1. Client → Hono `POST /api/downloads` → `{ jobId, statusUrl, eventsUrl }`.
+2. Hono enqueues work for Python with `callbackUrl` including `jobId`.
+3. Python uploads to GCS, creates URL, POSTs webhook with HMAC.
+4. Hono verifies, persists status, publishes to `downloads:events:{jobId}`.
+5. SSE endpoint pushes `completed` (or `failed`) to the client and closes.
+
+---
+
 ## Extending the Agents
 
 Add a new target language
@@ -209,6 +282,8 @@ Swap providers or add multi‑provider support
 - Score practice: `useSingingPractice.submitForScoring` → `geminiService.fetchSingingFeedback`
 - Save song: `addSongToLibrary` (IndexedDB)
 - Save practice: `addPracticeAttemptToDB` (IndexedDB)
+- Start async download: `POST /api/downloads` (returns `jobId`, `eventsUrl`)
+- Receive updates: `GET /api/downloads/:id/events` (SSE: `progress` → `completed`/`failed`)
+- Worker callback: `POST /api/downloads/:id/callback` (HMAC‑signed)
 
 This document focuses on the agent responsibilities and their integration points so contributors can safely evolve prompts, schemas, and model choices without breaking the UX.
-
