@@ -368,7 +368,7 @@ const App: React.FC = () => {
                            singingPractice.practiceVerseStatus !== PracticeModeStatus.IDLE &&
                            singingPractice.practiceVerseStatus !== PracticeModeStatus.CONSENT_GIVEN;
 
-  const globalIsLoading = isLoadingSongData || isLoadingDevices || isAppInitializing;
+  const globalIsLoading = isLoadingSongData || isLoadingDevices || isAppInitializing || ytWorking;
 
   const mainContentMaxWidth = currentPage === 'main' && songData ? 'max-w-4xl' : 'max-w-3xl'; // Adjusted for changelog
 
@@ -560,15 +560,14 @@ const App: React.FC = () => {
               </>
           )}
 
-          {/* YouTube processing spinner messages */}
-          {(ytWorking) && (
-            <div className="my-4 p-3 bg-slate-700/60 border border-slate-600 rounded text-slate-200 text-sm flex items-center justify-center">
-              <Icon name="spinner-gap" className="animate-spin mr-2" />
-              <span>{ytFun || 'Processing audio…'}</span>
-            </div>
+          {/* Unified loader: reuse LoadingSpinner for both YouTube fetch and analysis */}
+          {(ytWorking || isLoadingSongData) && (
+            <LoadingSpinner
+              message={ytWorking ? 'Fetching audio from YouTube…' : (loadingMessage || undefined)}
+              funMessage={ytWorking ? (ytFun || undefined) : funLoadingMessage}
+              elapsedTime={ytWorking ? undefined : elapsedLoadingTime}
+            />
           )}
-
-          {isLoadingSongData && <LoadingSpinner message={loadingMessage || undefined} funMessage={funLoadingMessage} elapsedTime={elapsedLoadingTime} />}
           {appError && !isLoadingSongData && !apiKeyMissing && ( 
             <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
               <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
