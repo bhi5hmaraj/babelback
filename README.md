@@ -29,13 +29,16 @@ Key files and docs
 ## Architecture
 
 ```mermaid
+
+---
+config:
+  layout: elk
+  elk:
+    nodePlacementStrategy: BRANDES_KOEPF
+---
+
 flowchart TD
   %% Client
-  subgraph Client["Web App (Vite + React)"]
-    UI["Babelback flow:<br>1) Source<br>2) Model<br>3) Language<br>4) Mode<br>5) Babelback"]
-    Player["Audio Player"]
-    IDB[("IndexedDB<br>Library + Practice")]
-  end
 
   %% API (Vercel)
   subgraph API["Hono API (Vercel)"]
@@ -52,6 +55,9 @@ flowchart TD
     ACT["yt-dlp<br>Upload via signed PUT"]
   end
 
+
+
+
   %% GCS
   subgraph GCS["Google Cloud Storage"]
     BUCKET[("gs://<GCS_BUCKET>")]
@@ -62,6 +68,12 @@ flowchart TD
     MODELS[("Models")] 
   end
 
+  subgraph Client["Web App (Vite + React)"]
+    UI["Babelback flow:<br>1) Source<br>2) Model<br>3) Language<br>4) Mode<br>5) Babelback"]
+    Player["Audio Player"]
+    IDB[("IndexedDB<br>Library + Practice")]
+  end
+  
   %% Main flow
   UI -->|YouTube URL| DL
   DL --> ACT
@@ -77,6 +89,7 @@ flowchart TD
   UI -->|analyze| AN --> MODELS --> AN --> UI
   UI -->|practice| FB --> MODELS --> FB --> UI
   UI --> IDB
+
 ```
 
 ## Running Locally
