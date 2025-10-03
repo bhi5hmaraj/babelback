@@ -17,6 +17,7 @@ As of October 2025 the project consists of:
 
 Key files and docs
 - Design overview: DESIGN.md (Edge/Node split; Apify + GCS signed PUT flow; future SSE/webhooks)
+- UI/UX design: docs/ui-ux-design.md (mobile Focus layout + desktop Workspace)
 - Agents/prompting: AGENTS.md (Song Analysis Agent, Singing Coach Agent)
 - API routes:
   - `api/song-analysis.ts` and `api/singing-feedback.ts` — Gemini endpoints
