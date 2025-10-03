@@ -47,7 +47,7 @@ const App: React.FC = () => {
   const [appError, setAppError] = useState<string | null>(null);
   const [showDeviceConfig, setShowDeviceConfig] = useState<boolean>(false);
   const [selectedModelId, setSelectedModelId] = useState<string>(DEFAULT_MODEL_ID);
-  const [sourceMode, setSourceMode] = useState<'file' | 'youtube'>('file');
+  const [sourceMode, setSourceMode] = useState<'file' | 'youtube'>('youtube');
   const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
   const [ytUrl, setYtUrl] = useState('');
   const [ytFormat, setYtFormat] = useState<'m4a' | 'mp3'>('m4a');
