@@ -100,6 +100,64 @@ Add these to Vercel Project → Settings → Environment Variables (Production/P
 
 The downloads API routes are pinned to Node runtime via `vercel.json` so that `@google-cloud/storage` works for signed URLs.
 
+## Vercel Deploy & Env Setup (CLI)
+
+Link project (one-time):
+
+```bash
+npx vercel login
+npx vercel link
+```
+
+Bulk-import envs from `.env.local` (Preview and/or Production):
+
+```bash
+# Make the helper executable (one-time)
+chmod +x scripts/vercel-env-import.sh
+
+# Import to Preview env
+scripts/vercel-env-import.sh -f .env.local -t preview
+
+# Import to Production env
+scripts/vercel-env-import.sh -f .env.local -t production
+
+# Force replace existing keys if needed
+scripts/vercel-env-import.sh -f .env.local -t preview,production --force
+
+# Verify
+vercel env ls
+```
+
+Notes on `GCP_SERVICE_ACCOUNT_KEY`:
+
+```bash
+# If you have a multi-line JSON file, minify to one line first
+jq -c . path/to/service-account.json > /tmp/sa.min.json
+echo "GCP_SERVICE_ACCOUNT_KEY=$(cat /tmp/sa.min.json)" >> .env.local
+```
+
+Deploy to Preview (uses Preview env vars):
+
+```bash
+npx vercel --confirm
+```
+
+Deploy to Production (uses Production env vars):
+
+```bash
+npx vercel --prod --confirm
+```
+
+Optional: dedicated preview branch
+
+```bash
+git checkout -b preview
+git push -u origin preview
+# In Vercel → Project Settings → Git:
+#   - Set Production Branch to `main`
+#   - Ensure “Deploy Previews for every git push” is enabled
+```
+
 ## Troubleshooting
 - YouTube 403 / "Only images available": try again (residential proxy is enabled), or switch to a different video. Cookies are usually not required with the current proxy + m4a strategy.
 - Signed URL 403: ensure the signer service account has `roles/iam.serviceAccountTokenCreator` and `roles/storage.objectCreator` on the bucket.
