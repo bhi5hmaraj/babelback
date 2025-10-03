@@ -16,9 +16,9 @@ As of October 2025 the project consists of:
   - Current mode is polling‑first (webhooks/SSE coming next).
 
 Key files and docs
-- Design overview: DESIGN.md (Edge/Node split; Apify + GCS signed PUT flow; future SSE/webhooks)
+- Design overview: docs/DESIGN.md (Edge/Node split; Apify + GCS signed PUT flow; future SSE/webhooks)
 - UI/UX design: docs/ui-ux-design.md (mobile Focus layout + desktop Workspace)
-- Agents/prompting: AGENTS.md (Song Analysis Agent, Singing Coach Agent)
+- Agents/prompting: docs/AGENTS.md (Song Analysis Agent, Singing Coach Agent)
 - API routes:
   - `api/song-analysis.ts` and `api/singing-feedback.ts` — Gemini endpoints
   - `api/downloads.ts` — create download job (mints GCS signed PUT, starts Apify)
