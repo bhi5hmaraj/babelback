@@ -134,17 +134,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
   } else if (audioUrl) {
-    try {
-      const resp = await fetch(audioUrl);
-      if (!resp.ok) throw new Error(`fetch(${resp.status})`);
-      const arr = await resp.arrayBuffer();
-      audioData = Buffer.from(arr);
-      if (audioData.byteLength === 0) throw new Error('fetched zero bytes');
-      // if mimeType not provided, rely on server sniffing or response header
-      if (!mimeType) mimeType = resp.headers.get('content-type') || 'audio/mpeg';
-      try { console.log('[song-analysis] fetched audio url', { bytes: audioData.byteLength, mimeType, fileName, audioUrl }); } catch {}
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch audio url';
+    // Minimal retry to reduce transient network flakiness
+    const attempts = 3;
+    let lastErr: unknown;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const resp = await fetch(audioUrl, { cache: 'no-store', redirect: 'follow' as const });
+        if (!resp.ok) throw new Error(`fetch(${resp.status})`);
+        const arr = await resp.arrayBuffer();
+        audioData = Buffer.from(arr);
+        if (audioData.byteLength === 0) throw new Error('fetched zero bytes');
+        // if mimeType not provided, rely on header
+        if (!mimeType) mimeType = resp.headers.get('content-type') || 'audio/mpeg';
+        try { console.log('[song-analysis] fetched audio url', { attempt: i + 1, bytes: audioData.byteLength, mimeType, fileName, audioUrl }); } catch {}
+        break; // success
+      } catch (err: any) {
+        lastErr = err;
+        const code = (err?.cause && (err.cause.code || err.cause?.code)) || err?.code || 'unknown';
+        try { console.error('[song-analysis] fetch url attempt failed', { attempt: i + 1, code, message: err?.message || String(err) }); } catch {}
+        await new Promise(r => setTimeout(r, 300 * (i + 1)));
+      }
+    }
+    if (!audioData) {
+      const message = (lastErr instanceof Error ? lastErr.message : 'Failed to fetch audio url');
       try { console.error('[song-analysis] fetch url error', { error: message, audioUrl }); } catch {}
       res.status(400).json({ error: `Invalid audioUrl payload: ${message}` });
       return;

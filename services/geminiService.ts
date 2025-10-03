@@ -95,18 +95,46 @@ export const fetchSongDataFromUrl = async (
   if (!modelId) throw new Error('AI Model ID is required for processing.');
   if (!audioUrl) throw new Error('audioUrl is required');
   if (onProgress) onProgress('Requesting song analysis…');
-  const response = await fetch(SONG_ANALYSIS_ENDPOINT, {
+  const payload = {
+    audioUrl,
+    fileName: opts?.fileName || 'downloaded-audio',
+    mimeType: opts?.mimeType || 'audio/mpeg',
+    targetLanguage,
+    enableKaraokeMode,
+    modelId,
+  };
+  let response = await fetch(SONG_ANALYSIS_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      audioUrl,
-      fileName: opts?.fileName || 'downloaded-audio',
-      mimeType: opts?.mimeType || 'audio/mpeg',
-      targetLanguage,
-      enableKaraokeMode,
-      modelId,
-    }),
+    body: JSON.stringify(payload),
   });
+  if (!response.ok) {
+    // Try client-side proxy → base64 fallback if server failed to fetch the URL
+    const text = await response.text().catch(() => '');
+    const isUrlFetchError = /Invalid audioUrl payload|fetch\(/i.test(text) || response.status === 400;
+    if (isUrlFetchError) {
+      if (onProgress) onProgress('Fetching audio via proxy…');
+      const proxied = await fetch(`/api/proxy?url=${encodeURIComponent(audioUrl)}`);
+      if (!proxied.ok) {
+        throw new Error(text || `Song analysis failed (${response.status})`);
+      }
+      const buf = await proxied.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      if (onProgress) onProgress('Retrying song analysis…');
+      response = await fetch(SONG_ANALYSIS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audioBase64: base64,
+          fileName: payload.fileName,
+          mimeType: payload.mimeType,
+          targetLanguage,
+          enableKaraokeMode,
+          modelId,
+        }),
+      });
+    }
+  }
   const { songData } = await parseJsonResponse<{ songData: SongData }>(response);
   if (!songData || !songData.verses) throw new Error('Server returned invalid song data.');
   if (onProgress) onProgress('Song analysis received. Preparing display...');
