@@ -90,6 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const file = storage.bucket(bucketName).file(objectPath)
     ;[uploadUrl] = await file.getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 30 * 60 * 1000, contentType })
     ;[getUrl] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+    try { console.log('[downloads] signed urls minted', { bucket: bucketName, objectPath, contentType }) } catch {}
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     try { console.error('[downloads] sign url error', msg) } catch {}
@@ -118,10 +119,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return s.bucket(existing.gcsObject!.bucket).file(existing.gcsObject!.path)
               })() : new Storage().bucket(existing.gcsObject.bucket).file(existing.gcsObject.path)
             const [freshGet] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+            try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: 'completed', backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
             return res.status(200).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: freshGet, apifyRunId: existing.apifyRunId })
           } catch {}
         }
         // Otherwise let client attach to existing job
+        try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: existing.status, backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
         return res.status(202).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: existing.url, apifyRunId: existing.apifyRunId })
       }
     }
@@ -151,21 +154,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   await setJobIdForSource(payload.youtubeUrl, jobId)
 
   try {
+    try { console.log('[downloads] apify:start', { actor: ACTOR, country: actorInput.proxyConfiguration.apifyProxyCountry, format: actorInput.audioFormat }) } catch {}
     const resp = await fetch(startUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(actorInput) })
     if (!resp.ok) {
       const text = await resp.text().catch(() => '')
+      try { console.error('[downloads] apify:start:failed', { status: resp.status, body: text?.slice?.(0, 300) }) } catch {}
       res.status(502).json({ error: 'Apify start failed', status: resp.status, body: text })
       return
     }
     const data = await resp.json().catch(() => ({} as any))
     runId = data?.data?.id
+    try { console.log('[downloads] apify:start:ok', { jobId, runId }) } catch {}
     await updateJob(jobId, { status: 'working', apifyRunId: runId })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    try { console.error('[downloads] apify start error', msg) } catch {}
+    try { console.error('[downloads] apify:start:error', msg) } catch {}
     res.status(502).json({ error: 'Failed to contact Apify', details: msg })
     return
   }
 
+  try { console.log('[downloads] queued', { jobId, runId, statusUrl: `/api/downloads/${jobId}` }) } catch {}
   res.status(202).json({ jobId, statusUrl: `/api/downloads/${jobId}`, getUrl, apifyRunId: runId })
 }

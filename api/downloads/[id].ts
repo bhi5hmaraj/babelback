@@ -17,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const jobId = Array.isArray(id) ? id[0] : id
   if (!jobId) { res.status(400).json({ error: 'missing id' }); return }
   let job = await getJob(jobId)
+  try { console.log('[downloads:id] fetch', { id: jobId, found: Boolean(job) }) } catch {}
   // If job missing (cold start/another instance), try to infer completion by probing GCS
   if (!job) {
     const bucketName = process.env.GCS_BUCKET
@@ -47,6 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             job = { id: jobId, status: 'completed', workerUrl: 'apify', url: signed, gcsObject: { bucket: bucketName, path } }
             // Cache it for future polls
             await updateJob(jobId, job)
+            try { console.log('[downloads:id] inferred completion via GCS', { id: jobId, path }) } catch {}
             break
           }
         }
@@ -65,6 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const data = await resp.json().catch(() => ({} as any))
         const status = (data?.data?.status as string | undefined) || ''
         apifyStatus = status
+        try { console.log('[downloads:id] apify:poll', { id: jobId, runId: job.apifyRunId, status }) } catch {}
         if (status === 'SUCCEEDED' && job.status !== 'completed') await updateJob(jobId, { status: 'completed' })
         else if ((status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') && job.status !== 'failed') await updateJob(jobId, { status: 'failed', error: { message: status } })
       }
@@ -95,6 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const file = storage.bucket(bucketName).file(path)
       const [signed] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
       freshUrl = signed
+      try { console.log('[downloads:id] minted fresh read url', { id: jobId, path }) } catch {}
     }
     res.status(200).json({
       id: jobId,

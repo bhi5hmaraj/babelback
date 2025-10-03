@@ -63,13 +63,17 @@ export async function putJob(rec: JobRecord) {
 
 export async function getJob(id: string) {
   const inMem = jobs.get(id)
-  if (inMem) return inMem
+  if (inMem) {
+    try { console.log('[jobStore] cache hit (memory)', { id }) } catch {}
+    return inMem
+  }
   const raw = await kvGet(`downloads:${id}`)
   if (!raw) return undefined
   try {
     const parsed = JSON.parse(raw) as JobRecord
     // Refresh in-memory cache for this instance
     jobs.set(id, parsed)
+    try { console.log('[jobStore] cache hit (kv)', { id, backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : (useRestKv ? 'vercel-kv-rest' : 'none') }) } catch {}
     return parsed
   } catch {
     return undefined
