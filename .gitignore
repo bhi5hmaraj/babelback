@@ -12,3 +12,10 @@ yarn-error.log*
 
 # Apify local runs (if any)
 apify_storage/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*
+!.env.example
+!.env.sample
