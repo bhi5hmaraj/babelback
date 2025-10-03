@@ -91,6 +91,7 @@ const App: React.FC = () => {
     funLoadingMessage, elapsedLoadingTime, error: songProcessingError, isKaraokeMode,
     currentSongDurationRef,
     handleAudioSubmit: smHandleAudioSubmit,
+    handleUrlAnalyze: smHandleUrlAnalyze,
     handleLanguageChange: smHandleLanguageChange,
     handleKaraokeModeToggle: smHandleKaraokeModeToggle,
     handleSongDurationAvailable: smHandleSongDurationAvailable,
@@ -432,7 +433,37 @@ const App: React.FC = () => {
                         error={rawDeviceError} 
                     />
                   )}
-                  <YouTubeDownloader />
+                  <YouTubeDownloader onAnalyze={async (url, opts) => {
+                    // Analyze from URL, then add to library by fetching a blob
+                    const result = await smHandleUrlAnalyze(url, { fileName: opts?.fileName, mimeType: opts?.mimeType })
+                    if (result && result.songData) {
+                      try {
+                        const resp = await fetch(url)
+                        const buf = await resp.arrayBuffer()
+                        const blob = new Blob([buf], { type: opts?.mimeType || 'audio/mpeg' })
+                        const fileName = opts?.fileName || 'downloaded-audio'
+                        const file = new File([blob], fileName, { type: blob.type })
+                        const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
+                          title: result.songData.title || fileName,
+                          originalLanguage: result.songData.originalLanguage,
+                          targetLanguage: targetLanguage,
+                          timestamp: Date.now(),
+                          audioFileBlob: file,
+                          audioFileName: file.name,
+                          audioFileType: file.type,
+                          songData: result.songData,
+                          processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
+                          songDurationSeconds: result.songDuration ? parseFloat((result.songDuration || 0).toFixed(1)) : undefined,
+                          modelIdUsed: result.modelIdUsed,
+                        }
+                        const newId = await addSongToLibrary(newLibraryEntry)
+                        setCurrentLibraryEntryId(newId)
+                        await refreshLibrary()
+                      } catch (e) {
+                        console.error('[AnalyzeFromUrl] failed to cache in library', e)
+                      }
+                    }
+                  }} />
                   <ModelSelector
                     selectedModelId={selectedModelId}
                     onModelChange={setSelectedModelId}

@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Language, SongData, LibraryEntry } from '../types';
 import { SUPPORTED_LANGUAGES, AI_THOUGHTS_AND_JOKES } from '../constants';
-import { fetchSongDataFromGemini } from '../services/geminiService';
+import { fetchSongDataFromGemini, fetchSongDataFromUrl } from '../services/geminiService';
 
 export interface UseSongDataManagerProps {
   apiKeyMissing: boolean;
@@ -40,6 +40,7 @@ export interface UseSongDataManagerReturn {
   setIsKaraokeMode: React.Dispatch<React.SetStateAction<boolean>>;
 
   handleAudioSubmit: (file: File) => Promise<SongProcessingResult | null>;
+  handleUrlAnalyze: (url: string, opts?: { fileName?: string; mimeType?: string }) => Promise<SongProcessingResult | null>;
   handleLanguageChange: (newLanguage: Language) => Promise<SongProcessingResult | null>;
   handleKaraokeModeToggle: () => void;
   handleSongDurationAvailable: (duration: number) => void;
@@ -157,6 +158,38 @@ export const useSongDataManager = ({
     }
     return null;
   }, [audioFile, apiKeyMissing, isKaraokeMode, selectedModelId, practiceExitCallback, handleFetchSongDataInternal]);
+
+  const handleUrlAnalyze = useCallback(async (url: string, opts?: { fileName?: string; mimeType?: string }): Promise<SongProcessingResult | null> => {
+    if (apiKeyMissing) return null;
+    if (!url) return null;
+    setAudioFile(null);
+    setAudioSrc(url);
+    setSongData(null);
+    currentSongDurationRef.current = null;
+    setError(null);
+    practiceExitCallback(false);
+
+    setIsLoading(true);
+    setLoadingMessage('Initializing process...');
+    processingStartTimeRef.current = Date.now();
+    const onProgressUpdate = (m: string) => setLoadingMessage(m);
+    try {
+      const data = await fetchSongDataFromUrl(url, targetLanguage, isKaraokeMode, selectedModelId, { fileName: opts?.fileName, mimeType: opts?.mimeType }, onProgressUpdate);
+      const processingTimeSeconds = processingStartTimeRef.current ? (Date.now() - processingStartTimeRef.current) / 1000 : undefined;
+      const durationToSave = currentSongDurationRef.current;
+      setSongData(data);
+      if (data.originalLanguage === 'Instrumental' && data.verses.length === 0) setError(null);
+      return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: selectedModelId };
+    } catch (e: any) {
+      setError(e?.message || 'Failed to analyze URL');
+      setSongData(null);
+      return null;
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage(null);
+      processingStartTimeRef.current = null;
+    }
+  }, [apiKeyMissing, targetLanguage, isKaraokeMode, selectedModelId, practiceExitCallback]);
   
   const handleKaraokeModeToggle = useCallback(() => {
     const newKaraokeMode = !isKaraokeMode;
@@ -218,6 +251,7 @@ export const useSongDataManager = ({
     isKaraokeMode, setIsKaraokeMode,
     currentSongDurationRef,
     handleAudioSubmit,
+    handleUrlAnalyze,
     handleLanguageChange,
     handleKaraokeModeToggle,
     handleSongDurationAvailable,

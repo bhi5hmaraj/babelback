@@ -2,7 +2,9 @@ import React from 'react'
 import { useDownloadJob } from '../hooks/useDownloadJob'
 import Icon from './Icon'
 
-const YouTubeDownloader: React.FC = () => {
+type Props = { onAnalyze?: (url: string, opts?: { fileName?: string; mimeType?: string }) => void }
+
+const YouTubeDownloader: React.FC<Props> = ({ onAnalyze }) => {
   const d = useDownloadJob('m4a')
 
   return (
@@ -55,6 +57,10 @@ const YouTubeDownloader: React.FC = () => {
                     try { await navigator.clipboard.writeText(d.status!.url!) } catch {}
                   }}
                 >Copy URL</button>
+                <button
+                  className="text-xs px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded text-white"
+                  onClick={() => onAnalyze?.(d.status!.url!, { fileName: (d.status.gcsObject?.path?.split('/')?.pop() || 'downloaded-audio'), mimeType: d.status.gcsObject?.contentType })}
+                >Analyze in Babelback</button>
                 <audio controls className="ml-2 w-full max-w-sm" src={d.status.url} />
               </div>
             )}
@@ -66,4 +72,3 @@ const YouTubeDownloader: React.FC = () => {
 }
 
 export default YouTubeDownloader
-

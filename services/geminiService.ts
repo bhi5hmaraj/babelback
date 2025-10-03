@@ -84,6 +84,35 @@ export const fetchSongDataFromGemini = async (
   return songData;
 };
 
+export const fetchSongDataFromUrl = async (
+  audioUrl: string,
+  targetLanguage: Language,
+  enableKaraokeMode: boolean,
+  modelId: string,
+  opts?: { fileName?: string; mimeType?: string },
+  onProgress?: (message: string) => void
+): Promise<SongData> => {
+  if (!modelId) throw new Error('AI Model ID is required for processing.');
+  if (!audioUrl) throw new Error('audioUrl is required');
+  if (onProgress) onProgress('Requesting song analysis…');
+  const response = await fetch(SONG_ANALYSIS_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      audioUrl,
+      fileName: opts?.fileName || 'downloaded-audio',
+      mimeType: opts?.mimeType || 'audio/mpeg',
+      targetLanguage,
+      enableKaraokeMode,
+      modelId,
+    }),
+  });
+  const { songData } = await parseJsonResponse<{ songData: SongData }>(response);
+  if (!songData || !songData.verses) throw new Error('Server returned invalid song data.');
+  if (onProgress) onProgress('Song analysis received. Preparing display...');
+  return songData;
+};
+
 export const fetchSingingFeedback = async (
   audioBlob: Blob,
   referenceVerses: Verse[],
