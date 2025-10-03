@@ -19,6 +19,7 @@ import LibraryView from './components/LibraryView';
 import DeviceSelector from './components/DeviceSelector';
 import ModelSelector from './components/ModelSelector'; 
 import YouTubeDownloader from './components/YouTubeDownloader';
+import YouTubeInput from './components/YouTubeInput';
 import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
@@ -47,6 +48,11 @@ const App: React.FC = () => {
   const [showDeviceConfig, setShowDeviceConfig] = useState<boolean>(false);
   const [selectedModelId, setSelectedModelId] = useState<string>(DEFAULT_MODEL_ID);
   const [sourceMode, setSourceMode] = useState<'file' | 'youtube'>('file');
+  const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
+  const [ytUrl, setYtUrl] = useState('');
+  const [ytFormat, setYtFormat] = useState<'m4a' | 'mp3'>('m4a');
+  const [ytWorking, setYtWorking] = useState(false);
+  const [ytFun, setYtFun] = useState('');
 
 
   // --- Core Hooks ---
@@ -434,7 +440,8 @@ const App: React.FC = () => {
                         error={rawDeviceError} 
                     />
                   )}
-                  {/* Source selection */}
+                  {/* 1) Choose Source */}
+                  <div className="text-sm text-slate-300 font-semibold mb-1">1. Choose Source</div>
                   <div className="w-full mb-3 flex items-center justify-center gap-2">
                     <button
                       onClick={() => setSourceMode('file')}
@@ -446,54 +453,29 @@ const App: React.FC = () => {
                     >From YouTube</button>
                   </div>
                   {sourceMode === 'youtube' ? (
-                  <YouTubeDownloader onAnalyze={async (url, opts) => {
-                    // Analyze from URL, then add to library by fetching a blob
-                    const result = await smHandleUrlAnalyze(url, { fileName: opts?.fileName, mimeType: opts?.mimeType })
-                    if (result && result.songData) {
-                      try {
-                        const resp = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`)
-                        const buf = await resp.arrayBuffer()
-                        const blob = new Blob([buf], { type: opts?.mimeType || 'audio/mpeg' })
-                        const fileName = opts?.fileName || 'downloaded-audio'
-                        const file = new File([blob], fileName, { type: blob.type })
-                        const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
-                          title: result.songData.title || fileName,
-                          originalLanguage: result.songData.originalLanguage,
-                          targetLanguage: targetLanguage,
-                          timestamp: Date.now(),
-                          audioFileBlob: file,
-                          audioFileName: file.name,
-                          audioFileType: file.type,
-                          songData: result.songData,
-                          processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
-                          songDurationSeconds: result.songDuration ? parseFloat((result.songDuration || 0).toFixed(1)) : undefined,
-                          modelIdUsed: result.modelIdUsed,
-                        }
-                        const newId = await addSongToLibrary(newLibraryEntry)
-                        setCurrentLibraryEntryId(newId)
-                        await refreshLibrary()
-                      } catch (e) {
-                        console.error('[AnalyzeFromUrl] failed to cache in library', e)
-                      }
-                    }
-                  }} />
+                    <YouTubeInput youtubeUrl={ytUrl} setYoutubeUrl={setYtUrl} audioFormat={ytFormat} setAudioFormat={setYtFormat} />
                   ) : (
-                  <AudioUpload
-                      onAudioSubmit={handleAudioSubmit}
-                      isLoading={isLoadingSongData}
-                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing} // Simplified disabled logic
-                  />
+                    <AudioUpload pickerOnly onFileSelected={setSelectedLocalFile} isLoading={isLoadingSongData} disabled={globalIsLoading || isPracticeActive || apiKeyMissing} />
                   )}
+
+                  {/* 2) AI Model */}
+                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">2. AI Model</div>
                   <ModelSelector
                     selectedModelId={selectedModelId}
                     onModelChange={setSelectedModelId}
                     disabled={globalIsLoading || isPracticeActive}
                   />
+
+                  {/* 3) Translate Target Language */}
+                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">3. Translate Target Language</div>
                   <LanguageSelector
                       selectedLanguage={targetLanguage}
                       onLanguageChange={handleLanguageChange}
                       disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
                   />
+
+                  {/* 4) Modes Selection */}
+                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">4. Modes</div>
                   <KaraokeModeToggle
                       isKaraokeMode={isKaraokeMode}
                       onToggle={handleKaraokeModeToggleApp}
@@ -504,7 +486,86 @@ const App: React.FC = () => {
                       onToggle={handlePracticeModeGlobalToggle}
                       disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) || apiKeyMissing }
                   />
+
+                  {/* 5) Babelback */}
+                  <div className="mt-6 flex items-center justify-center">
+                    <button
+                      className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow flex items-center"
+                      disabled={globalIsLoading || isLoadingSongData || isPracticeActive || apiKeyMissing}
+                      onClick={async () => {
+                        try {
+                          if (sourceMode === 'file') {
+                            if (!selectedLocalFile) { setAppError('Please choose an audio file.'); return }
+                            await handleAudioSubmit(selectedLocalFile)
+                          } else {
+                            if (!ytUrl || !/^https?:\/\//i.test(ytUrl)) { setAppError('Please paste a valid YouTube URL.'); return }
+                            setAppError(null)
+                            // Lightweight poller with fun messages
+                            setYtWorking(true)
+                            const jokes = AI_THOUGHTS_AND_JOKES
+                            let i = 0
+                            const interval = window.setInterval(() => { setYtFun(jokes[i++ % jokes.length]) }, 2500)
+                            try {
+                              const { startDownload, getDownloadStatus } = await import('./services/downloadsService')
+                              const start = await startDownload(ytUrl, ytFormat)
+                              let status = await getDownloadStatus(start.jobId)
+                              const t0 = Date.now()
+                              while (status.status !== 'completed' && status.status !== 'failed' && Date.now() - t0 < 15 * 60 * 1000) {
+                                await new Promise(r => setTimeout(r, 2000))
+                                status = await getDownloadStatus(start.jobId)
+                              }
+                              if (status.status !== 'completed' || !status.url) { setAppError('Failed to process YouTube audio.'); return }
+                              const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType })
+                              if (result && result.songData) {
+                                try {
+                                  const resp = await fetch(`/api/proxy?url=${encodeURIComponent(status.url)}`)
+                                  const buf = await resp.arrayBuffer()
+                                  const blob = new Blob([buf], { type: status.gcsObject?.contentType || 'audio/mpeg' })
+                                  const fileName = status.gcsObject?.path?.split('/')?.pop() || 'downloaded-audio'
+                                  const file = new File([blob], fileName, { type: blob.type })
+                                  const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
+                                    title: result.songData.title || fileName,
+                                    originalLanguage: result.songData.originalLanguage,
+                                    targetLanguage: targetLanguage,
+                                    timestamp: Date.now(),
+                                    audioFileBlob: file,
+                                    audioFileName: file.name,
+                                    audioFileType: file.type,
+                                    songData: result.songData,
+                                    processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
+                                    songDurationSeconds: result.songDuration ? parseFloat((result.songDuration || 0).toFixed(1)) : undefined,
+                                    modelIdUsed: result.modelIdUsed,
+                                  }
+                                  const newId = await addSongToLibrary(newLibraryEntry)
+                                  setCurrentLibraryEntryId(newId)
+                                  await refreshLibrary()
+                                } catch (e) {
+                                  console.error('[AnalyzeFromUrl] failed to cache in library', e)
+                                }
+                              }
+                            } finally {
+                              window.clearInterval(interval)
+                              setYtWorking(false)
+                              setYtFun('')
+                            }
+                          }
+                        } catch (e) {
+                          setAppError(e instanceof Error ? e.message : String(e))
+                        }
+                      }}
+                    >
+                      <Icon name="sparkle" className="mr-2" /> Babelback
+                    </button>
+                  </div>
               </>
+          )}
+
+          {/* YouTube processing spinner messages */}
+          {(ytWorking) && (
+            <div className="my-4 p-3 bg-slate-700/60 border border-slate-600 rounded text-slate-200 text-sm flex items-center justify-center">
+              <Icon name="spinner-gap" className="animate-spin mr-2" />
+              <span>{ytFun || 'Processing audio…'}</span>
+            </div>
           )}
 
           {isLoadingSongData && <LoadingSpinner message={loadingMessage || undefined} funMessage={funLoadingMessage} elapsedTime={elapsedLoadingTime} />}

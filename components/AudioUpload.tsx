@@ -3,12 +3,14 @@ import React, { useState, useRef } from 'react';
 import Icon from './Icon';
 
 interface AudioUploadProps {
-  onAudioSubmit: (file: File) => void;
+  onAudioSubmit?: (file: File) => void;
   isLoading: boolean;
   disabled: boolean;
+  pickerOnly?: boolean;
+  onFileSelected?: (file: File) => void;
 }
 
-const AudioUpload: React.FC<AudioUploadProps> = ({ onAudioSubmit, isLoading, disabled }) => {
+const AudioUpload: React.FC<AudioUploadProps> = ({ onAudioSubmit, isLoading, disabled, pickerOnly, onFileSelected }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -19,6 +21,7 @@ const AudioUpload: React.FC<AudioUploadProps> = ({ onAudioSubmit, isLoading, dis
     if (file) {
       if (file.type.startsWith('audio/')) {
         setSelectedFile(file);
+        if (onFileSelected) onFileSelected(file);
       } else {
         setSelectedFile(null);
         setError('Invalid file type. Please select an audio file (e.g., MP3, WAV, OGG).');
@@ -41,7 +44,7 @@ const AudioUpload: React.FC<AudioUploadProps> = ({ onAudioSubmit, isLoading, dis
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6">
+    <form onSubmit={handleSubmit} className="mb-3">
       <label htmlFor="audio-upload-input" className="block text-sm font-medium text-slate-300 mb-2">
         Upload Audio File
       </label>
@@ -64,18 +67,20 @@ const AudioUpload: React.FC<AudioUploadProps> = ({ onAudioSubmit, isLoading, dis
           <Icon name={selectedFile ? "check-circle" : "file-audio"} className={`mr-2 ${selectedFile ? 'text-green-400' : ''}`} />
           {selectedFile ? selectedFile.name : 'Choose Audio File...'}
         </button>
-        <button
-          type="submit"
-          disabled={isLoading || disabled || !selectedFile}
-          className="px-6 py-3 bg-sky-600 text-white rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50 disabled:bg-slate-500 disabled:cursor-not-allowed transition-colors duration-150 flex items-center justify-center"
-        >
-          {isLoading ? (
-            <Icon name="spinner-gap" className="animate-spin mr-2" />
-          ) : (
-            <Icon name="sparkle" className="mr-2" />
-          )}
-          Process Audio
-        </button>
+        {!pickerOnly && (
+          <button
+            type="submit"
+            disabled={isLoading || disabled || !selectedFile}
+            className="px-6 py-3 bg-sky-600 text-white rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-50 disabled:bg-slate-500 disabled:cursor-not-allowed transition-colors duration-150 flex items-center justify-center"
+          >
+            {isLoading ? (
+              <Icon name="spinner-gap" className="animate-spin mr-2" />
+            ) : (
+              <Icon name="sparkle" className="mr-2" />
+            )}
+            Process Audio
+          </button>
+        )}
       </div>
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
        <p className="mt-2 text-xs text-slate-400">
