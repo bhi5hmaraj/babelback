@@ -162,6 +162,7 @@ Add these to Vercel Project → Settings → Environment Variables (Production/P
 - GCP_SERVICE_ACCOUNT_KEY (or GCP_PROJECT_ID / GCP_CLIENT_EMAIL / GCP_PRIVATE_KEY)
 - GCS_BUCKET=babelback-dev
 - APIFY_ACTOR_ID, APIFY_TOKEN
+- APIFY_PROXY_COUNTRY=IN   # default country for Apify Proxy (optional; falls back to IN)
 - GEMINI_API_KEY
 
 The downloads API routes are pinned to Node runtime via `vercel.json` so that `@google-cloud/storage` works for signed URLs.

@@ -20,7 +20,10 @@ const parseRequestBody = (body: unknown): DownloadsRequestBody => {
   const r = obj as Record<string, unknown>
   const youtubeUrl = typeof r.youtubeUrl === 'string' ? r.youtubeUrl : undefined
   const audioFormat = typeof r.audioFormat === 'string' ? (r.audioFormat as 'm4a' | 'mp3') : 'm4a'
-  const country = typeof r.country === 'string' ? r.country : 'US'
+  const envCountry = (process.env.APIFY_PROXY_COUNTRY || '').toUpperCase()
+  const country = typeof r.country === 'string' && r.country
+    ? String(r.country).toUpperCase()
+    : (envCountry || 'IN')
   if (!youtubeUrl) throw new Error('youtubeUrl required')
   return { youtubeUrl, audioFormat, country }
 }

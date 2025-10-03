@@ -15,7 +15,7 @@ export type DownloadStatus = {
   apifyStatus?: string
 }
 
-export async function startDownload(youtubeUrl: string, audioFormat: 'm4a' | 'mp3' = 'm4a', country = 'US'): Promise<StartDownloadResponse> {
+export async function startDownload(youtubeUrl: string, audioFormat: 'm4a' | 'mp3' = 'm4a', country = 'IN'): Promise<StartDownloadResponse> {
   const resp = await fetch('/api/downloads', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -36,4 +36,3 @@ export async function getDownloadStatus(jobId: string): Promise<DownloadStatus> 
   }
   return await resp.json()
 }
-

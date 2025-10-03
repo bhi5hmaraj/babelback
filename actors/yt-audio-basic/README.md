@@ -9,7 +9,7 @@ Inputs
 - `cookiesTxt` (string, Netscape cookies.txt, optional)
 - `useProxy` (boolean, default false)
 - `proxyGroups` (array, default ["RESIDENTIAL"]) – requires Apify Proxy
-- `countryCode` (string, default "US")
+- `apifyProxyCountry` (string, default "IN") – 2-letter ISO code, e.g., IN, US, GB
 - `formatExpr` (string, default `bestaudio[ext=m4a]/140/234/bestaudio`)
 
 Output
@@ -51,7 +51,7 @@ apify call yt-audio-basic -i '{
   "audioFormat": "m4a",
   "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
   "formatExpr": "bestaudio[ext=m4a]/140/234/bestaudio",
-  "proxyConfiguration": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"], "apifyProxyCountry": "US" },
+  "proxyConfiguration": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"], "apifyProxyCountry": "IN" },
   "uploadUrl": "<signed-GCS-PUT-URL>",
   "callbackUrl": "https://your.api/app/api/downloads/<jobId>/callback",
   "callbackSecret": "<hmac-secret>",
