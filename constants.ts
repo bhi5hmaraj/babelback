@@ -53,5 +53,21 @@ export const AI_THOUGHTS_AND_JOKES = [
   "Our AI says this song has 'good vibes'. Very technical.",
   "Polishing the translations... almost there!",
   "Is this song in 4/4 or 7/8? Let me count...",
-  "Just double-checking if 'yeet' is a recognized lyrical term."
+  "Just double-checking if 'yeet' is a recognized lyrical term.",
+  // Extra quips + fun facts
+  "Fun fact: Babelback = Babel + playback — bringing languages back to your ears.",
+  "Pro tip: Karaoke Mode gives phrase-by-phrase highlights. Try it!",
+  "Transliteration ≠ translation: one sounds like it, the other means it.",
+  "Easter egg: if the lyrics mention coffee, productivity increases by 12%.",
+  "Counting syllables like it's cardio.",
+  "Fun fact: We re-number verses after sorting by start time.",
+  "Quirk alert: The AI occasionally sings off‑key. Please be kind.",
+  "Babelback tidbit: It loves multilingual puns — they’re pun‑iversal.",
+  "If this takes long, it's because your song is extra poetic.",
+  "Loading vibes… adding reverb… sprinkling metaphors…",
+  "Babelback believes every chorus deserves a little confetti.",
+  "Tiny robots are aligning timestamps. Please do not startle them.",
+  "Fun fact: Verse timing uses MM:SS.sss under the hood.",
+  "Be right back — negotiating with the rhyme scheme union.",
+  "If you can read this, the buffer hasn't dropped the beat yet."
 ];

@@ -515,6 +515,9 @@ const App: React.FC = () => {
                                 status = await getDownloadStatus(start.jobId)
                               }
                               if (status.status !== 'completed' || !status.url) { setAppError('Failed to process YouTube audio.'); return }
+                              // Switch loader context from fetching → analyzing
+                              setYtWorking(false)
+                              setYtFun('')
                               const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType })
                               if (result && result.songData) {
                                 try {
@@ -563,9 +566,9 @@ const App: React.FC = () => {
           {/* Unified loader: reuse LoadingSpinner for both YouTube fetch and analysis */}
           {(ytWorking || isLoadingSongData) && (
             <LoadingSpinner
-              message={ytWorking ? 'Fetching audio from YouTube…' : (loadingMessage || undefined)}
-              funMessage={ytWorking ? (ytFun || undefined) : funLoadingMessage}
-              elapsedTime={ytWorking ? undefined : elapsedLoadingTime}
+              message={isLoadingSongData ? (loadingMessage || 'Analyzing song…') : 'Fetching audio from YouTube…'}
+              funMessage={isLoadingSongData ? funLoadingMessage : (ytFun || undefined)}
+              elapsedTime={isLoadingSongData ? elapsedLoadingTime : undefined}
             />
           )}
           {appError && !isLoadingSongData && !apiKeyMissing && ( 
