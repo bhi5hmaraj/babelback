@@ -20,3 +20,7 @@ apify_storage/
 !.env.example
 !.env.sample
 .vercel
+
+# Screenshots
+*.jpeg
+*.jpg
