@@ -2,14 +2,20 @@ import { createClient } from 'redis'
 
 // Keep types loose to avoid @redis/* type clashes in serverless bundlers.
 let clientPromise: Promise<any> | null = null
+let disabled = false
+let loggedFailure = false
 
 export async function getRedis(): Promise<any | null> {
+  if (disabled || process.env.REDIS_DISABLE === '1' || process.env.REDIS_DISABLE === 'true') return null
   if (clientPromise) return clientPromise
   const url = process.env.REDIS_KV_REDIS_URL
   if (!url) return null
   const client = createClient({ url })
   client.on('error', (err) => {
-    try { console.error('[redis] client error', err?.message || String(err)) } catch {}
+    if (!loggedFailure) {
+      try { console.error('[redis] client error', err?.message || String(err)) } catch {}
+      loggedFailure = true
+    }
   })
   const connectTimeoutMs = Number(process.env.REDIS_CONNECT_TIMEOUT_MS || 1000)
   const connectPromise = client.connect().then(() => client)
@@ -19,9 +25,13 @@ export async function getRedis(): Promise<any | null> {
     const c = await clientPromise
     return c
   } catch (e) {
-    try { console.error('[redis] connect failed', e instanceof Error ? e.message : String(e)) } catch {}
+    if (!loggedFailure) {
+      try { console.error('[redis] connect failed', e instanceof Error ? e.message : String(e)) } catch {}
+      loggedFailure = true
+    }
     try { await client.quit().catch(() => {}) } catch {}
     clientPromise = null
+    disabled = true
     return null
   }
 }

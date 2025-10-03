@@ -1,4 +1,5 @@
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
+import { getRedis } from './_lib/redis.js'
 
 interface VercelRequest {
   method?: string;
@@ -54,6 +55,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     geminiInitError: geminiInitError ?? undefined,
   };
 
+  // Job store backend detection
+  try {
+    const hasRestKv = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
+    let backend: 'redis' | 'rest' | 'memory' = 'memory'
+    const r = await getRedis()
+    if (r) backend = 'redis'
+    else if (hasRestKv) backend = 'rest'
+    payload.jobStore = { backend }
+  } catch {
+    payload.jobStore = { backend: 'memory' }
+  }
+
   if (doGeminiCheck && gemini) {
     const started = Date.now();
     try {
@@ -73,4 +86,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(200).json(payload);
 }
-

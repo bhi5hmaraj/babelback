@@ -67,46 +67,22 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   const activeLinePairRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isKaraokeMode && activeLinePairRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const activeElement = activeLinePairRef.current;
+    if (!isKaraokeMode) return;
+    const container = scrollContainerRef.current;
+    const activeEl = activeLinePairRef.current;
+    if (!container || !activeEl) return;
 
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = activeElement.getBoundingClientRect();
+    // Keep the active line centered (or near the center) in the scroll viewport.
+    const containerHeight = container.clientHeight;
+    const elCenter = activeEl.offsetTop + activeEl.offsetHeight / 2; // relative to container scroll content
+    const targetScrollTop = Math.max(0, elCenter - containerHeight / 2);
 
-      // Condition 1: Element is scrolled above the visible area of the container
-      const isAbove = elementRect.top < containerRect.top;
-
-      // Condition 2: Element is approaching the bottom (preemptive scroll)
-      let isApproachingBottom = false;
-      const activeLineHeight = activeElement.offsetHeight;
-
-      if (activeLineHeight > 0) {
-        const remainingSpaceBelow = containerRect.bottom - elementRect.bottom;
-        // Preemptively scroll if less than ~1.5 line heights are visible below the active line
-        const bufferToKeep = activeLineHeight * 1.5; 
-        if (remainingSpaceBelow < bufferToKeep) {
-          isApproachingBottom = true;
-        }
-      } else {
-        // Fallback: if line height is 0 (e.g., display:none temporarily), 
-        // scroll if the element's bottom is in the lower 35% of the container.
-        if (elementRect.bottom > (containerRect.top + containerRect.height * 0.65)) {
-           isApproachingBottom = true;
-        }
-      }
-      
-      // Condition 3: Element is definitively past the bottom of the container
-      const isPastBottom = elementRect.bottom > containerRect.bottom;
-
-      if (isAbove || isApproachingBottom || isPastBottom) {
-        activeElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-        });
-      }
+    // Only adjust if we're far enough from the target to avoid jitter.
+    const delta = Math.abs(container.scrollTop - targetScrollTop);
+    if (delta > 16) {
+      container.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
     }
-  }, [currentTime, isKaraokeMode, verse]); 
+  }, [currentTime, isKaraokeMode, verse]);
 
   if (!verse) {
     return <div className="text-center text-slate-400 py-8">No verse data available.</div>;

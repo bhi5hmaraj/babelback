@@ -12,6 +12,18 @@ const getCurrentFormattedDate = (): string => {
 
 export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
+    version: '1.2.0',
+    date: 'October 3, 2025',
+    title: 'Simpler flow, YouTube support, smoother scrolling',
+    description: [
+      'New step-by-step flow: 1) Choose source, 2) AI model, 3) Target language, 4) Modes, 5) Babelback.',
+      'Process from YouTube: paste a link, we fetch and analyze automatically with fun progress lines.',
+      'Active lyric line now stays near the middle while playing.',
+      'Faster repeats: links processed before start almost instantly.',
+      'Playback and saving are more reliable behind the scenes.',
+    ],
+  },
+  {
     version: '1.1.0',
     date: 'June 13, 2025',
     title: 'Verse Display Reimagined & Smoother Scrolling',
