@@ -9,6 +9,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Language, SongData, LibraryEntry } from '../types';
 import { SUPPORTED_LANGUAGES, AI_THOUGHTS_AND_JOKES } from '../constants';
 import { fetchSongDataFromGemini, fetchSongDataFromUrl } from '../services/geminiService';
+import { trackEvent } from '../services/analytics';
 
 export interface UseSongDataManagerProps {
   apiKeyMissing: boolean;
@@ -108,6 +109,7 @@ export const useSongDataManager = ({
     }
 
     setIsLoading(true);
+    trackEvent('analysis_start', { source: 'file', karaoke: karaokeEnabled ? 1 : 0, lang: lang, model: modelToUse })
     setLoadingMessage("Initializing process...");
     setError(null);
     setSongData(null); 
@@ -128,8 +130,10 @@ export const useSongDataManager = ({
         setError(errorMsg);
         setSongData(data); 
       }
+      trackEvent('analysis_complete', { verses: data?.verses?.length || 0, secs: processingTimeSeconds ? Math.round(processingTimeSeconds * 1000) / 1000 : 0, model: modelToUse })
       return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: modelToUse };
     } catch (e: any) {
+      trackEvent('analysis_error', { reason: (e?.message || 'unknown').slice(0, 120) })
       setError(e.message || "An unexpected error occurred.");
       setSongData(null);
       return null; 
@@ -155,6 +159,7 @@ export const useSongDataManager = ({
 
   const handleLanguageChange = useCallback(async (newLanguage: Language): Promise<SongProcessingResult | null> => {
     setTargetLanguage(newLanguage);
+    trackEvent('language_change', { to: newLanguage })
     if (audioFile && !apiKeyMissing) {
       setSongData(null);
       setError(null);
@@ -176,6 +181,7 @@ export const useSongDataManager = ({
     practiceExitCallback(false);
 
     setIsLoading(true);
+    trackEvent('analysis_start', { source: 'url', karaoke: isKaraokeMode ? 1 : 0, lang: targetLanguage, model: selectedModelId })
     setLoadingMessage('Initializing process...');
     processingStartTimeRef.current = Date.now();
     const onProgressUpdate = (m: string) => setLoadingMessage(m);
@@ -185,8 +191,10 @@ export const useSongDataManager = ({
       const durationToSave = currentSongDurationRef.current;
       setSongData(data);
       if (data.originalLanguage === 'Instrumental' && data.verses.length === 0) setError(null);
+      trackEvent('analysis_complete', { verses: data?.verses?.length || 0, secs: processingTimeSeconds ? Math.round(processingTimeSeconds * 1000) / 1000 : 0, model: selectedModelId })
       return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: selectedModelId };
     } catch (e: any) {
+      trackEvent('analysis_error', { reason: (e?.message || 'unknown').slice(0, 120) })
       setError(e?.message || 'Failed to analyze URL');
       setSongData(null);
       return null;

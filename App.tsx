@@ -25,6 +25,7 @@ import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
 import ChangelogPage from './components/ChangelogPage'; // Import ChangelogPage
 import { Analytics } from '@vercel/analytics/react';
+import { trackEvent } from './services/analytics';
 import { addSongToLibrary, deleteSongFromLibrary, deleteAllPracticeAttemptsForSongFromDB } from './db';
 import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; 
 import { initializeAiClient } from './services/geminiService'; // Import AI client initializer
@@ -64,6 +65,10 @@ const App: React.FC = () => {
     // Server handles Gemini calls now; client initialization is a no-op.
     initializeAiClient('');
   }, []);
+
+  useEffect(() => {
+    trackEvent('model_change', { model: selectedModelId })
+  }, [selectedModelId])
 
   const deviceManager = useDeviceManager();
   const {

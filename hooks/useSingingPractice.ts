@@ -1,6 +1,7 @@
 
 /** Coordinates recording flow and Gemini scoring for practice mode. */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { trackEvent } from '../services/analytics';
 import { Verse, PracticeModeStatus, SingingScore, Language, SongData, PracticeAttempt } from '../types';
 import { fetchSingingFeedback } from '../services/geminiService';
 import { addPracticeAttemptToDB } from '../db'; // Import DB function
@@ -173,6 +174,7 @@ export const useSingingPractice = ({
     setHasEarphoneConsent(true);
     onEarphoneConsentGlobalUpdate(true);
     setShowEarphoneModal(false);
+    trackEvent('earphone_consent', { value: 1 })
     if (activePracticeVerses.length > 0) {
       await requestMicrophonePermissionAndSetReady();
     } else {
@@ -200,10 +202,12 @@ export const useSingingPractice = ({
     }
 
     setPracticeVerseStatus(PracticeModeStatus.SCORING);
+    trackEvent('practice_scoring_start', { verses: versesToScore.length })
     try {
       const score = await fetchSingingFeedback(audioBlobToProcess, versesToScore, targetLanguage, selectedModelId);
       setPracticeScore(score);
       setPracticeVerseStatus(PracticeModeStatus.SHOWING_SCORE);
+      trackEvent('practice_scored', { overall: score.overallScore, verses: versesToScore.length })
 
       if (currentLibrarySongId && songData) {
         const newPracticeAttempt: Omit<PracticeAttempt, 'id'> = {
@@ -228,6 +232,7 @@ export const useSingingPractice = ({
       }
 
     } catch (e: any) {
+      trackEvent('practice_scoring_error', { reason: (e?.message || 'unknown').slice(0, 120) })
       setPracticeError(e.message || "Failed to get feedback from AI.");
       setPracticeVerseStatus(PracticeModeStatus.ERROR);
     }
@@ -252,6 +257,7 @@ export const useSingingPractice = ({
     setActivePracticeVerses(versesForDisplayDuringRecording);
 
     const actualStartVerseTime = songData.verses[practiceInitiationVerseIndexRef.current].startTime;
+    trackEvent('practice_recording_start', { startVerse: songData.verses[practiceInitiationVerseIndexRef.current].verseNumber })
     audioPlayerRef.current.currentTime = actualStartVerseTime;
 
     let streamForThisAttempt: MediaStream | null = null;
@@ -405,6 +411,7 @@ export const useSingingPractice = ({
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
+      trackEvent('practice_recording_stop')
     } else {
       audioPlayerRef.current?.pause();
       if (practiceVerseStatus === PracticeModeStatus.RECORDING) {
