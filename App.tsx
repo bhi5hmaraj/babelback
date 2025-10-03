@@ -24,6 +24,7 @@ import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
 import ChangelogPage from './components/ChangelogPage'; // Import ChangelogPage
+import { Analytics } from '@vercel/analytics/react';
 import { addSongToLibrary, deleteSongFromLibrary, deleteAllPracticeAttemptsForSongFromDB } from './db';
 import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; 
 import { initializeAiClient } from './services/geminiService'; // Import AI client initializer
@@ -739,6 +740,7 @@ const App: React.FC = () => {
         <p className="mb-1">Babelback: AI-Powered Lyric Explorer. Powered by Gemini.</p>
         <p>AI processing may not always be perfectly accurate. For conceptual and entertainment purposes.</p>
       </footer>
+      <Analytics />
     </div>
   );
 };

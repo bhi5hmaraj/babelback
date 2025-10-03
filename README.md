@@ -230,3 +230,22 @@ git push -u origin preview
 - YouTube 403 / "Only images available": try again (residential proxy is enabled), or switch to a different video. Cookies are usually not required with the current proxy + m4a strategy.
 - Signed URL 403: ensure the signer service account has `roles/iam.serviceAccountTokenCreator` and `roles/storage.objectCreator` on the bucket.
 - npm EJSONPARSE: package.json must be valid JSON; commas between entries, no trailing commas.
+### Analytics
+
+- Enable Web Analytics in your Vercel project (Project → Analytics → Enable).
+- Install the package locally and deploy:
+
+```bash
+npm i @vercel/analytics
+```
+
+- We already render the component in `App.tsx`:
+
+```tsx
+import { Analytics } from '@vercel/analytics/react';
+
+// …inside your root component render
+<Analytics />
+```
+
+That’s it — events will appear on Vercel after deploying a Preview/Production build.
