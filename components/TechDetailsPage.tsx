@@ -15,7 +15,7 @@ const TechDetailsPage: React.FC<TechDetailsPageProps> = ({ onNavigateBack }) => 
   return (
     <div className="w-full max-w-3xl bg-slate-800/70 backdrop-blur-md p-6 md:p-8 rounded-xl shadow-2xl my-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-sky-300">Technical Details</h1>
+        <h1 className="text-3xl font-bold text-sky-300">Tech Details (Simple)</h1>
         <button
           onClick={onNavigateBack}
           className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition-colors text-sm flex items-center"
@@ -24,64 +24,67 @@ const TechDetailsPage: React.FC<TechDetailsPageProps> = ({ onNavigateBack }) => 
         </button>
       </div>
 
+      {/* How it works */}
       <section className="mb-8">
         <h2 className="text-2xl font-semibold text-purple-300 mb-3 flex items-center">
-          <Icon name="cpu" weight="duotone" className="mr-3 text-purple-400" size="lg" />
-          Core Technologies
-        </h2>
-        <ul className="list-disc list-inside text-slate-300 space-y-2 pl-2">
-          <li><strong>Frontend:</strong> Built with <a href="https://react.dev/" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">React</a> and <a href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">TypeScript</a> for a robust, type-safe, and modern user interface.</li>
-          <li><strong>Styling:</strong> <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">Tailwind CSS</a> is used for rapid UI development and a consistent, utility-first styling approach.</li>
-          <li><strong>AI Engine:</strong> Powered by Google's <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">Gemini API</a> using the <code>@google/genai</code> SDK. Users can select from available models (e.g., Gemini Pro, Gemini Flash - currently defaults to <strong>{defaultModelName}</strong> if not changed).</li>
-          <li><strong>Client-Side Storage:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API" target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">IndexedDB</a> is utilized to store your personal song library directly in your browser, enabling offline access to previously processed songs.</li>
-        </ul>
-      </section>
-
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold text-teal-300 mb-3 flex items-center">
-          <Icon name="list-checks" weight="duotone" className="mr-3 text-teal-400" size="lg" />
-          High-Level Workflow
+          <Icon name="map-trifold" weight="duotone" className="mr-3 text-purple-400" size="lg" />
+          How It Works
         </h2>
         <ol className="list-decimal list-inside text-slate-300 space-y-2 pl-2">
-          <li><strong>API Key & Device Configuration:</strong> The application first attempts to load the Gemini API key from environment variables (<code>process.env.GEMINI_API_KEY</code>, <code>process.env.API_KEY</code>, or <code>import.meta.env.VITE_GEMINI_API_KEY</code>). Users then select their preferred audio input/output devices and AI model. An audio file is uploaded.</li>
-          <li>
-            <strong>AI Processing (Gemini API):</strong>
-            <ul className="list-circle list-inside pl-4 mt-1 text-sm text-slate-400 space-y-1">
-              <li>The audio is securely processed by the Gemini API using the selected model.</li>
-              <li>The AI transcribes original lyrics, detects the language, and segments the song into verses with precise timings.</li>
-              <li>Lyrics are translated into the user's target language.</li>
-              <li>Phonetic transliterations are generated (customized for English speakers or in the target language's native script).</li>
-              <li>Verse-by-verse meanings, song summaries, and detailed analyses are created.</li>
-              <li>If Karaoke Mode is active, word-by-word timings for transliteration and translation are generated.</li>
-            </ul>
-          </li>
-          <li><strong>Interactive Display:</strong> The structured data from the AI is presented to the user, synchronized with audio playback for an engaging experience.</li>
-          <li>
-            <strong>Singing Practice Mode:</strong>
-             <ul className="list-circle list-inside pl-4 mt-1 text-sm text-slate-400 space-y-1">
-                <li>Users can record themselves singing selected verses.</li>
-                <li>The recording and reference lyrics are sent to the Gemini API for analysis.</li>
-                <li>The AI provides verse-by-verse feedback on pronunciation, timing, and vocal clarity, along with an overall performance score.</li>
-            </ul>
-          </li>
-          <li><strong>Local Library Management:</strong> Processed songs, along with their AI-generated data and audio, can be saved to and loaded from the browser's IndexedDB.</li>
+          <li><strong>Choose source:</strong> Paste a YouTube link or upload an audio file.</li>
+          <li><strong>We fetch the audio:</strong> For YouTube, a small cloud worker grabs the audio track and stores it safely.</li>
+          <li><strong>AI analyzes the song:</strong> Gemini (<em>{defaultModelName}</em> by default) transcribes lyrics, translates them, and adds timings.</li>
+          <li><strong>See it in sync:</strong> Verses light up as the song plays. Karaoke Mode highlights phrases.</li>
+          <li><strong>Practice:</strong> Record a verse and get feedback on pronunciation, timing, and clarity.</li>
         </ol>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-semibold text-indigo-300 mb-3 flex items-center">
-          <Icon name="code-block" weight="duotone" className="mr-3 text-indigo-400" size="lg" />
-          Design Philosophy & Key Aspects
+      {/* What we use */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold text-teal-300 mb-3 flex items-center">
+          <Icon name="cpu" weight="duotone" className="mr-3 text-teal-400" size="lg" />
+          What’s under the hood
         </h2>
         <ul className="list-disc list-inside text-slate-300 space-y-2 pl-2">
-          <li><strong>User Experience Focus:</strong> Prioritizing an intuitive, responsive, and enjoyable interface.</li>
-          <li><strong>Real-Time Interaction:</strong> Synchronized lyrics and dynamic updates enhance engagement.</li>
-          <li><strong>Cutting-Edge AI:</strong> Leveraging the power of Gemini for deep, nuanced lyrical insights and feedback.</li>
-          <li><strong>API Key Handling:</strong> The API key is sourced from environment variables (<code>process.env</code> or Vite's <code>import.meta.env</code>) and is required for the application to function.</li>
-          <li><strong>Privacy-Conscious:</strong> Song library data is stored locally in the user's browser via IndexedDB.</li>
-          <li><strong>Offline Capability:</strong> Saved library songs are accessible without an internet connection (once processed and saved).</li>
-          <li><strong>Modularity & Maintainability:</strong> Code is structured using React functional components and custom hooks for better organization.</li>
+          <li><strong>React + TypeScript:</strong> For a fast, reliable UI.</li>
+          <li><strong>Gemini models:</strong> You pick the model; we default to <em>{defaultModelName}</em>.</li>
+          <li><strong>Local library:</strong> Your saved songs live in your browser (IndexedDB).</li>
+          <li><strong>Private links:</strong> When needed, we use short‑lived, signed links to fetch audio securely.</li>
         </ul>
+      </section>
+
+      {/* FAQ */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold text-indigo-300 mb-3 flex items-center">
+          <Icon name="chat-circle-dots" weight="duotone" className="mr-3 text-indigo-400" size="lg" />
+          FAQ
+        </h2>
+        <div className="space-y-4 text-slate-300">
+          <div>
+            <p className="font-semibold">Why does analysis sometimes take longer?</p>
+            <p className="text-sm text-slate-400">Longer songs, busy networks, or a tricky lyric structure can slow things down. You’ll see progress messages; a quick retry usually helps if it stalls.</p>
+          </div>
+          <div>
+            <p className="font-semibold">Where is my audio stored?</p>
+            <p className="text-sm text-slate-400">Uploads are analyzed by the AI and results are saved locally in your browser unless you choose to keep the audio in your library. YouTube audio is fetched by a cloud worker and accessed via short‑lived, private links.</p>
+          </div>
+          <div>
+            <p className="font-semibold">Which audio formats work best?</p>
+            <p className="text-sm text-slate-400">For YouTube we prefer m4a. Local uploads can be common formats like mp3/m4a; we’ll try to handle what you give us.</p>
+          </div>
+          <div>
+            <p className="font-semibold">Can I change the model or translation language later?</p>
+            <p className="text-sm text-slate-400">Yes. Pick a different model or language and re‑run analysis. Pro is thorough; Flash is speedy.</p>
+          </div>
+          <div>
+            <p className="font-semibold">Does the coach judge pitch?</p>
+            <p className="text-sm text-slate-400">No. It focuses on pronunciation, timing, and clarity — not pitch.</p>
+          </div>
+          <div>
+            <p className="font-semibold">What does “Babelback” mean?</p>
+            <p className="text-sm text-slate-400">It blends “Babel Fish” (universal translation from sci‑fi) and “humpback” (whales famous for songs). In short: translating songs back to you.</p>
+          </div>
+        </div>
       </section>
 
       <EchoTester />
