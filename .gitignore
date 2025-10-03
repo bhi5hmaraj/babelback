@@ -19,3 +19,4 @@ apify_storage/
 .env.*
 !.env.example
 !.env.sample
+.vercel
