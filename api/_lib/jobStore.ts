@@ -10,6 +10,7 @@ export interface JobRecord {
   error?: { message: string }
   workerUrl: string
   apifyRunId?: string
+  sourceUrl?: string
 }
 
 const jobs = new Map<string, JobRecord>()
@@ -82,4 +83,25 @@ export async function updateJob(id: string, patch: Partial<JobRecord>) {
   jobs.set(id, next)
   try { await kvSet(`downloads:${id}`, JSON.stringify(next), JOB_TTL_SECONDS) } catch {}
   return next
+}
+
+// --------- Source URL ↔ Job mapping helpers ---------
+
+function sourceKey(url: string) {
+  const hash = crypto.createHash('sha1').update(url.trim()).digest('hex')
+  return `downloads:src:${hash}`
+}
+
+export async function setJobIdForSource(url: string, jobId: string) {
+  try { await kvSet(sourceKey(url), jobId, JOB_TTL_SECONDS) } catch {}
+}
+
+export async function getJobIdBySource(url: string): Promise<string | null> {
+  try {
+    const val = await kvGet(sourceKey(url))
+    if (typeof val === 'string' && val.length > 0) return val
+    return null
+  } catch {
+    return null
+  }
 }

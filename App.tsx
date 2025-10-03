@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [appError, setAppError] = useState<string | null>(null);
   const [showDeviceConfig, setShowDeviceConfig] = useState<boolean>(false);
   const [selectedModelId, setSelectedModelId] = useState<string>(DEFAULT_MODEL_ID);
+  const [sourceMode, setSourceMode] = useState<'file' | 'youtube'>('file');
 
 
   // --- Core Hooks ---
@@ -433,12 +434,24 @@ const App: React.FC = () => {
                         error={rawDeviceError} 
                     />
                   )}
+                  {/* Source selection */}
+                  <div className="w-full mb-3 flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setSourceMode('file')}
+                      className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'file' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                    >From File</button>
+                    <button
+                      onClick={() => setSourceMode('youtube')}
+                      className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'youtube' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                    >From YouTube</button>
+                  </div>
+                  {sourceMode === 'youtube' ? (
                   <YouTubeDownloader onAnalyze={async (url, opts) => {
                     // Analyze from URL, then add to library by fetching a blob
                     const result = await smHandleUrlAnalyze(url, { fileName: opts?.fileName, mimeType: opts?.mimeType })
                     if (result && result.songData) {
                       try {
-                        const resp = await fetch(url)
+                        const resp = await fetch(`/api/proxy?url=${encodeURIComponent(url)}`)
                         const buf = await resp.arrayBuffer()
                         const blob = new Blob([buf], { type: opts?.mimeType || 'audio/mpeg' })
                         const fileName = opts?.fileName || 'downloaded-audio'
@@ -464,15 +477,17 @@ const App: React.FC = () => {
                       }
                     }
                   }} />
-                  <ModelSelector
-                    selectedModelId={selectedModelId}
-                    onModelChange={setSelectedModelId}
-                    disabled={globalIsLoading || isPracticeActive}
-                  />
+                  ) : (
                   <AudioUpload
                       onAudioSubmit={handleAudioSubmit}
                       isLoading={isLoadingSongData}
                       disabled={globalIsLoading || isPracticeActive || apiKeyMissing} // Simplified disabled logic
+                  />
+                  )}
+                  <ModelSelector
+                    selectedModelId={selectedModelId}
+                    onModelChange={setSelectedModelId}
+                    disabled={globalIsLoading || isPracticeActive}
                   />
                   <LanguageSelector
                       selectedLanguage={targetLanguage}

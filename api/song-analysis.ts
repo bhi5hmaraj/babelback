@@ -108,7 +108,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const { audioBase64, fileName, mimeType, enableKaraokeMode, modelId: requestedModelId } = parsedBody;
+  const { audioBase64, audioUrl, fileName, mimeType: providedMimeType, enableKaraokeMode, modelId: requestedModelId } = parsedBody;
+  let mimeType: string | undefined = providedMimeType;
   let targetLanguage: Language;
   try {
     targetLanguage = coerceLanguage(parsedBody.targetLanguage as string);
@@ -162,6 +163,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const resolvedModelId = resolveModelId(requestedModelId);
   const startedAt = Date.now();
+
+  if (!audioData) {
+    res.status(400).json({ error: 'No audio data to analyze' });
+    return;
+  }
 
   try {
     const audioBlob = new Blob([audioData], { type: mimeType || 'audio/mpeg' });

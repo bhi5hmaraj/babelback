@@ -2,6 +2,7 @@ import './_lib/loadEnv.js'
 import { Storage } from '@google-cloud/storage'
 import { newId, putJob } from './_lib/jobStore.js'
 import { updateJob } from './_lib/jobStore.js'
+import { getJob, getJobIdBySource, setJobIdForSource } from './_lib/jobStore.js'
 
 interface VercelRequest { method?: string; body?: unknown }
 interface VercelResponse { status: (code: number) => VercelResponse; json: (b: unknown) => void; setHeader?: (k: string, v: string) => void }
@@ -93,6 +94,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  // Fast-path: If we’ve already processed this URL, return existing job with a fresh GET URL
+  try {
+    const existingId = await getJobIdBySource(payload.youtubeUrl)
+    if (existingId) {
+      const existing = await getJob(existingId)
+      if (existing) {
+        // If completed and we know GCS object, mint a fresh read URL and return 200
+        if (existing.status === 'completed' && existing.gcsObject) {
+          try {
+            const file = (keyJson || process.env.GCP_PROJECT_ID) ?
+              (() => {
+                let s: Storage
+                if (keyJson) {
+                  const sa = JSON.parse(keyJson)
+                  s = new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } })
+                } else {
+                  s = new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
+                }
+                return s.bucket(existing.gcsObject!.bucket).file(existing.gcsObject!.path)
+              })() : new Storage().bucket(existing.gcsObject.bucket).file(existing.gcsObject.path)
+            const [freshGet] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+            return res.status(200).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: freshGet, apifyRunId: existing.apifyRunId })
+          } catch {}
+        }
+        // Otherwise let client attach to existing job
+        return res.status(202).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: existing.url, apifyRunId: existing.apifyRunId })
+      }
+    }
+  } catch {}
+
   const ACTOR = process.env.APIFY_ACTOR_ID
   const TOKEN = process.env.APIFY_TOKEN
   if (!ACTOR || !TOKEN) {
@@ -113,7 +144,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let runId: string | undefined
   // Persist job immediately so first polls do not 404 during actor startup
-  await putJob({ id: jobId, status: 'queued', workerUrl: 'apify', gcsObject: { bucket: bucketName, path: objectPath, contentType }, url: getUrl })
+  await putJob({ id: jobId, status: 'queued', workerUrl: 'apify', gcsObject: { bucket: bucketName, path: objectPath, contentType }, url: getUrl, sourceUrl: payload.youtubeUrl })
+  await setJobIdForSource(payload.youtubeUrl, jobId)
 
   try {
     const resp = await fetch(startUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(actorInput) })

@@ -73,15 +73,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const current = await getJob(jobId)
-  const finalRec = current ?? job
-  res.status(200).json({
-    id: jobId,
-    status: finalRec?.status ?? 'unknown',
-    url: finalRec?.url,
-    gcsObject: finalRec?.gcsObject,
-    error: finalRec?.error,
-    apifyRunId: finalRec?.apifyRunId,
-    apifyStatus: apifyStatus,
-  })
+  // Mint a fresh read URL if we have a GCS object (avoid stale signed URLs)
+  let freshUrl: string | undefined = undefined
+  try {
+    const current = await getJob(jobId)
+    const finalRec = current ?? job
+    if (finalRec?.gcsObject) {
+      const bucketName = finalRec.gcsObject.bucket
+      const path = finalRec.gcsObject.path
+      const makeStorage = () => {
+        const keyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
+        if (keyJson) {
+          try { const sa = JSON.parse(keyJson); return new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } }) } catch {}
+        }
+        if (process.env.GCP_PROJECT_ID && process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
+          return new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
+        }
+        return new Storage()
+      }
+      const storage = makeStorage()
+      const file = storage.bucket(bucketName).file(path)
+      const [signed] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+      freshUrl = signed
+    }
+    res.status(200).json({
+      id: jobId,
+      status: finalRec?.status ?? 'unknown',
+      url: freshUrl ?? finalRec?.url,
+      gcsObject: finalRec?.gcsObject,
+      error: finalRec?.error,
+      apifyRunId: finalRec?.apifyRunId,
+      apifyStatus: apifyStatus,
+    })
+  } catch {
+    const current = await getJob(jobId)
+    const finalRec = current ?? job
+    res.status(200).json({ id: jobId, status: finalRec?.status ?? 'unknown', url: finalRec?.url, gcsObject: finalRec?.gcsObject, error: finalRec?.error, apifyRunId: finalRec?.apifyRunId, apifyStatus })
+  }
 }
