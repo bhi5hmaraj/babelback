@@ -26,6 +26,69 @@ Key files and docs
 - Apify Actor: `actors/yt-audio-basic` — minimal yt‑dlp actor with optional direct‑to‑GCS upload
 - GCS signer (local testing): `scripts/sign-gcs.cjs`
 
+## Architecture
+
+```mermaid
+flowchart TD
+  %% Client
+  subgraph Client["Babelback Web App (Vite + React)"]
+    UI["1) Choose Source\n2) AI Model\n3) Target Language\n4) Modes\n5) Babelback"]
+    Player["Audio Player"]
+    IDB[("IndexedDB\nLibrary + Practice Attempts")]
+  end
+
+  %% Server (Vercel)
+  subgraph Vercel["Hono API (Vercel)"]
+    Downloads["POST /api/downloads\n(Node runtime)\n• Mint GCS signed PUT/GET\n• Start Apify run\n• Create job record"]
+    JobPoll["GET /api/downloads/:id\n• Poll Apify run\n• Mint fresh signed GET\n• Return status + url"]
+    Proxy["GET /api/proxy?url=...\n• Stream GCS → client\n• Avoid CORS"]
+    SongAnalysis["POST /api/song-analysis\n• Fetch audio (URL/Blob)\n• Call Gemini\n• Return SongData"]
+    SingingFeedback["POST /api/singing-feedback\n• Score attempt via Gemini"]
+    Health["GET /api/health"]
+    KV[("Job Store\nRedis / Vercel KV / Memory")]
+  end
+
+  %% Apify
+  subgraph Apify["Apify Actor (yt-dlp)"]
+    Actor["yt-dlp runner\nUploads to GCS via signed PUT"]
+  end
+
+  %% GCS
+  subgraph GCS["Google Cloud Storage"]
+    Bucket[("gs://<GCS_BUCKET>")]
+  end
+
+  %% Gemini
+  subgraph Gemini["Google Gemini"]
+    GeminiAPI[("Gemini Models")] 
+  end
+
+  %% Main YouTube flow
+  UI -->|YouTube URL| Downloads
+  Downloads -->|Mint signed PUT/GET| Bucket
+  Downloads -->|Start run| Actor
+  Downloads <--> KV
+
+  %% Polling for status
+  UI -->|poll jobId| JobPoll
+  JobPoll -->|Query run| Actor
+  Actor -->|PUT audio| Bucket
+  JobPoll -->|Return fresh signed GET| UI
+
+  %% Playback + Analysis
+  UI -->|Stream via proxy| Proxy --> Bucket
+  UI -->|Analyze| SongAnalysis --> GeminiAPI --> SongAnalysis --> UI
+  UI -->|Practice| SingingFeedback --> GeminiAPI --> SingingFeedback --> UI
+  UI -->|Save to library| IDB
+
+  %% Optional (future)
+  Callback["POST /api/downloads/:id/callback\n(HMAC) (future)"]
+  Actor -.->|Webhook| Callback
+  Callback -.-> KV
+  SSE["GET /api/downloads/:id/events\n(SSE) (future)"]
+  Vercel -.-> SSE
+```
+
 ## Running Locally
 
 Prerequisites
