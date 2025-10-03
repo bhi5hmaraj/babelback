@@ -31,62 +31,52 @@ Key files and docs
 ```mermaid
 flowchart TD
   %% Client
-  subgraph Client["Babelback Web App (Vite + React)"]
-    UI["1) Choose Source\n2) AI Model\n3) Target Language\n4) Modes\n5) Babelback"]
+  subgraph Client["Web App (Vite + React)"]
+    UI["Babelback flow:<br>1) Source<br>2) Model<br>3) Language<br>4) Mode<br>5) Babelback"]
     Player["Audio Player"]
-    IDB[("IndexedDB\nLibrary + Practice Attempts")]
+    IDB[("IndexedDB<br>Library + Practice")]
   end
 
-  %% Server (Vercel)
-  subgraph Vercel["Hono API (Vercel)"]
-    Downloads["POST /api/downloads\n(Node runtime)\n• Mint GCS signed PUT/GET\n• Start Apify run\n• Create job record"]
-    JobPoll["GET /api/downloads/:id\n• Poll Apify run\n• Mint fresh signed GET\n• Return status + url"]
-    Proxy["GET /api/proxy?url=...\n• Stream GCS → client\n• Avoid CORS"]
-    SongAnalysis["POST /api/song-analysis\n• Fetch audio (URL/Blob)\n• Call Gemini\n• Return SongData"]
-    SingingFeedback["POST /api/singing-feedback\n• Score attempt via Gemini"]
-    Health["GET /api/health"]
-    KV[("Job Store\nRedis / Vercel KV / Memory")]
+  %% API (Vercel)
+  subgraph API["Hono API (Vercel)"]
+    DL["POST /api/downloads<br>Mint GCS signed PUT/GET<br>Start Apify run<br>Record job"]
+    ST["GET /api/downloads/:id<br>Poll Apify<br>Return fresh signed GET"]
+    AN["POST /api/song-analysis<br>Gemini SongData"]
+    FB["POST /api/singing-feedback<br>Gemini scoring"]
+    PX["GET /api/proxy<br>Stream GCS → client"]
+    JS[("Job Store<br>Redis/KV/Memory")]
   end
 
   %% Apify
   subgraph Apify["Apify Actor (yt-dlp)"]
-    Actor["yt-dlp runner\nUploads to GCS via signed PUT"]
+    ACT["yt-dlp<br>Upload via signed PUT"]
   end
 
   %% GCS
   subgraph GCS["Google Cloud Storage"]
-    Bucket[("gs://<GCS_BUCKET>")]
+    BUCKET[("gs://<GCS_BUCKET>")]
   end
 
   %% Gemini
   subgraph Gemini["Google Gemini"]
-    GeminiAPI[("Gemini Models")] 
+    MODELS[("Models")] 
   end
 
-  %% Main YouTube flow
-  UI -->|YouTube URL| Downloads
-  Downloads -->|Mint signed PUT/GET| Bucket
-  Downloads -->|Start run| Actor
-  Downloads <--> KV
+  %% Main flow
+  UI -->|YouTube URL| DL
+  DL --> ACT
+  DL --> BUCKET
+  DL <--> JS
 
-  %% Polling for status
-  UI -->|poll jobId| JobPoll
-  JobPoll -->|Query run| Actor
-  Actor -->|PUT audio| Bucket
-  JobPoll -->|Return fresh signed GET| UI
+  UI -->|poll job| ST
+  ST --> ACT
+  ACT --> BUCKET
+  ST -->|signed GET| UI
 
-  %% Playback + Analysis
-  UI -->|Stream via proxy| Proxy --> Bucket
-  UI -->|Analyze| SongAnalysis --> GeminiAPI --> SongAnalysis --> UI
-  UI -->|Practice| SingingFeedback --> GeminiAPI --> SingingFeedback --> UI
-  UI -->|Save to library| IDB
-
-  %% Optional (future)
-  Callback["POST /api/downloads/:id/callback\n(HMAC) (future)"]
-  Actor -.->|Webhook| Callback
-  Callback -.-> KV
-  SSE["GET /api/downloads/:id/events\n(SSE) (future)"]
-  Vercel -.-> SSE
+  UI -->|stream| PX --> BUCKET
+  UI -->|analyze| AN --> MODELS --> AN --> UI
+  UI -->|practice| FB --> MODELS --> FB --> UI
+  UI --> IDB
 ```
 
 ## Running Locally
