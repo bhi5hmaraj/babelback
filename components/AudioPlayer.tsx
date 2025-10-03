@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import Icon from './Icon';
 
+/** Public props for the HTML5 audio player wrapper. */
 interface AudioPlayerProps {
   src: string | null;
   onTimeUpdate: (currentTime: number) => void;
@@ -12,6 +13,7 @@ interface AudioPlayerProps {
   outputDeviceId?: string | null; // New prop for selected output device
 }
 
+/** Renders a styled <audio> with time/duration callbacks and optional output device switching. */
 const AudioPlayer: React.FC<AudioPlayerProps> = ({ 
     src, 
     onTimeUpdate, 

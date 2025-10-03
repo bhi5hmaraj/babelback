@@ -1,3 +1,11 @@
+/**
+ * Song Analysis API
+ *
+ * POST /api/song-analysis
+ * - Accepts audio as base64 (audioBase64) or a URL (audioUrl)
+ * - Uploads audio to Gemini Files and requests structured JSON with schema
+ * - Normalizes/validates verses and returns SongData for the UI
+ */
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { Buffer } from 'node:buffer';
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
@@ -42,6 +50,9 @@ type SongData = {
 
 type RawSongData = Omit<SongData, 'verses'> & { verses: RawVerse[] };
 
+/**
+ * Validate and coerce request body for analysis.
+ */
 const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
   if (!body) {
     throw new Error('Missing request body');
@@ -83,6 +94,7 @@ const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
   };
 };
 
+/** Ensure language value is one of the supported enum values. */
 const coerceLanguage = (value: string): Language => {
   if (SUPPORTED_LANGUAGES.has(value)) {
     return value as Language;
@@ -90,6 +102,9 @@ const coerceLanguage = (value: string): Language => {
   throw new Error(`Unsupported targetLanguage '${value}'. Supported languages: ${Array.from(SUPPORTED_LANGUAGES).join(', ')}`);
 };
 
+/**
+ * Route handler for song analysis.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const method = (req.method ?? 'GET').toUpperCase();
   try { console.log('[song-analysis] request start', { method }); } catch {}

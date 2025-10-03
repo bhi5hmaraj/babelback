@@ -1,3 +1,7 @@
+/**
+ * Lightweight streaming proxy for signed GCS URLs to avoid CORS issues in the browser.
+ * GET /api/proxy?url=<signed-gcs-url>
+ */
 import './_lib/loadEnv.js'
 
 export default async function handler(req: any, res: any) {
@@ -37,4 +41,3 @@ export default async function handler(req: any, res: any) {
     res.status(502).json({ error: 'proxy fetch failed' })
   }
 }
-

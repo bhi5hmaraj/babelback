@@ -1,4 +1,5 @@
 
+/** Loads and toggles the local song library (IndexedDB). */
 import { useState, useEffect, useCallback } from 'react';
 import { LibraryEntry } from '../types';
 import { getAllSongsFromLibrary } from '../db';

@@ -1,3 +1,4 @@
+/** Response from POST /api/downloads when a job is created or reused. */
 export type StartDownloadResponse = {
   jobId: string
   statusUrl: string
@@ -5,6 +6,7 @@ export type StartDownloadResponse = {
   apifyRunId?: string
 }
 
+/** Status payload returned by GET /api/downloads/:id. */
 export type DownloadStatus = {
   id: string
   status: 'queued' | 'working' | 'completed' | 'failed' | 'unknown'
@@ -15,6 +17,7 @@ export type DownloadStatus = {
   apifyStatus?: string
 }
 
+/** Start a YouTube download-and-upload job via the server. */
 export async function startDownload(youtubeUrl: string, audioFormat: 'm4a' | 'mp3' = 'm4a', country = 'IN'): Promise<StartDownloadResponse> {
   const resp = await fetch('/api/downloads', {
     method: 'POST',
@@ -28,6 +31,7 @@ export async function startDownload(youtubeUrl: string, audioFormat: 'm4a' | 'mp
   return await resp.json()
 }
 
+/** Poll the server for job status; returns a fresh signed read URL when available. */
 export async function getDownloadStatus(jobId: string): Promise<DownloadStatus> {
   const resp = await fetch(`/api/downloads/${encodeURIComponent(jobId)}`)
   if (!resp.ok) {

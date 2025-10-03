@@ -1,13 +1,22 @@
+/**
+ * Client-side helpers that call our server API routes.
+ *
+ * - fetchSongDataFromGemini: Uploads a local file then triggers analysis.
+ * - fetchSongDataFromUrl: Triggers analysis for a remote/signed URL.
+ * - fetchSingingFeedback: Scores a recorded attempt against reference verses.
+ */
 import { SongData, Language, Verse, SingingScore } from '../types';
 import { upload } from '@vercel/blob/client';
 
 const SONG_ANALYSIS_ENDPOINT = '/api/song-analysis';
 const SINGING_FEEDBACK_ENDPOINT = '/api/singing-feedback';
 
+/** Placeholder: AI client is server-side; kept for legacy compatibility. */
 export const initializeAiClient = (_apiKey: string): void => {
   // No-op in the new architecture; Gemini calls are routed through serverless APIs.
 };
 
+/** Read a Blob and resolve to a base64 string (no data URL prefix). */
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,6 +33,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
+/** Small helper that parses JSON (or text) and throws with server error message when present. */
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   const contentType = response.headers.get('content-type');
   const isJson = contentType && contentType.includes('application/json');
@@ -41,6 +51,7 @@ const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   return payload as T;
 };
 
+/** Upload a local audio file and request server-side analysis. */
 export const fetchSongDataFromGemini = async (
   audioFile: File,
   targetLanguage: Language,
@@ -84,6 +95,7 @@ export const fetchSongDataFromGemini = async (
   return songData;
 };
 
+/** Request analysis for a remote audio URL (e.g., GCS signed URL). */
 export const fetchSongDataFromUrl = async (
   audioUrl: string,
   targetLanguage: Language,
@@ -141,6 +153,7 @@ export const fetchSongDataFromUrl = async (
   return songData;
 };
 
+/** Submit a recorded attempt and get SingingScore back from the server. */
 export const fetchSingingFeedback = async (
   audioBlob: Blob,
   referenceVerses: Verse[],

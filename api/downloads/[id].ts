@@ -1,3 +1,11 @@
+/**
+ * Download status API
+ *
+ * GET /api/downloads/:id
+ * - Returns job status and a fresh signed GCS read URL when available
+ * - Polls Apify run status if a runId exists
+ * - Can infer completion by probing GCS when job cache is cold
+ */
 import '../_lib/loadEnv.js'
 import { getJob, updateJob } from '../_lib/jobStore.js'
 import { Storage } from '@google-cloud/storage'
@@ -5,6 +13,9 @@ import { Storage } from '@google-cloud/storage'
 interface VercelRequest { method?: string; query: Record<string, string | string[] | undefined> }
 interface VercelResponse { status: (code: number) => VercelResponse; json: (b: unknown) => void; setHeader?: (k: string, v: string) => void; end?: (b?: any) => void }
 
+/**
+ * Route handler for polling job status.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const method = (req.method ?? 'GET').toUpperCase()
   if (method !== 'GET') {

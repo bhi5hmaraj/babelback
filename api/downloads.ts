@@ -1,3 +1,15 @@
+/**
+ * Downloads API
+ *
+ * POST /api/downloads
+ * - Mints GCS V4 signed URLs (PUT for upload, GET for reading)
+ * - Starts an Apify actor run (yt-dlp) to fetch audio from YouTube
+ * - Persists a job record and maps source URL → jobId for fast-path reuse
+ *
+ * Notes
+ * - Country default can be overridden via body.country or APIFY_PROXY_COUNTRY env
+ * - Uses Redis/Vercel KV when available; falls back to in-memory cache
+ */
 import './_lib/loadEnv.js'
 import { Storage } from '@google-cloud/storage'
 import { newId, putJob } from './_lib/jobStore.js'
@@ -7,12 +19,18 @@ import { getJob, getJobIdBySource, setJobIdForSource } from './_lib/jobStore.js'
 interface VercelRequest { method?: string; body?: unknown }
 interface VercelResponse { status: (code: number) => VercelResponse; json: (b: unknown) => void; setHeader?: (k: string, v: string) => void }
 
+/**
+ * Body accepted by POST /api/downloads
+ */
 type DownloadsRequestBody = {
   youtubeUrl: string
   audioFormat?: 'm4a' | 'mp3'
   country?: string
 }
 
+/**
+ * Validate and coerce user payload.
+ */
 const parseRequestBody = (body: unknown): DownloadsRequestBody => {
   if (!body) throw new Error('Missing request body')
   const obj = typeof body === 'string' ? JSON.parse(body) : body
@@ -28,6 +46,9 @@ const parseRequestBody = (body: unknown): DownloadsRequestBody => {
   return { youtubeUrl, audioFormat, country }
 }
 
+/**
+ * Route handler for creating a download job.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const method = (req.method ?? 'GET').toUpperCase()
   try { console.log('[downloads] start', { method }) } catch {}

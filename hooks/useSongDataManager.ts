@@ -1,4 +1,10 @@
 
+/**
+ * Orchestrates the Song Analysis flow for local files and remote URLs.
+ * - Tracks loading/progress UI
+ * - Calls server endpoints via services
+ * - Normalizes library save and playback duration handoff
+ */
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Language, SongData, LibraryEntry } from '../types';
 import { SUPPORTED_LANGUAGES, AI_THOUGHTS_AND_JOKES } from '../constants';

@@ -1,4 +1,5 @@
 
+/** Synchronizes audio time with active verse; provides seek/prev/next helpers. */
 import { useState, useCallback } from 'react';
 import { SongData } from '../types';
 

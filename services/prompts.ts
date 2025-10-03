@@ -1,4 +1,5 @@
 
+/** Prompt builders for agents: analysis and singing feedback. */
 import { Language } from '../types';
 
 // Helper for transliteration instruction, exported for potential re-use or clarity if needed elsewhere,

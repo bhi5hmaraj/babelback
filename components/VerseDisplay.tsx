@@ -30,6 +30,7 @@ const VerseDisplayCard: React.FC<VerseDisplayCardProps> = ({ title, content, lan
   );
 };
 
+/** Props for the synchronized verse view. */
 interface VerseDisplayProps {
   verse: Verse;
   targetLanguage: string;
@@ -55,6 +56,11 @@ const renderWords = (lineText: string) => {
 };
 
 
+/**
+ * Renders the current verse with synchronized lines.
+ * - In Karaoke mode, highlights phrase timings and auto-centers the active line.
+ * - On mobile, words render inline for readability (no chips).
+ */
 const VerseDisplay: React.FC<VerseDisplayProps> = ({
   verse,
   targetLanguage,

@@ -1,4 +1,5 @@
 
+/** Manages device discovery, permissions, and selected input/output IDs. */
 import { useState, useEffect, useCallback } from 'react';
 import { AudioDevice } from '../types';
 

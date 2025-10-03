@@ -1,4 +1,5 @@
 
+/** Coordinates recording flow and Gemini scoring for practice mode. */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Verse, PracticeModeStatus, SingingScore, Language, SongData, PracticeAttempt } from '../types';
 import { fetchSingingFeedback } from '../services/geminiService';

@@ -1,4 +1,5 @@
 
+/** Resolves one-time client init tasks (e.g., IndexedDB). No client API key required. */
 import { useState, useEffect } from 'react';
 import { initDB } from '../db';
 

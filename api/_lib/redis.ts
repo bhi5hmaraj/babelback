@@ -1,3 +1,4 @@
+/** Lightweight wrapper that lazily creates a Redis client when REDIS_KV_REDIS_URL is set. */
 import { createClient } from 'redis'
 
 // Keep types loose to avoid @redis/* type clashes in serverless bundlers.
@@ -36,6 +37,7 @@ export async function getRedis(): Promise<any | null> {
   }
 }
 
+/** Set a string value with optional TTL (seconds). No-op when Redis unavailable. */
 export async function redisSet(key: string, value: string, ttlSeconds?: number) {
   const redis = await getRedis()
   if (!redis) return
@@ -43,6 +45,7 @@ export async function redisSet(key: string, value: string, ttlSeconds?: number) 
   else await redis.set(key, value)
 }
 
+/** Get a string value or null. No-op when Redis unavailable. */
 export async function redisGet(key: string): Promise<string | null> {
   const redis = await getRedis()
   if (!redis) return null

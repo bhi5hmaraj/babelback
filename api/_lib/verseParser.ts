@@ -1,3 +1,4 @@
+/** Normalizes raw AI verse output into safe UI-friendly structures. */
 import type { Language } from './prompts.js';
 
 export interface Verse {

@@ -1,7 +1,15 @@
+/**
+ * Job store abstraction over in-memory map with optional Redis / Vercel KV backing.
+ * Provides:
+ *  - putJob/getJob/updateJob for job lifecycle
+ *  - source URL → jobId mapping helpers (setJobIdForSource/getJobIdBySource)
+ */
 import crypto from 'node:crypto'
 
+/** Status of a download job. */
 export type JobStatus = 'queued' | 'working' | 'completed' | 'failed'
 
+/** Persisted job record used by API routes. */
 export interface JobRecord {
   id: string
   status: JobStatus
@@ -52,15 +60,18 @@ async function kvGet(key: string): Promise<string | null> {
   }
 }
 
+/** Create a uuid for new jobs. */
 export function newId() {
   return crypto.randomUUID()
 }
 
+/** Insert or replace a job record in caches and KV. */
 export async function putJob(rec: JobRecord) {
   jobs.set(rec.id, rec)
   try { await kvSet(`downloads:${rec.id}`, JSON.stringify(rec), JOB_TTL_SECONDS) } catch {}
 }
 
+/** Retrieve job from memory or KV; rehydrates memory cache when found. */
 export async function getJob(id: string) {
   const inMem = jobs.get(id)
   if (inMem) {
@@ -80,6 +91,7 @@ export async function getJob(id: string) {
   }
 }
 
+/** Update an existing record and persist back to KV. */
 export async function updateJob(id: string, patch: Partial<JobRecord>) {
   const cur = await getJob(id)
   if (!cur) return undefined
@@ -96,10 +108,12 @@ function sourceKey(url: string) {
   return `downloads:src:${hash}`
 }
 
+/** Map a source URL hash → jobId with TTL. */
 export async function setJobIdForSource(url: string, jobId: string) {
   try { await kvSet(sourceKey(url), jobId, JOB_TTL_SECONDS) } catch {}
 }
 
+/** Resolve jobId for a given source URL if known. */
 export async function getJobIdBySource(url: string): Promise<string | null> {
   try {
     const val = await kvGet(sourceKey(url))
