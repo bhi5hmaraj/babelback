@@ -62,7 +62,7 @@
     }
 
     .lyrics-scroll-container {
-      max-height: 45vh; /* Use viewport height for dynamic sizing, was 350px */
+      max-height: 45vh; /* desktop/tablet default */
       overflow-y: auto;
       padding: 8px;
       border: 1px solid #374151; /* slate-700 */
@@ -140,6 +140,39 @@
       background-color: #6d28d9; /* Match parent active background */
       border-color: #a78bfa; /* Slightly lighter indigo border for words */
       color: #eef2ff; /* Ensure word text color matches active line */
+    }
+
+    /* --- Mobile quick wins (<= 640px) --- */
+    @media (max-width: 640px) {
+      .current-verse-display-wrapper { border-width: 1px; box-shadow: none; }
+      .lyrics-scroll-container {
+        max-height: 72vh; /* make lyrics dominant on phones */
+        padding: 4px;
+        border: none;
+        background-color: transparent;
+      }
+      .lyric-line-pair { 
+        border: none; 
+        background-color: transparent; 
+        padding: 6px 0; 
+        margin-bottom: 8px; 
+      }
+      .translit-segment, .translation-segment { padding: 0; border: none; }
+      .lyric-word { 
+        display: inline; 
+        padding: 0; 
+        margin: 0 2px 0 0; 
+        border: 0; 
+        background: transparent; 
+      }
+      .lyric-line-transliteration, .lyric-line-translation { font-size: 18px; line-height: 1.65; }
+      .active-translit-segment, .active-translation-segment { 
+        background: transparent !important; 
+        border-color: transparent !important; 
+        font-size: 22px; 
+      }
+      .active-translit-segment .lyric-word { text-decoration: underline; text-decoration-color: #c084fc; text-underline-offset: 3px; }
+      .active-translation-segment .lyric-word { text-decoration: underline; text-decoration-color: #a78bfa; text-underline-offset: 3px; }
     }
 
   </style>
