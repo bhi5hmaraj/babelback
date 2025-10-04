@@ -58,7 +58,7 @@ function makeStorage(): Storage {
   stream.on('finish', async () => {
     try {
       const [signed] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
-      try { gaEvent('upload_done', { source: 'file', content_type: contentType, size_bytes: bytes, duration_ms: Date.now() - startedAt, ok: 1 }) } catch {}
+      try { gaEvent('upload_done', { source: 'file', content_type: contentType, size_bytes: bytes, upload_duration_ms: Date.now() - startedAt, ok: 1 }) } catch {}
       res.status(200).json({ id, url: signed, gcsObject: { bucket: bucketName, path: objectPath, contentType, size: bytes } })
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)

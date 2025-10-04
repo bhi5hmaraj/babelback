@@ -88,7 +88,17 @@ export const fetchSongDataFromGemini = async (
     const url = upJson?.url
     const analysisJobId = upJson?.id as (string | undefined)
     if (!url) throw new Error('upload returned no url')
-    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, duration_ms: Date.now() - upStart, ok: 1 })
+    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, upload_duration_ms: Date.now() - upStart, ok: 1 })
+    // Emit analysis_start with a job_id so all downstream events can be joined
+    if (analysisJobId) {
+      trackEvent('analysis_start', {
+        source: 'file',
+        job_id: analysisJobId,
+        model_id: modelId,
+        lang: targetLanguage,
+        karaoke: enableKaraokeMode ? 1 : 0,
+      })
+    }
     if (onProgress) onProgress('Requesting song analysis…');
     response = await fetch(SONG_ANALYSIS_ENDPOINT, {
       method: 'POST',
@@ -117,7 +127,7 @@ export const fetchSongDataFromGemini = async (
     if (onProgress) onProgress('Uploading (fallback)…');
     const fbStart = Date.now();
     const base64 = await blobToBase64(audioFile);
-    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, duration_ms: Date.now() - fbStart, ok: 1, method: 'base64' })
+    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, upload_duration_ms: Date.now() - fbStart, ok: 1, method: 'base64' })
     if (onProgress) onProgress('Requesting song analysis…');
     response = await fetch(SONG_ANALYSIS_ENDPOINT, {
       method: 'POST',

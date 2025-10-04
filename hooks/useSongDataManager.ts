@@ -113,7 +113,7 @@ export const useSongDataManager = ({
     }
 
     setIsLoading(true);
-    trackEvent('analysis_start', { source: 'file', karaoke: karaokeEnabled ? 1 : 0, lang: lang, model: modelToUse })
+    // Note: analysis_start for file uploads is emitted after upload when job_id is known (in services/geminiService)
     setLoadingMessage("Initializing process...");
     setError(null);
     setSongData(null); 
@@ -210,7 +210,7 @@ export const useSongDataManager = ({
     practiceExitCallback(false);
 
     setIsLoading(true);
-    trackEvent('analysis_start', { source: 'url', karaoke: isKaraokeMode ? 1 : 0, lang: targetLanguage, model: selectedModelId })
+    trackEvent('analysis_start', { source: 'url', job_id: opts?.jobId, karaoke: isKaraokeMode ? 1 : 0, lang: targetLanguage, model_id: selectedModelId })
     setLoadingMessage('Initializing process...');
     processingStartTimeRef.current = Date.now();
     const onProgressUpdate = (m: string) => setLoadingMessage(m);
