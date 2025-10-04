@@ -19,7 +19,7 @@ export default async function handler(req: any, res: any) {
         };
       },
       onUploadCompleted: async ({ blob }) => {
-        try { console.log('[upload] completed', { url: blob.url, size: blob.size, pathname: blob.pathname }); } catch {}
+        try { console.log('[upload] completed', { url: blob.url, pathname: (blob as any).pathname }); } catch {}
       },
     });
     res.status(200).json(response);
