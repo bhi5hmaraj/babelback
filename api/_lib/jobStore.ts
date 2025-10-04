@@ -19,6 +19,8 @@ export interface JobRecord {
   workerUrl: string
   apifyRunId?: string
   sourceUrl?: string
+  startedAtMs?: number
+  metricsSent?: boolean
 }
 
 const jobs = new Map<string, JobRecord>()

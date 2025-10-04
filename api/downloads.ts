@@ -175,7 +175,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let runId: string | undefined
   // Persist job immediately so first polls do not 404 during actor startup
-  await putJob({ id: jobId, status: 'queued', workerUrl: 'apify', gcsObject: { bucket: bucketName, path: objectPath, contentType }, url: getUrl, sourceUrl: payload.youtubeUrl })
+  await putJob({ id: jobId, status: 'queued', workerUrl: 'apify', gcsObject: { bucket: bucketName, path: objectPath, contentType }, url: getUrl, sourceUrl: payload.youtubeUrl, startedAtMs: Date.now(), metricsSent: false })
   await setJobIdForSource(payload.youtubeUrl, jobId)
 
   try {

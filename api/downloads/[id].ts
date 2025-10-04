@@ -8,6 +8,7 @@
  */
 import '../_lib/loadEnv.js'
 import { getJob, updateJob } from '../_lib/jobStore.js'
+import { gaEvent } from '../_lib/ga.js'
 import { Storage } from '@google-cloud/storage'
 
 interface VercelRequest { method?: string; query: Record<string, string | string[] | undefined> }
@@ -81,6 +82,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         try { console.log('[downloads:id] apify:poll', { id: jobId, runId: job.apifyRunId, status }) } catch {}
         if (status === 'SUCCEEDED' && job.status !== 'completed') await updateJob(jobId, { status: 'completed' })
         else if ((status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') && job.status !== 'failed') await updateJob(jobId, { status: 'failed', error: { message: status } })
+
+        // Emit GA once when terminal state reached
+        const cur = await getJob(jobId)
+        if (cur && !cur.metricsSent && (cur.status === 'completed' || cur.status === 'failed')) {
+          const dur = typeof cur.startedAtMs === 'number' ? (Date.now() - cur.startedAtMs) : undefined
+          if (cur.status === 'completed') {
+            try { await gaEvent('yt_download_done', { source: 'yt_apify', yt_duration_ms: dur ?? 0, ok: 1 }) } catch {}
+          } else {
+            try { await gaEvent('yt_download_error', { source: 'yt_apify', yt_duration_ms: dur ?? 0, ok: 0, status: cur.error?.message || 'FAILED' }) } catch {}
+          }
+          await updateJob(jobId, { metricsSent: true })
+        }
       }
     } catch (e) {
       try { console.warn('[downloads:id] apify poll failed', String(e)) } catch {}

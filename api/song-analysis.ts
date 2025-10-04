@@ -316,13 +316,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       modelId: resolvedModelId,
       processingTimeMs: Date.now() - startedAt,
     };
-    try { await gaEvent('analysis_done', { model_id: resolvedModelId, verses: finalVerses.length, duration_ms: responsePayload.processingTimeMs, mime_type: mimeType || 'audio/mpeg', karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
+    try { await gaEvent('analysis_done', { model_id: resolvedModelId, verses: finalVerses.length, ai_duration_ms: responsePayload.processingTimeMs, mime_type: mimeType || 'audio/mpeg', karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
 
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
     try { console.error('[song-analysis] error', message); } catch {}
-    try { await gaEvent('analysis_error', { duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
+    try { await gaEvent('analysis_error', { ai_duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
     res.status(502).json({ error: message });
   }
 }
