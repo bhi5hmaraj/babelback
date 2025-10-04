@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect } from 'react';
-import { Verse, PanelVisibility, TransliterationSegment, TranslationSegment } from '../types';
+import { Verse, PanelVisibility } from '../types';
 import Icon from './Icon';
 
 interface VerseDisplayCardProps {
@@ -16,15 +16,15 @@ const VerseDisplayCard: React.FC<VerseDisplayCardProps> = ({ title, content, lan
   if (!isVisible) return null;
 
   return (
-    <div className="bg-slate-800 p-4 rounded-lg shadow-lg mt-4 transition-all duration-300 ease-in-out">
-      <h3 className={`text-sm font-semibold ${iconColorClass} mb-1 tracking-wide flex items-center`}>
+    <div className="p-2 mt-2 transition-all duration-200">
+      <h3 className={`text-xs font-semibold ${iconColorClass} mb-1 tracking-wide flex items-center`}>
         {iconName && <Icon name={iconName} weight="bold" className="mr-2" />}
         {title} {language && <span className="text-xs text-slate-400">({language})</span>}
       </h3>
       {typeof content === 'string' ? (
-        <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-base">{content || "N/A"}</p>
+        <p className="text-slate-200 whitespace-pre-wrap leading-snug text-sm">{content || "N/A"}</p>
       ) : (
-        <div className="text-slate-200 leading-relaxed text-base">{content || "N/A"}</div>
+        <div className="text-slate-200 leading-snug text-sm">{content || "N/A"}</div>
       )}
     </div>
   );
@@ -38,21 +38,29 @@ interface VerseDisplayProps {
   panelVisibility: PanelVisibility;
   currentTime: number;
   isKaraokeMode: boolean;
+  onLyricAreaFocus?: () => void; // called when user taps/clicks lyrics pane
+  onLyricAreaScrollUp?: () => void; // called when user scrolls up inside lyrics
 }
 
-const renderWords = (lineText: string) => {
-  if (!lineText || lineText.trim() === "") {
-    return <span className="lyric-word">&nbsp;</span>; // Placeholder for empty lines
-  }
-  const words = lineText.split(' ').filter(word => word.length > 0);
-  if (words.length === 0 && lineText.trim() !== "") { // Line has content but it's all spaces
-     return <span className="lyric-word">{lineText}</span>; // Render the spaces as a single "word"
-  }
-  return words.map((word, wordIndex) => (
-    <span key={`word-${wordIndex}`} className="lyric-word">
-      {word}
+// Render a plain lyric line with native spacing and wrapping (fixes cramped words on mobile).
+const renderLineText = (lineText: string) => (
+  <span className="whitespace-pre-wrap break-normal">{lineText && lineText.length > 0 ? lineText : '\u00A0'}</span>
+);
+
+// Render transliteration text as per-word underlines (keeps line height stable and helps chunking)
+const renderTranslitWords = (text: string) => {
+  if (!text) return renderLineText('');
+  const parts = text.trim().split(/\s+/);
+  return (
+    <span className="whitespace-pre-wrap break-normal">
+      {parts.map((tok, i) => (
+        <span key={i}>
+          <span className="translit-word">{tok}</span>
+          {i < parts.length - 1 ? ' ' : null}
+        </span>
+      ))}
     </span>
-  ));
+  );
 };
 
 
@@ -67,13 +75,16 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   originalLanguageLabel,
   panelVisibility,
   currentTime,
-  isKaraokeMode
+  isKaraokeMode,
+  onLyricAreaFocus,
+  onLyricAreaScrollUp,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeLinePairRef = useRef<HTMLDivElement>(null);
+  const lastScrollTopRef = useRef<number>(0);
+  const autoScrollingRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (!isKaraokeMode) return;
     const container = scrollContainerRef.current;
     const activeEl = activeLinePairRef.current;
     if (!container || !activeEl) return;
@@ -86,9 +97,29 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
     // Only adjust if we're far enough from the target to avoid jitter.
     const delta = Math.abs(container.scrollTop - targetScrollTop);
     if (delta > 16) {
+      autoScrollingRef.current = true;
       container.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+      window.setTimeout(() => { autoScrollingRef.current = false; }, 240);
     }
-  }, [currentTime, isKaraokeMode, verse]);
+  }, [currentTime, verse]);
+
+  // Detect upward user scrolls to reveal header
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      if (autoScrollingRef.current) return; // ignore programmatic centering
+      const current = el.scrollTop;
+      const last = lastScrollTopRef.current;
+      // if user scrolled up by a noticeable amount
+      if (current < last - 12) {
+        onLyricAreaScrollUp && onLyricAreaScrollUp();
+      }
+      lastScrollTopRef.current = current;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => { el.removeEventListener('scroll', onScroll); };
+  }, [onLyricAreaScrollUp]);
 
   if (!verse) {
     return <div className="text-center text-slate-400 py-8">No verse data available.</div>;
@@ -162,14 +193,29 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
     }
 
     if (isInstrumentalSong && linePairs.every(p => !p.translit && !p.translat)) {
-       return <div className="lyric-line-pair"><div className="translit-segment lyric-line-transliteration">{renderWords("Instrumental Section")}</div></div>;
+       return <div className="lyric-line-pair"><div className="translit-segment lyric-line-transliteration">{renderLineText("Instrumental Section")}</div></div>;
     }
     if (linePairs.length === 0) {
-        return <div className="lyric-line-pair"><div className="translit-segment lyric-line-transliteration">{renderWords("Lyrics not available for this verse.")}</div></div>;
+        return <div className="lyric-line-pair"><div className="translit-segment lyric-line-transliteration">{renderLineText("Lyrics not available for this verse.")}</div></div>;
+    }
+
+    // Determine which pair should be considered active for centering
+    let activeIdx = linePairs.findIndex(p => p.isActiveTlit || p.isActiveTlat)
+    if (activeIdx === -1) {
+      // Fallback: choose the nearest by startTime to currentTime
+      let best = Infinity; let bestIdx = 0
+      for (let i = 0; i < linePairs.length; i++) {
+        const st = linePairs[i].startTime
+        if (typeof st === 'number') {
+          const d = Math.abs(st - currentTime)
+          if (d < best) { best = d; bestIdx = i }
+        }
+      }
+      activeIdx = best === Infinity ? 0 : bestIdx
     }
 
     return linePairs.map((pair, index) => {
-      const isOverallActivePair = pair.isActiveTlit || pair.isActiveTlat; 
+      const isOverallActivePair = (pair.isActiveTlit || pair.isActiveTlat) || index === activeIdx; 
       return (
         <div 
           key={`line-pair-${index}`} 
@@ -178,12 +224,12 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
         >
           {pair.translit !== null && (
             <div className={`lyric-line-transliteration translit-segment ${pair.isActiveTlit ? 'active-translit-segment' : ''}`}>
-              {renderWords(pair.translit)}
+              {renderTranslitWords(pair.translit)}
             </div>
           )}
           {pair.translat !== null && (
             <div className={`lyric-line-translation translation-segment ${pair.isActiveTlat ? 'active-translation-segment' : ''}`}>
-              {renderWords(pair.translat)}
+              {renderLineText(pair.translat)}
             </div>
           )}
         </div>
@@ -192,23 +238,27 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   };
 
   return (
-    <div className="bg-slate-800/60 p-5 md:p-6 rounded-xl shadow-xl backdrop-blur-sm current-verse-display-wrapper">
-      <h2 className="text-xl md:text-2xl font-bold text-slate-100 mb-1">
+    <div className="p-1 md:p-2 current-verse-display-wrapper">
+      <h2 className="text-lg md:text-xl font-semibold text-slate-100 mb-0.5">
         Verse {verse.verseNumber}
       </h2>
-      <p className="text-xs text-slate-400 mb-4">
+      <p className="text-[10px] text-slate-400 mb-2">
         Original Lyrics Language: {originalLanguageLabel} | Timings: {new Date(verse.startTime * 1000).toISOString().substr(14, 5)} - {new Date(verse.endTime * 1000).toISOString().substr(14, 5)}
       </p>
-      <div className="border-b border-slate-700 mb-4"></div>
+      <div className="border-b border-slate-700 mb-2"></div>
 
       {panelVisibility.lyrics && (
-        <div className="bg-slate-800 p-4 rounded-lg shadow-lg mb-4">
-          <h3 className="text-sm font-semibold text-sky-400 mb-3 tracking-wide flex items-center">
+        <div className="p-0 rounded-lg mb-1">
+          <h3 className="text-xs font-semibold text-sky-400 mb-1 tracking-wide flex items-center">
             <Icon name={isKaraokeMode ? "microphone-stage" : "list-dashes"} weight="bold" className="mr-2" />
             {isKaraokeMode ? "Synced Lyrics" : "Lyrics"}
             <span className="text-xs text-slate-400 ml-1"> (Transliteration & Translation to {targetLanguage})</span>
           </h3>
-          <div ref={scrollContainerRef} className="lyrics-scroll-container">
+          <div
+            ref={scrollContainerRef}
+            className="lyrics-scroll-container"
+            onPointerDown={() => { if (onLyricAreaFocus) onLyricAreaFocus(); }}
+          >
             {renderLyricPairs()}
           </div>
         </div>
