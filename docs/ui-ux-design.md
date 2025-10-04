@@ -105,3 +105,52 @@ This document defines a practical, responsive design for Babelback that prioriti
 
 Inspired by fullscreen lyrics patterns (e.g., Spotify‑style) while tailored to Babelback’s translation/transliteration needs.
 
+## Fixed‑Screen App (No Page Scroll) — Tabs + Sticky Player
+
+This variant locks the app to a single viewport with tabbed navigation and a bottom player that’s always visible.
+
+**Structure**
+- Root grid (100dvh/100svh): header, tabs, content, player.
+- No page scroll: html, body { height: 100%; overflow: hidden; }.
+- Safe areas: padding with env(safe-area-inset-*) and viewport‑fit=cover.
+
+**Grid Rows**
+- Header: auto.
+- Tabs bar: 44–56px.
+- Content pane: 1fr (fills remaining space).
+- Player bar: 64–80px (+ safe‑area bottom).
+
+**Tabs (single focus per pane)**
+- Setup: Source (YouTube/File), Model, Language, Mode, primary action (Babelback).
+- Lyrics: centered active line, dimmed neighbors, karaoke inline highlight, Synced/Meaning toggle.
+- Meaning: paged sections (Verse meaning, Summary, Analysis) with left/right arrows.
+- Practice: verse selector (carousel/arrows), Record/Stop, feedback.
+- Library: paginated list (Prev/Next), no infinite scroll.
+
+**Sticky Player (bottom)**
+- Play/pause, prev/next, scrubber/time; optional output device in ⋯.
+- Always visible; large tap targets; safe‑area padding.
+
+**Behavior & Layout Rules**
+- Tabs switch content without page scroll; content panes manage their own internal paging.
+- Lyrics pane: overflow hidden; auto‑scrolls active line into view; optional swipe gestures.
+- Setup/Meaning/Practice/Library: stepped or paged sections (no vertical scrolling).
+
+**Breakpoints**
+- Mobile ≤ 640px: Focused typography (active line ~22–24px), minimal chrome.
+- Desktop ≥ 1024px: Same fixed grid; optional Workspace toggle to show a narrow side panel next to Lyrics.
+
+**Implementation Plan**
+- App shell: grid container in App.tsx (100dvh); new TabsBar and PlayerBar components.
+- Panes: SetupPane, LyricsPane, MeaningPane, PracticePane, LibraryPane.
+- Styles: grid‑rows‑[auto_48px_minmax(0,1fr)_72px] on small; adjust for desktop; overflow‑hidden on content pane.
+- Inputs: use bottom sheets on mobile (avoid keyboard pushing layout).
+
+**Acceptance Criteria (Fixed‑Screen)**
+- 360×800: no page scroll; player always visible; tab switch instant; Lyrics auto‑scroll; other panes fit within content pane height.
+- Desktop: resizing preserves layout; no page scroll; player sticky.
+
+**Risks & Mitigations**
+- iOS Safari dynamic bars: prefer 100dvh with 100svh fallback; add safe‑area padding to player.
+- On‑screen keyboard: open inputs in sheets; keep player visible.
+- Reduced motion: disable karaoke sweep when prefers‑reduced‑motion.
