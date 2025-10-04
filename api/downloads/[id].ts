@@ -90,7 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (cur.status === 'completed') {
             try { await gaEvent('yt_download_done', { source: 'yt_apify', yt_duration_ms: dur ?? 0, ok: 1 }) } catch {}
           } else {
-            try { await gaEvent('yt_download_error', { source: 'yt_apify', yt_duration_ms: dur ?? 0, ok: 0, status: cur.error?.message || 'FAILED' }) } catch {}
+            try { await gaEvent('yt_download_error', { source: 'yt_apify', error_type: 'yt', yt_duration_ms: dur ?? 0, ok: 0, status: cur.error?.message || 'FAILED' }) } catch {}
           }
           await updateJob(jobId, { metricsSent: true })
         }

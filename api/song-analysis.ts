@@ -322,7 +322,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
     try { console.error('[song-analysis] error', message); } catch {}
-    try { await gaEvent('analysis_error', { ai_duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
+    try { await gaEvent('analysis_error', { error_type: 'analysis', ai_duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
     res.status(502).json({ error: message });
   }
 }

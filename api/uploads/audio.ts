@@ -52,7 +52,7 @@ function makeStorage(): Storage {
 
   stream.on('error', (err: any) => {
     try { console.error('[uploads/audio] gcs error', err?.message || String(err)) } catch {}
-    try { gaEvent('upload_error', { source: 'file', content_type: contentType, duration_ms: Date.now() - startedAt, ok: 0, msg: String(err?.message || err).slice(0,120) }) } catch {}
+    try { gaEvent('upload_error', { source: 'file', error_type: 'upload', content_type: contentType, duration_ms: Date.now() - startedAt, ok: 0, msg: String(err?.message || err).slice(0,120) }) } catch {}
     res.status(502).json({ error: 'gcs upload failed', details: err?.message || String(err) })
   })
   stream.on('finish', async () => {

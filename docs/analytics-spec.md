@@ -50,8 +50,21 @@ Optional (future)
   - Fields: source='yt', audio_format, duration_ms, ok (0/1), message? (truncated)
 
 ## Parameters (custom definitions to register)
-- Custom metrics: duration_ms (Number), size_bytes (Number), verses (Number)
-- Custom dimensions: source, content_type, ext, method, model_id, lang, karaoke, ok, mime_type
+- Custom metrics:
+  - ai_duration_ms (Number) — analysis phase duration in ms
+  - yt_duration_ms (Number) — YouTube ingest duration in ms
+  - size_bytes (Number) — upload size
+  - verses (Number) — verses counted in analysis
+- Custom dimensions:
+  - source — event source (file|url|yt_apify|yt)
+  - model_id — AI model id
+  - lang — target language code
+  - content_type — MIME type of audio
+  - mime_type — MIME seen by analysis
+  - ext — file extension
+  - method — upload method (e.g., base64)
+  - ok — success flag (0/1)
+  - error_type — normalized error class (upload|analysis|yt)
 
 Notes
 - No PII: never send emails, raw URLs, tokens, or IDs that can identify a person.
@@ -83,8 +96,9 @@ Notes
 - Realtime → DebugView for validation.
 - Explorations
   - Upload duration by size buckets (custom metric vs binned dimension).
-  - Analysis duration by model_id/lang/karaoke.
-  - Error rates by step (upload vs analysis) and source.
+- Analysis duration (ai_duration_ms) by model_id/lang/karaoke.
+- YouTube ingest duration (yt_duration_ms) by source 'yt_apify'.
+- Error rates by error_type (upload|analysis|yt) and source.
 - (Optional) BigQuery export: enable in GA4 Admin → BigQuery Links for raw analysis.
 
 ## QA / Validation Checklist

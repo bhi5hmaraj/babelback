@@ -109,7 +109,7 @@ export const fetchSongDataFromGemini = async (
     // Guard: avoid posting large base64 payloads to /api/song-analysis (Vercel body limit)
     const MAX_BASE64_BYTES = 2 * 1024 * 1024; // ~2MB safe fallback
     if (audioFile.size > MAX_BASE64_BYTES) {
-      trackEvent('upload_error', { source: 'file', reason: 'fallback_blocked_large', size_bytes: audioFile.size });
+      trackEvent('upload_error', { source: 'file', error_type: 'upload', reason: 'fallback_blocked_large', size_bytes: audioFile.size });
       throw new Error('Upload failed and the file is too large for fallback. Please retry upload on a stable connection.');
     }
     if (onProgress) onProgress('Uploading (fallback)…');
