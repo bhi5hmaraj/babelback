@@ -118,21 +118,25 @@ export const useSongDataManager = ({
     setError(null);
     setSongData(null); 
     processingStartTimeRef.current = Date.now();
-
-    // Heuristic progress (local file only): ~6s/MB + 4s base, cap 120s
-    const sizeMB = Math.max(1, Math.round(file.size / (1024 * 1024)) || 1);
-    const predictedMs = Math.min(120_000, 4_000 + sizeMB * 6_000);
-    predictedAnalysisMsRef.current = predictedMs;
-    setAnalysisProgressPercent(0);
-    if (progressIntervalRef.current) window.clearInterval(progressIntervalRef.current);
-    progressIntervalRef.current = window.setInterval(() => {
-      if (!processingStartTimeRef.current || !predictedAnalysisMsRef.current) return;
-      const elapsed = Date.now() - processingStartTimeRef.current;
-      const pct = Math.min(95, Math.floor((elapsed / predictedAnalysisMsRef.current) * 100));
-      setAnalysisProgressPercent(pct);
-    }, 500);
-
-    const onProgressUpdate = (message: string) => setLoadingMessage(message);
+    const onProgressUpdate = (message: string) => {
+      setLoadingMessage(message);
+      if (/Requesting song analysis/i.test(message)) {
+        // Reset and start progress now that analysis is beginning (exclude upload time)
+        const sizeMB = Math.max(1, Math.round(file.size / (1024 * 1024)) || 1);
+        const predictedMs = Math.min(120_000, 4_000 + sizeMB * 6_000);
+        predictedAnalysisMsRef.current = predictedMs;
+        setAnalysisProgressPercent(0);
+        if (progressIntervalRef.current) window.clearInterval(progressIntervalRef.current);
+        const startAt = Date.now();
+        processingStartTimeRef.current = startAt;
+        progressIntervalRef.current = window.setInterval(() => {
+          if (!processingStartTimeRef.current || !predictedAnalysisMsRef.current) return;
+          const elapsed = Date.now() - processingStartTimeRef.current;
+          const pct = Math.min(95, Math.floor((elapsed / predictedAnalysisMsRef.current) * 100));
+          setAnalysisProgressPercent(pct);
+        }, 500);
+      }
+    };
 
     try {
       const data = await fetchSongDataFromGemini(file, lang, karaokeEnabled, modelToUse, onProgressUpdate);

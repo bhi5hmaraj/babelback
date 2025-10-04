@@ -590,7 +590,7 @@ const App: React.FC = () => {
             <LoadingSpinner
               message={isLoadingSongData ? (loadingMessage || 'Analyzing song…') : 'Fetching audio from YouTube…'}
               funMessage={isLoadingSongData ? funLoadingMessage : (ytFun || undefined)}
-              elapsedTime={isLoadingSongData ? elapsedLoadingTime : undefined}
+              
               progressPercent={isLoadingSongData ? (analysisProgressPercent ?? undefined) : undefined}
             />
           )}
