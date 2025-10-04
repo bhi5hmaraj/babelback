@@ -9,6 +9,7 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { Buffer } from 'node:buffer';
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
+import { gaEvent } from './_lib/ga.js';
 import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText, Language } from './_lib/prompts.js';
 import { parseSongVerses, RawVerse, Verse } from './_lib/verseParser.js';
 
@@ -315,11 +316,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       modelId: resolvedModelId,
       processingTimeMs: Date.now() - startedAt,
     };
+    try { await gaEvent('analysis_done', { model_id: resolvedModelId, verses: finalVerses.length, duration_ms: responsePayload.processingTimeMs, mime_type: mimeType || 'audio/mpeg', karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
 
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
     try { console.error('[song-analysis] error', message); } catch {}
+    try { await gaEvent('analysis_error', { duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
     res.status(502).json({ error: message });
   }
 }

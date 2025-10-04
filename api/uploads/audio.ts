@@ -1,6 +1,7 @@
 import '../_lib/loadEnv.js'
 import { Storage } from '@google-cloud/storage'
 import crypto from 'node:crypto'
+import { gaEvent } from '../_lib/ga.js'
 
 interface VercelResponse { status: (code: number) => VercelResponse; json: (b: unknown) => void; setHeader?: (k: string, v: string) => void; end?: (b?: any) => void }
 
@@ -51,11 +52,13 @@ function makeStorage(): Storage {
 
   stream.on('error', (err: any) => {
     try { console.error('[uploads/audio] gcs error', err?.message || String(err)) } catch {}
+    try { gaEvent('upload_error', { source: 'file', content_type: contentType, duration_ms: Date.now() - startedAt, ok: 0, msg: String(err?.message || err).slice(0,120) }) } catch {}
     res.status(502).json({ error: 'gcs upload failed', details: err?.message || String(err) })
   })
   stream.on('finish', async () => {
     try {
       const [signed] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+      try { gaEvent('upload_done', { source: 'file', content_type: contentType, size_bytes: bytes, duration_ms: Date.now() - startedAt, ok: 1 }) } catch {}
       res.status(200).json({ id, url: signed, gcsObject: { bucket: bucketName, path: objectPath, contentType, size: bytes } })
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
