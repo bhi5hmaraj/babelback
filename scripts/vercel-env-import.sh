@@ -24,6 +24,7 @@ TARGETS=("preview" "production")
 FORCE=0
 DRY=0
 ALLOW_EMPTY=0
+SKIP_EXISTING=1
 
 usage() {
   echo "Usage: $0 [-f env_file] [-t envs] [--force] [--dry-run] [--allow-empty]"
@@ -32,6 +33,7 @@ usage() {
   echo "      --force        Remove var first (non-interactive) before adding"
   echo "      --dry-run      Print actions but do not call vercel"
   echo "      --allow-empty  Add variables even when value is empty"
+  echo "      --no-skip      Do not skip existing keys (default skips)"
 }
 
 # Parse args
@@ -47,6 +49,8 @@ while [[ $# -gt 0 ]]; do
       DRY=1; shift;;
     --allow-empty)
       ALLOW_EMPTY=1; shift;;
+    --no-skip)
+      SKIP_EXISTING=0; shift;;
     -h|--help)
       usage; exit 0;;
     *)
@@ -82,6 +86,36 @@ echo "Targets: ${TARGETS[*]}"
 (( FORCE )) && echo "Force replace: enabled"
 (( DRY )) && echo "Dry run: enabled"
 (( ALLOW_EMPTY )) && echo "Allow empty: enabled"
+(( SKIP_EXISTING )) && echo "Skip existing: enabled"
+
+# Cache env keys per target (requires vercel CLI and jq). If jq missing, pre-check is disabled.
+declare -A TARGET_KEYS
+have_jq=0
+if command -v jq >/dev/null 2>&1; then have_jq=1; fi
+
+load_keys_for_target() {
+  local target="$1"
+  [[ $SKIP_EXISTING -eq 0 ]] && return 0
+  [[ $have_jq -eq 0 ]] && return 0
+  if [[ -n "${TARGET_KEYS[$target]:-}" ]]; then return 0; fi
+  # vercel env ls <target> --json prints a JSON with envs[]
+  local json
+  if ! json=$(vercel env ls "$target" --json 2>/dev/null); then
+    return 0
+  fi
+  local keys
+  keys=$(printf '%s' "$json" | jq -r '.envs[]?.key' | tr '\n' ' ')
+  TARGET_KEYS[$target]="$keys"
+}
+
+key_exists_in_target() {
+  local key="$1" target="$2"
+  [[ $SKIP_EXISTING -eq 0 ]] && return 1
+  [[ $have_jq -eq 0 ]] && return 1
+  load_keys_for_target "$target"
+  local keys="${TARGET_KEYS[$target]:-}"
+  [[ " $keys " == *" $key "* ]]
+}
 
 # Read file line-by-line
 while IFS= read -r raw || [[ -n "${raw}" ]]; do
@@ -141,6 +175,12 @@ while IFS= read -r raw || [[ -n "${raw}" ]]; do
       continue
     fi
 
+    # Skip if key already exists and not forcing
+    if key_exists_in_target "$key" "$target" && (( FORCE == 0 )); then
+      echo "Skip (exists) $key in $target"
+      continue
+    fi
+
     # Remove existing var if forcing (non-interactive)
     if (( FORCE )); then
       vercel env rm "$key" "$target" --yes >/dev/null 2>&1 || true
@@ -160,4 +200,3 @@ while IFS= read -r raw || [[ -n "${raw}" ]]; do
 done < "$ENV_FILE"
 
 echo "Done."
-
