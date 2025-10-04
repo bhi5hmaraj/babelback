@@ -186,10 +186,16 @@ while IFS= read -r raw || [[ -n "${raw}" ]]; do
       vercel env rm "$key" "$target" --yes >/dev/null 2>&1 || true
     fi
 
-    # Pipe value via stdin to avoid interactive prompt
-    if printf '%s' "$val" | vercel env add "$key" "$target"; then
+    # Pipe value via stdin to avoid interactive prompt; tolerate "already added" errors
+    add_out="$(printf '%s' "$val" | vercel env add "$key" "$target" 2>&1 || true)"
+    if grep -qi "has already been added" <<< "$add_out"; then
+      echo "Skip (exists) $key in $target"
+    elif grep -qi "already exists" <<< "$add_out"; then
+      echo "Skip (exists) $key in $target"
+    elif grep -qi "added\|Created Variable" <<< "$add_out"; then
       echo "Added $key to $target"
     else
+      echo "$add_out"
       echo "Failed to add $key to $target"
       exit 1
     fi
