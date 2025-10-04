@@ -50,21 +50,28 @@ Optional (future)
   - Fields: source='yt', audio_format, duration_ms, ok (0/1), message? (truncated)
 
 ## Parameters (custom definitions to register)
-- Custom metrics:
-  - ai_duration_ms (Number) — analysis phase duration in ms
-  - yt_duration_ms (Number) — YouTube ingest duration in ms
-  - size_bytes (Number) — upload size
-  - verses (Number) — verses counted in analysis
-- Custom dimensions:
+Add these in GA4 Admin → Property → Custom definitions.
+
+- Custom metrics (Event scope)
+  - upload_duration_ms — upload phase duration in ms (client/server)
+  - ai_duration_ms — analysis phase duration in ms (server)
+  - yt_duration_ms — YouTube ingest duration in ms (server)
+  - size_bytes — upload/object size in bytes
+  - verses — verses counted in analysis
+
+- Custom dimensions (Event scope)
+  - job_id — stable join key across phases
   - source — event source (file|url|yt_apify|yt)
   - model_id — AI model id
   - lang — target language code
-  - content_type — MIME type of audio
-  - mime_type — MIME seen by analysis
-  - ext — file extension
-  - method — upload method (e.g., base64)
-  - ok — success flag (0/1)
   - error_type — normalized error class (upload|analysis|yt)
+  - content_type — MIME type of uploaded audio (optional)
+  - mime_type — MIME seen by analysis (optional)
+  - ext — file extension (optional)
+  - method — upload method (e.g., base64) (optional)
+  - ok — success flag (0/1) (optional)
+
+Event parameter names must match the list above (e.g., event parameter `job_id` for the job_id dimension).
 
 Notes
 - No PII: never send emails, raw URLs, tokens, or IDs that can identify a person.
