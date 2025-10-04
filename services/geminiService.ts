@@ -63,27 +63,56 @@ export const fetchSongDataFromGemini = async (
     throw new Error('AI Model ID is required for processing.');
   }
 
-  if (onProgress) onProgress('Uploading audio…');
-  const { url } = await upload(audioFile.name, audioFile, {
-    access: 'public',
-    contentType: audioFile.type || 'application/octet-stream',
-    handleUploadUrl: '/api/upload',
-    multipart: true,
-  });
-
-  if (onProgress) onProgress('Requesting song analysis…');
-  const response = await fetch(SONG_ANALYSIS_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      audioUrl: url,
-      fileName: audioFile.name,
-      mimeType: audioFile.type,
-      targetLanguage,
-      enableKaraokeMode,
-      modelId,
-    }),
-  });
+  let response: Response | null = null;
+  try {
+    // Preferred path: stream upload to GCS via our proxy (no vendor limits)
+    if (onProgress) onProgress('Uploading audio…');
+    const up = await fetch('/api/uploads/audio', {
+      method: 'POST',
+      headers: {
+        'Content-Type': audioFile.type || 'application/octet-stream',
+        'x-file-name': encodeURIComponent(audioFile.name || 'upload'),
+      },
+      body: audioFile,
+    })
+    if (!up.ok) throw new Error(`upload failed (${up.status})`)
+    const upJson = await up.json().catch(() => ({} as any))
+    const url = upJson?.url
+    if (!url) throw new Error('upload returned no url')
+    if (onProgress) onProgress('Requesting song analysis…');
+    response = await fetch(SONG_ANALYSIS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        audioUrl: url,
+        fileName: audioFile.name,
+        mimeType: audioFile.type,
+        targetLanguage,
+        enableKaraokeMode,
+        modelId,
+      }),
+    });
+  } catch (e) {
+    // Fallback if Vercel Blob is not configured: send base64 directly
+    const message = e instanceof Error ? e.message : String(e);
+    const missingToken = /No token found|BLOB_READ_WRITE_TOKEN/i.test(message) || /upload failed/i.test(message);
+    if (!missingToken) throw e;
+    if (onProgress) onProgress('Uploading (fallback)…');
+    const base64 = await blobToBase64(audioFile);
+    if (onProgress) onProgress('Requesting song analysis…');
+    response = await fetch(SONG_ANALYSIS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        audioBase64: base64,
+        fileName: audioFile.name,
+        mimeType: audioFile.type || 'application/octet-stream',
+        targetLanguage,
+        enableKaraokeMode,
+        modelId,
+      }),
+    });
+  }
 
   const { songData } = await parseJsonResponse<{ songData: SongData }>(response);
 

@@ -11,7 +11,10 @@
     "api/downloads/[id]/callback.ts": {
       "memory": 512,
       "maxDuration": 30
+    },
+    "api/uploads/audio.ts": {
+      "memory": 1024,
+      "maxDuration": 120
     }
   }
 }
-
