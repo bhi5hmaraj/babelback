@@ -29,18 +29,16 @@ This document lays out a pragmatic v1 design to move AI and heavy logic to the b
 
 ### Key Flows
 
-1) Upload Audio (direct-to-storage)
-- FE → Hono: init upload → returns signed URL + object key.
-- FE → Storage: PUT audio directly.
-- FE → Hono: create `analysis` job with object key, target_language, karaoke flag, model_id, prompt id/version.
-- Worker (Node) → reads object, uploads to Gemini files API, generates structured output, stores `SongData` JSON in `song_analysis`, marks job `succeeded`.
-- FE follows `jobs/:id` to show progress; then fetches analysis.
+1) Upload Audio (streaming proxy → GCS)
+- FE → Hono (Node): `POST /api/uploads/audio` with raw file body. Headers: `Content-Type`, `x-file-name`.
+- Hono streams to GCS (resumable) and returns a short-lived signed GET URL + `gcsObject`.
+- FE → `POST /api/song-analysis` with `{ audioUrl, fileName, mimeType, targetLanguage, karaoke, modelId }`.
+- Hono performs analysis and returns `SongData`. This flow is identical to the YouTube path once a GCS object exists.
 
-2) YouTube Ingestion
-- FE → Hono: create `yt_ingest` job with `youtube_url` + options.
-- Python worker claims job (poll or webhook trigger), runs yt-dlp, transcodes to standard format (e.g., 48kHz Opus mono), uploads to Storage, updates job output with object key and metadata (e.g., youtube_id, title), marks completed or triggers `analysis` child job.
-- Node worker performs analysis just like direct upload.
-- FE tracks parent job → child job chain.
+2) YouTube Ingestion (Apify Actor + GCS)
+- FE → Hono: `POST /api/downloads` with `youtubeUrl` and options. Hono mints an `uploadUrl` (V4 signed PUT) and starts the Apify run.
+- Apify Actor (yt-dlp) downloads the source (proxy if needed) and `PUT`s audio to `uploadUrl`. It then POSTs a callback with `{ jobId, status, bytes, contentType }`.
+- FE polls `GET /api/downloads/:id` (or listens on SSE) to obtain the signed read URL, then calls `/api/song-analysis` (same as manual upload).
 
 3) Practice Scoring
 - FE → API: POST `/v1/uploads/practice` with recording blob; API stores and returns `objectKey`.
@@ -54,8 +52,12 @@ This document lays out a pragmatic v1 design to move AI and heavy logic to the b
 - Auth
   - `GET /v1/auth/me` → current user
 - Uploads (server-side streaming)
-  - `POST /v1/uploads/audio` → multipart/binary upload; stores and returns `{ objectKey, contentType, size }`
-  - `POST /v1/uploads/practice` → multipart/binary upload; returns `{ objectKey, contentType, size }`
+  - Implemented: `POST /api/uploads/audio` → binary stream upload (Content-Type + x-file-name header). Streams request body directly to GCS using a resumable write; responds with `{ id, url (signed GET), gcsObject: { bucket, path, contentType, size } }`.
+  - Rationale: avoids vendor size limits and keeps credentials on the server; the browser never sees GCS keys. No bucket CORS is required for upload because the browser posts to our API.
+  - Alternatives (future):
+    - Direct browser → GCS (V4 signed PUT). Pros: server doesn’t relay bytes. Cons: requires signed PUT, strict headers, and bucket CORS; single-shot uploads can be brittle.
+    - Signed resumable session (chunked PUTs). Best for very large files, but more client complexity.
+  - Practice uploads can mirror the same pattern at `/api/uploads/practice`.
 - Jobs
   - `POST /v1/jobs/analysis` → create analysis job for an existing object key
   - `POST /v1/jobs/youtube` → create yt_ingest job { youtubeUrl, opts }

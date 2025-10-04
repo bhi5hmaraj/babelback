@@ -24,6 +24,7 @@ Key files and docs
   - `api/downloads.ts` — create download job (mints GCS signed PUT, starts Apify)
   - `api/downloads/[id].ts` — poll job status (polls Apify run in “running” state)
   - `api/downloads/[id]/callback.ts` — webhook endpoint (present but not used yet; TODO to enable)
+  - `api/uploads/audio.ts` — streaming proxy upload to GCS (manual file uploads)
 - Apify Actor: `actors/yt-audio-basic` — minimal yt‑dlp actor with optional direct‑to‑GCS upload
 - GCS signer (local testing): `scripts/sign-gcs.cjs`
 
