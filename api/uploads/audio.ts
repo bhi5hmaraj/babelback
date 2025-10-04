@@ -1,5 +1,4 @@
 import '../_lib/loadEnv.js'
-import { tLog } from '../_lib/telemetry.js'
 import { Storage } from '@google-cloud/storage'
 import crypto from 'node:crypto'
 
@@ -40,7 +39,6 @@ function makeStorage(): Storage {
 
   let bytes = 0
   const startedAt = Date.now()
-  try { await tLog('upload_start', { contentType, fileName, path: objectPath }) } catch {}
   const stream = file.createWriteStream({
     resumable: true,
     contentType: String(contentType),
@@ -53,17 +51,14 @@ function makeStorage(): Storage {
 
   stream.on('error', (err: any) => {
     try { console.error('[uploads/audio] gcs error', err?.message || String(err)) } catch {}
-    try { tLog('upload_error', { contentType, fileName, path: objectPath, durationMs: Date.now() - startedAt, message: String(err?.message || err) }) } catch {}
     res.status(502).json({ error: 'gcs upload failed', details: err?.message || String(err) })
   })
   stream.on('finish', async () => {
     try {
       const [signed] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
-      try { await tLog('upload_done', { contentType, fileName, path: objectPath, sizeBytes: bytes, durationMs: Date.now() - startedAt }) } catch {}
       res.status(200).json({ id, url: signed, gcsObject: { bucket: bucketName, path: objectPath, contentType, size: bytes } })
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
-      try { await tLog('upload_done', { contentType, fileName, path: objectPath, sizeBytes: bytes, durationMs: Date.now() - startedAt, warn: 'signed_url_failed' }) } catch {}
       res.status(200).json({ id, gcsObject: { bucket: bucketName, path: objectPath, contentType, size: bytes }, warning: `signed url failed: ${msg}` })
     }
   })

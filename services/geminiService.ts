@@ -7,6 +7,7 @@
  */
 import { SongData, Language, Verse, SingingScore } from '../types';
 import { upload } from '@vercel/blob/client';
+import { trackEvent } from './analytics';
 
 const SONG_ANALYSIS_ENDPOINT = '/api/song-analysis';
 const SINGING_FEEDBACK_ENDPOINT = '/api/singing-feedback';
@@ -67,6 +68,13 @@ export const fetchSongDataFromGemini = async (
   try {
     // Preferred path: stream upload to GCS via our proxy (no vendor limits)
     if (onProgress) onProgress('Uploading audio…');
+    const upStart = Date.now();
+    trackEvent('upload_start', {
+      source: 'file',
+      content_type: audioFile.type || 'application/octet-stream',
+      size_bytes: audioFile.size,
+      ext: (audioFile.name.split('.').pop() || '').toLowerCase(),
+    });
     const up = await fetch('/api/uploads/audio', {
       method: 'POST',
       headers: {
@@ -79,6 +87,7 @@ export const fetchSongDataFromGemini = async (
     const upJson = await up.json().catch(() => ({} as any))
     const url = upJson?.url
     if (!url) throw new Error('upload returned no url')
+    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, duration_ms: Date.now() - upStart, ok: 1 })
     if (onProgress) onProgress('Requesting song analysis…');
     response = await fetch(SONG_ANALYSIS_ENDPOINT, {
       method: 'POST',
@@ -98,7 +107,9 @@ export const fetchSongDataFromGemini = async (
     const missingToken = /No token found|BLOB_READ_WRITE_TOKEN/i.test(message) || /upload failed/i.test(message);
     if (!missingToken) throw e;
     if (onProgress) onProgress('Uploading (fallback)…');
+    const fbStart = Date.now();
     const base64 = await blobToBase64(audioFile);
+    trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, duration_ms: Date.now() - fbStart, ok: 1, method: 'base64' })
     if (onProgress) onProgress('Requesting song analysis…');
     response = await fetch(SONG_ANALYSIS_ENDPOINT, {
       method: 'POST',

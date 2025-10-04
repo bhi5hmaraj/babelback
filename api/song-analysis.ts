@@ -9,7 +9,6 @@
 import { GenerateContentResponse, Part, Type } from '@google/genai';
 import { Buffer } from 'node:buffer';
 import { getGeminiClient, resolveModelId } from './_lib/gemini/index.js';
-import { tLog } from './_lib/telemetry.js';
 import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText, Language } from './_lib/prompts.js';
 import { parseSongVerses, RawVerse, Verse } from './_lib/verseParser.js';
 
@@ -199,7 +198,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const audioBlob = new Blob([audioData], { type: mimeType || 'audio/mpeg' });
-    try { await tLog('analysis_start', { source: audioBase64 ? 'base64' : 'url', sizeBytes: audioData.byteLength, mimeType, karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
 
     try { console.log('[song-analysis] uploading to gemini'); } catch {}
     const uploadResult = await geminiClient.files.upload({
@@ -317,13 +315,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       modelId: resolvedModelId,
       processingTimeMs: Date.now() - startedAt,
     };
-    try { await tLog('analysis_done', { modelId: resolvedModelId, verses: finalVerses.length, durationMs: responsePayload.processingTimeMs, mimeType, karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
 
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
     try { console.error('[song-analysis] error', message); } catch {}
-    try { await tLog('analysis_error', { message, durationMs: Date.now() - startedAt }) } catch {}
     res.status(502).json({ error: message });
   }
 }

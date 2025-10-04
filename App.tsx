@@ -23,7 +23,6 @@ import RecordingInfoBanner from './components/RecordingInfoBanner';
 import AboutPage from './components/AboutPage';
 import TechDetailsPage from './components/TechDetailsPage';
 import ChangelogPage from './components/ChangelogPage'; // Import ChangelogPage
-import { Analytics } from '@vercel/analytics/react';
 import { trackEvent } from './services/analytics';
 import { addSongToLibrary, deleteSongFromLibrary, deleteAllPracticeAttemptsForSongFromDB } from './db';
 import { useSingingPractice, UseSingingPracticeReturn } from './hooks/useSingingPractice'; 
@@ -826,7 +825,6 @@ const App: React.FC = () => {
         disabled={isPracticeActive}
         compact
       />
-      <Analytics />
     </div>
   );
 };

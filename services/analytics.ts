@@ -1,7 +1,4 @@
-// Lightweight wrapper around Vercel Analytics custom events.
-// Safe to import from anywhere in the client bundle.
-import { track as trackReact } from '@vercel/analytics/react'
-
+// Lightweight GA4 wrapper. Safe to import from anywhere in the client bundle.
 type Props = Record<string, string | number | boolean | null | undefined>
 
 function sanitize(props?: Props): Record<string, string | number> | undefined {
@@ -19,15 +16,8 @@ function sanitize(props?: Props): Record<string, string | number> | undefined {
 export function trackEvent(name: string, props?: Props) {
   try {
     const p = sanitize(props)
-    // Try the React helper first
-    trackReact(name, p)
+    ;(window as any)?.gtag?.('event', name, p)
   } catch {
-    try {
-      // Fallback to the global if available
-      ;(window as any)?.va?.track?.(name, sanitize(props))
-    } catch {
-      // no-op in dev or when analytics is disabled
-    }
+    // no-op in dev or when analytics is disabled
   }
 }
-
