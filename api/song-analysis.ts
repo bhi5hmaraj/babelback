@@ -28,6 +28,7 @@ interface SongAnalysisRequestBody {
   audioUrl?: string;
   fileName?: string;
   mimeType?: string;
+  jobId?: string;
   targetLanguage: Language | string;
   enableKaraokeMode: boolean;
   modelId?: string;
@@ -89,6 +90,7 @@ const parseRequestBody = (body: unknown): SongAnalysisRequestBody => {
     audioUrl,
     fileName: typeof record.fileName === 'string' ? record.fileName : 'uploaded-audio',
     mimeType: typeof record.mimeType === 'string' ? record.mimeType : 'audio/mpeg',
+    jobId: typeof record.jobId === 'string' ? record.jobId : undefined,
     targetLanguage,
     enableKaraokeMode,
     modelId: typeof record.modelId === 'string' ? record.modelId : undefined,
@@ -316,13 +318,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       modelId: resolvedModelId,
       processingTimeMs: Date.now() - startedAt,
     };
-    try { await gaEvent('analysis_done', { model_id: resolvedModelId, verses: finalVerses.length, ai_duration_ms: responsePayload.processingTimeMs, mime_type: mimeType || 'audio/mpeg', karaoke: enableKaraokeMode ? 1 : 0 }) } catch {}
+    try { await gaEvent('analysis_done', { job_id: parsedBody.jobId, model_id: resolvedModelId, verses: finalVerses.length, ai_duration_ms: responsePayload.processingTimeMs, mime_type: mimeType || 'audio/mpeg', karaoke: enableKaraokeMode ? 1 : 0, size_bytes: audioData.byteLength }) } catch {}
 
     res.status(200).json(responsePayload);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Song analysis failed';
     try { console.error('[song-analysis] error', message); } catch {}
-    try { await gaEvent('analysis_error', { error_type: 'analysis', ai_duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
+    try { await gaEvent('analysis_error', { error_type: 'analysis', job_id: parsedBody.jobId, ai_duration_ms: Date.now() - startedAt, message: String(message).slice(0,120) }) } catch {}
     res.status(502).json({ error: message });
   }
 }

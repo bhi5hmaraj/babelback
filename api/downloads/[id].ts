@@ -87,10 +87,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const cur = await getJob(jobId)
         if (cur && !cur.metricsSent && (cur.status === 'completed' || cur.status === 'failed')) {
           const dur = typeof cur.startedAtMs === 'number' ? (Date.now() - cur.startedAtMs) : undefined
+          let sizeBytes: number | undefined
+          try {
+            if (cur.gcsObject) {
+              const metaStorage = new Storage()
+              const [md] = await metaStorage.bucket(cur.gcsObject.bucket).file(cur.gcsObject.path).getMetadata()
+              const sz = md && (md.size as any)
+              const n = sz != null ? parseInt(String(sz), 10) : NaN
+              if (!Number.isNaN(n)) sizeBytes = n
+            }
+          } catch {}
           if (cur.status === 'completed') {
-            try { await gaEvent('yt_download_done', { source: 'yt_apify', yt_duration_ms: dur ?? 0, ok: 1 }) } catch {}
+            try { await gaEvent('yt_download_done', { job_id: jobId, source: 'yt_apify', yt_duration_ms: dur ?? 0, size_bytes: sizeBytes ?? undefined, ok: 1 }) } catch {}
           } else {
-            try { await gaEvent('yt_download_error', { source: 'yt_apify', error_type: 'yt', yt_duration_ms: dur ?? 0, ok: 0, status: cur.error?.message || 'FAILED' }) } catch {}
+            try { await gaEvent('yt_download_error', { job_id: jobId, source: 'yt_apify', error_type: 'yt', yt_duration_ms: dur ?? 0, size_bytes: sizeBytes ?? undefined, ok: 0, status: cur.error?.message || 'FAILED' }) } catch {}
           }
           await updateJob(jobId, { metricsSent: true })
         }

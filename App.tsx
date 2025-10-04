@@ -535,7 +535,7 @@ const App: React.FC = () => {
                               // Switch loader context from fetching → analyzing
                               setYtWorking(false)
                               setYtFun('')
-                              const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType })
+                              const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType, jobId: start.jobId })
                               if (result && result.songData) {
                                 try {
                                   const resp = await fetch(`/api/proxy?url=${encodeURIComponent(status.url)}`)

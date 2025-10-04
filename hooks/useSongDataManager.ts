@@ -48,7 +48,7 @@ export interface UseSongDataManagerReturn {
   setIsKaraokeMode: React.Dispatch<React.SetStateAction<boolean>>;
 
   handleAudioSubmit: (file: File) => Promise<SongProcessingResult | null>;
-  handleUrlAnalyze: (url: string, opts?: { fileName?: string; mimeType?: string }) => Promise<SongProcessingResult | null>;
+  handleUrlAnalyze: (url: string, opts?: { fileName?: string; mimeType?: string; jobId?: string }) => Promise<SongProcessingResult | null>;
   handleLanguageChange: (newLanguage: Language) => Promise<SongProcessingResult | null>;
   handleKaraokeModeToggle: () => void;
   handleSongDurationAvailable: (duration: number) => void;
@@ -199,7 +199,7 @@ export const useSongDataManager = ({
     return null;
   }, [audioFile, apiKeyMissing, isKaraokeMode, selectedModelId, practiceExitCallback, handleFetchSongDataInternal]);
 
-  const handleUrlAnalyze = useCallback(async (url: string, opts?: { fileName?: string; mimeType?: string }): Promise<SongProcessingResult | null> => {
+  const handleUrlAnalyze = useCallback(async (url: string, opts?: { fileName?: string; mimeType?: string; jobId?: string }): Promise<SongProcessingResult | null> => {
     if (apiKeyMissing) return null;
     if (!url) return null;
     setAudioFile(null);
@@ -215,7 +215,7 @@ export const useSongDataManager = ({
     processingStartTimeRef.current = Date.now();
     const onProgressUpdate = (m: string) => setLoadingMessage(m);
     try {
-      const data = await fetchSongDataFromUrl(url, targetLanguage, isKaraokeMode, selectedModelId, { fileName: opts?.fileName, mimeType: opts?.mimeType }, onProgressUpdate);
+      const data = await fetchSongDataFromUrl(url, targetLanguage, isKaraokeMode, selectedModelId, { fileName: opts?.fileName, mimeType: opts?.mimeType, jobId: opts?.jobId }, onProgressUpdate);
       const processingTimeSeconds = processingStartTimeRef.current ? (Date.now() - processingStartTimeRef.current) / 1000 : undefined;
       const durationToSave = currentSongDurationRef.current;
       setSongData(data);

@@ -86,6 +86,7 @@ export const fetchSongDataFromGemini = async (
     if (!up.ok) throw new Error(`upload failed (${up.status})`)
     const upJson = await up.json().catch(() => ({} as any))
     const url = upJson?.url
+    const analysisJobId = upJson?.id as (string | undefined)
     if (!url) throw new Error('upload returned no url')
     trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, duration_ms: Date.now() - upStart, ok: 1 })
     if (onProgress) onProgress('Requesting song analysis…');
@@ -96,6 +97,7 @@ export const fetchSongDataFromGemini = async (
         audioUrl: url,
         fileName: audioFile.name,
         mimeType: audioFile.type,
+        jobId: analysisJobId,
         targetLanguage,
         enableKaraokeMode,
         modelId,
@@ -147,7 +149,7 @@ export const fetchSongDataFromUrl = async (
   targetLanguage: Language,
   enableKaraokeMode: boolean,
   modelId: string,
-  opts?: { fileName?: string; mimeType?: string },
+  opts?: { fileName?: string; mimeType?: string; jobId?: string },
   onProgress?: (message: string) => void
 ): Promise<SongData> => {
   if (!modelId) throw new Error('AI Model ID is required for processing.');
@@ -157,6 +159,7 @@ export const fetchSongDataFromUrl = async (
     audioUrl,
     fileName: opts?.fileName || 'downloaded-audio',
     mimeType: opts?.mimeType || 'audio/mpeg',
+    jobId: opts?.jobId,
     targetLanguage,
     enableKaraokeMode,
     modelId,
