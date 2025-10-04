@@ -1,6 +1,5 @@
 {"youtubeUrl":"https://www.youtube.com/watch?v=IdveDKCYtI8",
-"audioFormat":"m4a","userAgent":"Mozilla/5.0 (X11;Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+"audioFormat":"m4a",
 "formatExpr":"bestaudio[ext=m4a]/140/234/bestaudio",
-  "proxyConfiguration":{"useApifyProxy":true,"apifyProxyGroups":["RESIDENTIAL"],"apifyProxyCountry":"IN"},
-"uploadUrl": "https://storage.googleapis.com/babelback-dev/downloads/dev-001.m4a?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=babelback-storage%40talkito-dev.iam.gserviceaccount.com%2F20251002%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251002T175044Z&X-Goog-Expires=1800&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=89608d996eedffd69e85bac42ccef80c2eeed90a139876efc2034bcfcd959239aa6b6ea3475f9bba239949c21ffd29f23f24a4f01d24f16a06988444d5f4fc12284a82cf1a38c43595ae543aa956d84ba7aedacda208465143958ba23dae8d5d6e1bb12c06ae5ab970e24df117c5f529f57539641845292406e15b3d403522eb40aa81dd48024ededa3e3b28cb1fb367e2ed24fda4255b53764383c1a2712cb75e61af9ebd9c02f1f6ac36acabb9e59e359b5328808408025cee5678ef44b210a9c5c53c21e0eba33fd55597ed81cb628f4f61a83e10c9bac48c6ce76716f34033095ee83f9e96743a74f62c50a07a6dfe0061b7031d222bec8429dd8defb6de"
+  "proxyConfiguration":{"useApifyProxy":true,"apifyProxyGroups":["RESIDENTIAL"],"apifyProxyCountry":"IN"}
 }

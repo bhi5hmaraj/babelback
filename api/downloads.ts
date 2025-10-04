@@ -125,28 +125,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (existingId) {
       const existing = await getJob(existingId)
       if (existing) {
-        // If completed and we know GCS object, mint a fresh read URL and return 200
-        if (existing.status === 'completed' && existing.gcsObject) {
-          try {
-            const file = (keyJson || process.env.GCP_PROJECT_ID) ?
-              (() => {
-                let s: Storage
-                if (keyJson) {
-                  const sa = JSON.parse(keyJson)
-                  s = new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } })
-                } else {
-                  s = new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
-                }
-                return s.bucket(existing.gcsObject!.bucket).file(existing.gcsObject!.path)
-              })() : new Storage().bucket(existing.gcsObject.bucket).file(existing.gcsObject.path)
-            const [freshGet] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
-            try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: 'completed', backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
-            return res.status(200).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: freshGet, apifyRunId: existing.apifyRunId })
-          } catch {}
+        // If the cached job previously failed, DO NOT reuse it — start a new run instead.
+        if (existing.status === 'failed') {
+          try { console.warn('[downloads] cache hit but previous run failed — retrying with new job', { prevJobId: existingId }) } catch {}
+        } else {
+          // If completed and we know GCS object, mint a fresh read URL and return 200
+          if (existing.status === 'completed' && existing.gcsObject) {
+            try {
+              const file = (keyJson || process.env.GCP_PROJECT_ID) ?
+                (() => {
+                  let s: Storage
+                  if (keyJson) {
+                    const sa = JSON.parse(keyJson)
+                    s = new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } })
+                  } else {
+                    s = new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
+                  }
+                  return s.bucket(existing.gcsObject!.bucket).file(existing.gcsObject!.path)
+                })() : new Storage().bucket(existing.gcsObject.bucket).file(existing.gcsObject.path)
+              const [freshGet] = await file.getSignedUrl({ version: 'v4', action: 'read', expires: Date.now() + 2 * 60 * 60 * 1000 })
+              try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: 'completed', backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
+              return res.status(200).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: freshGet, apifyRunId: existing.apifyRunId })
+            } catch {}
+          }
+          // Otherwise let client attach to existing job
+          try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: existing.status, backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
+          return res.status(202).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: existing.url, apifyRunId: existing.apifyRunId })
         }
-        // Otherwise let client attach to existing job
-        try { console.log('[downloads] cache hit (source→job)', { jobId: existingId, status: existing.status, backend: process.env.REDIS_KV_REDIS_URL ? 'redis' : 'kv/memory' }) } catch {}
-        return res.status(202).json({ jobId: existingId, statusUrl: `/api/downloads/${existingId}`, getUrl: existing.url, apifyRunId: existing.apifyRunId })
       }
     }
   } catch {}
@@ -166,7 +171,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ['RESIDENTIAL'], apifyProxyCountry: payload.country },
     uploadUrl,
     jobId,
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
   }
 
   let runId: string | undefined

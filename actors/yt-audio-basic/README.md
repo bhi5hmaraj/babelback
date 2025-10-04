@@ -5,7 +5,6 @@ Minimal Apify Actor that downloads YouTube audio with yt-dlp and exposes the fil
 Inputs
 - `youtubeUrl` (string, required)
 - `audioFormat` (m4a|mp3, default m4a)
-- `userAgent` (string, optional)
 - `cookiesTxt` (string, Netscape cookies.txt, optional)
 - `useProxy` (boolean, default false)
 - `proxyGroups` (array, default ["RESIDENTIAL"]) – requires Apify Proxy
@@ -31,7 +30,6 @@ apify push   # builds/pushes the actor
 apify run -i '{
   "youtubeUrl": "https://www.youtube.com/watch?v=IdveDKCYtI8",
   "audioFormat": "m4a",
-  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
   "cookiesTxt": "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t...",
   "useProxy": false
 }'
@@ -49,7 +47,6 @@ Example run with Apify Residential proxy and direct GCS upload
 apify call yt-audio-basic -i '{
   "youtubeUrl": "https://www.youtube.com/watch?v=IdveDKCYtI8",
   "audioFormat": "m4a",
-  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
   "formatExpr": "bestaudio[ext=m4a]/140/234/bestaudio",
   "proxyConfiguration": { "useApifyProxy": true, "apifyProxyGroups": ["RESIDENTIAL"], "apifyProxyCountry": "IN" },
   "uploadUrl": "<signed-GCS-PUT-URL>",
