@@ -11,6 +11,8 @@ interface AudioPlayerProps {
   setAudioElement?: (element: HTMLAudioElement | null) => void; // To pass ref to parent
   onDurationAvailable?: (duration: number) => void; 
   outputDeviceId?: string | null; // New prop for selected output device
+  compact?: boolean; // Compact spacing for mobile/sticky bar
+  className?: string; // Optional wrapper override
 }
 
 /** Renders a styled <audio> with time/duration callbacks and optional output device switching. */
@@ -21,7 +23,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
     onEnded, 
     setAudioElement, 
     onDurationAvailable,
-    outputDeviceId 
+    outputDeviceId,
+    compact,
+    className,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -97,7 +101,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
   if (!src) {
     return (
-        <div className="my-4 p-4 bg-slate-700/50 rounded-lg text-center text-slate-400">
+        <div className={`my-3 p-3 bg-slate-700/50 rounded-lg text-center text-slate-400 ${className || ''}`}>
             <Icon name="speaker-none" size="lg" className="mb-2"/>
             <p>Audio will appear here once processed.</p>
         </div>
@@ -105,7 +109,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   }
 
   return (
-    <div className="my-6 audio-player-container">
+    <div className={`audio-player-container ${compact ? 'my-2' : 'my-5'} ${className || ''}`}>
       <audio
         ref={audioRef}
         controls

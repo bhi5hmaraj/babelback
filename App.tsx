@@ -6,7 +6,6 @@ import AudioUpload from './components/AudioUpload';
 import AudioPlayer from './components/AudioPlayer';
 import LanguageSelector from './components/LanguageSelector';
 import VerseDisplay from './components/VerseDisplay';
-import PlayerControls from './components/PlayerControls';
 import LoadingSpinner from './components/LoadingSpinner';
 import PanelToggle from './components/PanelToggle';
 import KaraokeModeToggle from './components/KaraokeModeToggle';
@@ -35,11 +34,15 @@ import { useLibraryManager } from './hooks/useLibraryManager';
 import { useSongDataManager, type SongProcessingResult } from './hooks/useSongDataManager';
 import { useAudioPlaybackManager } from './hooks/useAudioPlaybackManager';
 import { useDeviceManager } from './hooks/useDeviceManager';
+import TabsBar from './components/TabsBar';
+import PlayerBar from './components/PlayerBar';
 
 type CurrentAppPage = 'main' | 'about' | 'techDetails' | 'changelog'; // Add 'changelog'
 
 const App: React.FC = () => {
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const [activeTab, setActiveTab] = useState<'setup' | 'lyrics' | 'meaning' | 'practice' | 'library'>('setup');
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [currentPage, setCurrentPage] = useState<CurrentAppPage>('main');
   const [currentLibraryEntryId, setCurrentLibraryEntryId] = useState<number | null>(null);
   const [panelVisibility, setPanelVisibility] = useState<PanelVisibility>(INITIAL_PANEL_VISIBILITY);
@@ -137,6 +140,13 @@ const App: React.FC = () => {
     singingPracticeHooksRef.current = singingPractice;
   }, [singingPractice]);
 
+  // Auto-collapse header when playback starts or when not on Setup
+  useEffect(() => {
+    if ((audioSrc && playbackTime > 0) || (audioSrc && activeTab !== 'setup')) {
+      setHeaderCollapsed(true);
+    }
+  }, [audioSrc, playbackTime, activeTab]);
+
 
   useEffect(() => {
     if (rawInitializationError) {
@@ -217,6 +227,8 @@ const App: React.FC = () => {
             const newId = await addSongToLibrary(newLibraryEntry);
             setCurrentLibraryEntryId(newId);
             await refreshLibrary();
+            setActiveTab('lyrics');
+            setHeaderCollapsed(true);
         } catch (dbError) {
             console.error("[App.tsx handleAudioSubmit] Failed to add to library:", dbError);
             setAppError( (prevError) => (prevError ? prevError + " " : "") + "Failed to save song to library.");
@@ -274,6 +286,8 @@ const App: React.FC = () => {
     setCurrentLibraryEntryId(entry.id);
     setSelectedModelId(entry.modelIdUsed || DEFAULT_MODEL_ID); 
     setCurrentPage('main');
+    setActiveTab('lyrics');
+    setHeaderCollapsed(true);
   };
 
   const handleDeleteSongFromLibrary = async (id: number) => {
@@ -413,7 +427,7 @@ const App: React.FC = () => {
              <AboutBabelback />
           </div>
         )}
-        <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}>
+        <div className={`w-full ${mainContentMaxWidth} ${activeTab === 'lyrics' ? 'p-2 mt-2' : 'bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6'}`}>
           {apiKeyMissing && (
               <div className="my-6 p-4 bg-red-800/80 border border-red-600 text-red-100 rounded-lg shadow text-center">
                   <Icon name="warning-octagon" weight="bold" className="inline-block mr-2 text-red-300" size="lg"/>
@@ -446,64 +460,62 @@ const App: React.FC = () => {
                         error={rawDeviceError} 
                     />
                   )}
-                  {/* 1) Choose Source */}
-                  <div className="text-sm text-slate-300 font-semibold mb-1">1. Choose Source</div>
-                  <div className="w-full mb-3 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => setSourceMode('file')}
-                      className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'file' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
-                    >From File</button>
-                    <button
-                      onClick={() => setSourceMode('youtube')}
-                      className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'youtube' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
-                    >From YouTube</button>
-                  </div>
-                  {sourceMode === 'youtube' ? (
-                    <YouTubeInput youtubeUrl={ytUrl} setYoutubeUrl={setYtUrl} audioFormat={ytFormat} setAudioFormat={setYtFormat} />
-                  ) : (
-                    <AudioUpload pickerOnly onFileSelected={setSelectedLocalFile} isLoading={isLoadingSongData} disabled={globalIsLoading || isPracticeActive || apiKeyMissing} />
-                  )}
+                  {/* Setup Pane content */}
+                  {activeTab === 'setup' && (
+                    <>
+                      <div className="text-sm text-slate-300 font-semibold mb-1">1. Choose Source</div>
+                      <div className="w-full mb-3 flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setSourceMode('file')}
+                          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'file' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                        >From File</button>
+                        <button
+                          onClick={() => setSourceMode('youtube')}
+                          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'youtube' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+                        >From YouTube</button>
+                      </div>
+                      {sourceMode === 'youtube' ? (
+                        <YouTubeInput youtubeUrl={ytUrl} setYoutubeUrl={setYtUrl} audioFormat={ytFormat} setAudioFormat={setYtFormat} />
+                      ) : (
+                        <AudioUpload pickerOnly onFileSelected={setSelectedLocalFile} isLoading={isLoadingSongData} disabled={globalIsLoading || isPracticeActive || apiKeyMissing} />
+                      )}
 
-                  {/* 2) AI Model */}
-                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">2. AI Model</div>
-                  <ModelSelector
-                    selectedModelId={selectedModelId}
-                    onModelChange={setSelectedModelId}
-                    disabled={globalIsLoading || isPracticeActive}
-                  />
+                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">2. AI Model</div>
+                      <ModelSelector
+                        selectedModelId={selectedModelId}
+                        onModelChange={setSelectedModelId}
+                        disabled={globalIsLoading || isPracticeActive}
+                      />
 
-                  {/* 3) Translate Target Language */}
-                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">3. Translate Target Language</div>
-                  <LanguageSelector
-                      selectedLanguage={targetLanguage}
-                      onLanguageChange={handleLanguageChange}
-                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
-                  />
+                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">3. Translate Target Language</div>
+                      <LanguageSelector
+                          selectedLanguage={targetLanguage}
+                          onLanguageChange={handleLanguageChange}
+                          disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
+                      />
 
-                  {/* 4) Modes Selection */}
-                  <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">4. Modes</div>
-                  <KaraokeModeToggle
-                      isKaraokeMode={isKaraokeMode}
-                      onToggle={handleKaraokeModeToggleApp}
-                      disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
-                  />
-                  <PracticeModeToggle
-                      isPracticeModeEnabled={isPracticeModeGloballyEnabled}
-                      onToggle={handlePracticeModeGlobalToggle}
-                      disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) || apiKeyMissing }
-                  />
+                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">4. Modes</div>
+                      <KaraokeModeToggle
+                          isKaraokeMode={isKaraokeMode}
+                          onToggle={handleKaraokeModeToggleApp}
+                          disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
+                      />
+                      <PracticeModeToggle
+                          isPracticeModeEnabled={isPracticeModeGloballyEnabled}
+                          onToggle={handlePracticeModeGlobalToggle}
+                          disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) || apiKeyMissing }
+                      />
 
-                  {/* 5) Babelback */}
-                  <div className="mt-6 flex items-center justify-center">
-                    <button
-                      className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow flex items-center"
-                      disabled={globalIsLoading || isLoadingSongData || isPracticeActive || apiKeyMissing}
-                      onClick={async () => {
-                        try {
-                          if (sourceMode === 'file') {
-                            if (!selectedLocalFile) { setAppError('Please choose an audio file.'); return }
-                            await handleAudioSubmit(selectedLocalFile)
-                          } else {
+                      <div className="mt-6 flex items-center justify-center">
+                        <button
+                          className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow flex items-center"
+                          disabled={globalIsLoading || isLoadingSongData || isPracticeActive || apiKeyMissing}
+                          onClick={async () => {
+                          try {
+                            if (sourceMode === 'file') {
+                              if (!selectedLocalFile) { setAppError('Please choose an audio file.'); return }
+                              await handleAudioSubmit(selectedLocalFile)
+                            } else {
                             if (!ytUrl || !/^https?:\/\//i.test(ytUrl)) { setAppError('Please paste a valid YouTube URL.'); return }
                             setAppError(null)
                             // Lightweight poller with fun messages
@@ -548,6 +560,8 @@ const App: React.FC = () => {
                                   const newId = await addSongToLibrary(newLibraryEntry)
                                   setCurrentLibraryEntryId(newId)
                                   await refreshLibrary()
+                                  setActiveTab('lyrics')
+                                  setHeaderCollapsed(true)
                                 } catch (e) {
                                   console.error('[AnalyzeFromUrl] failed to cache in library', e)
                                 }
@@ -562,10 +576,12 @@ const App: React.FC = () => {
                           setAppError(e instanceof Error ? e.message : String(e))
                         }
                       }}
-                    >
-                      <Icon name="sparkle" className="mr-2" /> Babelback
-                    </button>
-                  </div>
+                        >
+                          <Icon name="sparkle" className="mr-2" /> Babelback
+                        </button>
+                      </div>
+                    </>
+                  )}
               </>
           )}
 
@@ -593,7 +609,7 @@ const App: React.FC = () => {
 
           <RecordingInfoBanner isVisible={showRecordingHelpBanner} />
 
-          {isPracticeActive && !apiKeyMissing && (
+          {activeTab === 'practice' && isPracticeActive && !apiKeyMissing && (
               <PracticeVersePanel
                   practiceTargetVerses={singingPractice.activePracticeVerses}
                   status={singingPractice.practiceVerseStatus}
@@ -612,20 +628,53 @@ const App: React.FC = () => {
               />
           )}
 
+          {/* Meaning pane: show song-level summary and analysis */}
+          {activeTab === 'meaning' && songData && !isLoadingSongData && !apiKeyMissing && !isPracticeActive && (
+            <>
+              <div className="mb-4 text-center">
+                <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : 'Track')}</h2>
+                {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
+              </div>
+              {songData.summary && (
+                <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
+                  <h3 className="text-md font-semibold text-sky-400 mb-2 flex items-center"><Icon name="info" weight="bold" className="mr-2"/> Song Summary</h3>
+                  <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.summary}</p>
+                </div>
+              )}
+              {songData.detailedAnalysis && (
+                <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
+                  <h3 className="text-md font-semibold text-teal-400 mb-2 flex items-center"><Icon name="chart-line" weight="bold" className="mr-2"/> Detailed Analysis</h3>
+                  <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.detailedAnalysis}</p>
+                </div>
+              )}
+              {!songData.summary && !songData.detailedAnalysis && (
+                <div className="text-center py-6 text-slate-300">No analysis available for this song yet.</div>
+              )}
+            </>
+          )}
 
-          {songData && !isLoadingSongData && !apiKeyMissing && !isPracticeActive && (
+
+          {songData && !isLoadingSongData && !apiKeyMissing && !isPracticeActive && activeTab === 'lyrics' && (
             <>
               <div className="mb-4 text-center">
                 <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : "Uploaded Track")}</h2>
                 {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
               </div>
-              {songData.summary && ( <div className="my-6 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow"> <h3 className="text-md font-semibold text-sky-400 mb-2 flex items-center"> <Icon name="info" weight="bold" className="mr-2" /> Song Summary </h3> <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.summary}</p> </div> )}
-              {songData.detailedAnalysis && ( <div className="my-6 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow"> <h3 className="text-md font-semibold text-teal-400 mb-2 flex items-center"> <Icon name="chart-line" weight="bold" className="mr-2" /> Detailed Song Analysis </h3> <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.detailedAnalysis}</p> </div> )}
+              {/* Summary/Analysis moved to Meaning tab for a cleaner Lyrics view */}
 
               {currentVerseData ? (
                 <>
                   <PanelToggle panelVisibility={panelVisibility} onToggle={handlePanelToggle} />
-                  <VerseDisplay verse={currentVerseData} targetLanguage={targetLanguage} originalLanguageLabel={songData.originalLanguage} panelVisibility={panelVisibility} currentTime={playbackTime} isKaraokeMode={isKaraokeMode} />
+                  <VerseDisplay
+                    verse={currentVerseData}
+                    targetLanguage={targetLanguage}
+                    originalLanguageLabel={songData.originalLanguage}
+                    panelVisibility={panelVisibility}
+                    currentTime={playbackTime}
+                    isKaraokeMode={isKaraokeMode}
+                    onLyricAreaFocus={() => setHeaderCollapsed(true)}
+                    onLyricAreaScrollUp={() => setHeaderCollapsed(false)}
+                  />
                   {isPracticeModeGloballyEnabled && songData.verses.length > 0 && songData.originalLanguage !== "Instrumental" && (
                       <button
                           onClick={() => handleInitiatePracticeForVerse(currentVerseData)}
@@ -642,36 +691,14 @@ const App: React.FC = () => {
                           <Icon name="waveform" weight="bold" className="mr-2" /> Practice this Verse
                       </button>
                   )}
-                  {songData.verses.length > 0 && (
-                    <PlayerControls
-                        currentVerseIndex={currentVerseIndex}
-                        totalVerses={songData.verses.length}
-                        onSeekToVerse={seekToVerse}
-                        onPrevVerseClick={handlePrevVerse}
-                        onNextVerseClick={handleNextVerse}
-                        disabled={globalIsLoading || isPracticeActive || !audioSrc}
-                    />
-                  )}
+          {/* Verse navigation moved to bottom PlayerBar */}
                 </>
               ) : ( songData.originalLanguage === "Instrumental" && songData.verses.length === 0 && !appError && ( <div className="text-center py-6 text-slate-300"> <Icon name="speaker-simple-slash" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">This track appears to be instrumental.</p> <p className="text-xs mt-1">No lyrical verses found.</p> </div> ))}
 
             </>
           )}
 
-          {!apiKeyMissing && audioSrc && (
-              <AudioPlayer
-                  src={audioSrc}
-                  onTimeUpdate={handleTimeUpdate}
-                  setAudioElement={(el) => audioPlayerRef.current = el}
-                  onLoadedData={() => {
-                      if (songData?.verses?.length && audioPlayerRef.current) {
-                          handleTimeUpdate(audioPlayerRef.current.currentTime);
-                      }
-                  }}
-                  onDurationAvailable={smHandleSongDurationAvailable}
-                  outputDeviceId={selectedOutputDeviceId}
-              />
-          )}
+          {/* Audio element moved to sticky PlayerBar */}
 
           {!songData && !isLoadingSongData && !appError && !apiKeyMissing && !showLibraryView && !isPracticeActive && ( <div className="text-center py-10 text-slate-400"> <Icon name="music-notes-simple" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">Configure audio devices & AI model, then upload audio and select language to begin.</p> <p className="text-xs mt-2">Enable Karaoke Mode for word-by-word synchronized transliteration!</p> </div> )}
         </div>
@@ -686,15 +713,25 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-100 p-4 md:p-8 flex flex-col items-center selection:bg-sky-500 selection:text-white">
-      <header className="w-full max-w-4xl mb-6 text-center">
+    <div className="h-[100dvh] w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-100 p-4 md:p-8 flex flex-col items-center selection:bg-sky-500 selection:text-white">
+      {!headerCollapsed && (
+      <header className={`w-full max-w-5xl mb-3 text-center shrink-0`}>
         <div className="flex items-center justify-center mb-2">
           <img src="https://i.postimg.cc/Cxjbf5Pd/bb-logo.png" alt="Babelback Logo" className="h-12 md:h-16 mr-3 md:mr-4" />
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-sky-300 tracking-tight">Babelback</h1>
+          {audioSrc && (
+            <button
+              className="ml-2 px-2 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600 text-sky-200"
+              onClick={() => setHeaderCollapsed(h => !h)}
+            >{headerCollapsed ? 'Expand' : 'Collapse'}</button>
+          )}
         </div>
-        <p className="text-slate-300 text-md md:text-lg mb-3">Upload audio, play, and explore lyrics in sync.</p>
+        {!headerCollapsed && (
+          <p className="text-slate-300 text-md md:text-lg">Upload audio, play, and explore lyrics in sync.</p>
+        )}
 
-        <div className="mb-3 space-x-2 sm:space-x-3 flex flex-wrap justify-center">
+        {!headerCollapsed && (
+        <div className="mt-2 mb-2 space-x-2 sm:space-x-3 flex flex-wrap justify-center">
             <button
               onClick={() => handleNavigate('main')}
               className={`text-xs px-2.5 py-1.5 sm:px-3 sm:py-1 rounded-md transition-colors my-1
@@ -724,27 +761,70 @@ const App: React.FC = () => {
               <Icon name="megaphone" weight="bold" className="mr-1 sm:mr-1.5" />Changelog
             </button>
         </div>
-
-        {!apiKeyMissing && currentPage === 'main' && (
-            <button
-              onClick={toggleLibraryView}
-              className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm flex items-center mx-auto disabled:bg-slate-500 disabled:opacity-70"
-              disabled={isPracticeActive}
-            >
-                <Icon name={showLibraryView ? "music-notes-plus" : "books"} weight="bold" className="mr-2" />
-                {showLibraryView ? "Back to Main App" : "View My Song Library"} ({libraryEntries.length})
-            </button>
         )}
-      </header>
 
-      <main className={`w-full flex flex-col items-center`}>
+        {/* Library toggle button hidden; use Library tab */}
+        {/* Tabs moved below into content area */}
+      </header>
+      )}
+
+      {headerCollapsed && (
+        <button
+          className="fixed top-2 right-2 z-40 px-2.5 py-1.5 text-xs rounded bg-slate-800/90 hover:bg-slate-700 text-sky-200 border border-slate-700"
+          onClick={() => setHeaderCollapsed(false)}
+          aria-label="Show header"
+        >Menu</button>
+      )}
+
+      {/* Content pane that can scroll while the page remains fixed */}
+      <main className="w-full flex-1 overflow-auto flex flex-col items-center pb-24">
+        {/* Tabs for fixed-screen shell (always visible in Main) */}
+        {currentPage === 'main' && (
+          <div className="w-full max-w-5xl sticky top-0 z-20 py-1 bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-transparent backdrop-blur-sm">
+            <TabsBar
+              tabs={[
+                { id: 'setup', label: 'Setup', icon: 'sliders' },
+                { id: 'lyrics', label: 'Lyrics', icon: 'music-notes' },
+                { id: 'meaning', label: 'Meaning', icon: 'book-open' },
+                { id: 'practice', label: 'Practice', icon: 'microphone' },
+                { id: 'library', label: 'Library', icon: 'books' },
+              ]}
+              activeTab={activeTab}
+              onChange={(id) => {
+                setActiveTab(id as any);
+                if (id === 'library') {
+                  if (!showLibraryView) toggleLibraryView();
+                } else {
+                  if (showLibraryView) toggleLibraryView();
+                }
+              }}
+              disabled={isPracticeActive}
+            />
+          </div>
+        )}
         {renderMainContent()}
       </main>
 
-      <footer className="w-full max-w-4xl mt-12 text-center text-xs text-slate-500">
-        <p className="mb-1">Babelback: AI-Powered Lyric Explorer. Powered by Gemini.</p>
-        <p>AI processing may not always be perfectly accurate. For conceptual and entertainment purposes.</p>
-      </footer>
+      {/* Sticky bottom playback bar */}
+      <PlayerBar
+        audioSrc={audioSrc}
+        onTimeUpdate={handleTimeUpdate}
+        setAudioElement={(el) => (audioPlayerRef.current = el)}
+        onLoadedData={() => {
+          if (songData?.verses?.length && audioPlayerRef.current) {
+            handleTimeUpdate(audioPlayerRef.current.currentTime);
+          }
+        }}
+        onDurationAvailable={smHandleSongDurationAvailable}
+        outputDeviceId={selectedOutputDeviceId}
+        totalVerses={songData?.verses?.length || 0}
+        currentVerseIndex={currentVerseIndex}
+        onSeekToVerse={seekToVerse}
+        onPrevVerseClick={handlePrevVerse}
+        onNextVerseClick={handleNextVerse}
+        disabled={isPracticeActive}
+        compact
+      />
       <Analytics />
     </div>
   );

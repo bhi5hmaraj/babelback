@@ -9,6 +9,7 @@ interface PlayerControlsProps {
   onPrevVerseClick: () => void; // New prop
   onNextVerseClick: () => void; // New prop
   disabled: boolean;
+  compact?: boolean;
 }
 
 const PlayerControls: React.FC<PlayerControlsProps> = ({
@@ -18,6 +19,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   onPrevVerseClick,
   onNextVerseClick,
   disabled,
+  compact,
 }) => {
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onSeekToVerse(parseInt(event.target.value, 10));
@@ -28,7 +30,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   }
 
   return (
-    <div className="mt-6 p-4 bg-slate-800/80 rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-between backdrop-blur-sm space-y-3 sm:space-y-0 sm:space-x-3">
+    <div className={`${compact ? 'mt-2 p-2' : 'mt-6 p-4'} bg-slate-800/80 rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-between backdrop-blur-sm space-y-3 sm:space-y-0 sm:space-x-3`}>
       <button
         onClick={onPrevVerseClick}
         disabled={disabled || currentVerseIndex === 0 || totalVerses <= 1}
@@ -64,7 +66,7 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         <Icon name="skip-forward" weight="bold" size="lg" />
       </button>
 
-      <div className="text-slate-300 font-medium text-sm whitespace-nowrap sm:ml-2">
+      <div className={`text-slate-300 font-medium ${compact ? 'text-xs' : 'text-sm'} whitespace-nowrap sm:ml-2`}>
         Verse {currentVerseIndex + 1} of {totalVerses}
       </div>
     </div>
