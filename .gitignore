@@ -21,6 +21,22 @@ apify_storage/
 !.env.sample
 .vercel
 
-# Screenshots
+# Images (binary)
 *.jpeg
 *.jpg
+*.png
+*.gif
+*.webp
+*.bmp
+*.tif
+*.tiff
+*.ico
+
+# Keep public assets (favicons, logos) if needed
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!public/**/*.gif
+!public/**/*.webp
+!public/**/*.ico
+!public/**/*.svg
