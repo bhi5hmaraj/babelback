@@ -114,8 +114,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         ref={audioRef}
         controls
         src={src} 
-        className="w-full rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-75"
-        style={{backgroundColor: '#334155', filter: 'invert(90%) sepia(20%) saturate(500%) hue-rotate(180deg) brightness(100%) contrast(90%)' }}
+        className="audio-enhanced w-full rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-75"
+        style={{ backgroundColor: '#334155' }}
         preload="auto"
       >
         Your browser does not support the audio element.

@@ -47,32 +47,79 @@
       background: #64748b; /* slate-500 */
     }
 
-    /* Style for HTML5 audio player controls to make them more visible on dark backgrounds */
-    audio::-webkit-media-controls-panel {
-      background-color: #334155; /* slate-700, or a slightly lighter shade for contrast */
-      border-radius: 8px; /* Match app's rounded corners */
+    /* HTML5 audio controls: high-contrast timeline and thumb */
+    audio.audio-enhanced::-webkit-media-controls-panel {
+      background-color: #334155; /* slate-700 */
+      border-radius: 8px;
     }
-    audio::-webkit-media-controls-play-button,
-    audio::-webkit-media-controls-timeline,
-    audio::-webkit-media-controls-current-time-display,
-    audio::-webkit-media-controls-time-remaining-display,
-    audio::-webkit-media-controls-mute-button,
-    audio::-webkit-media-controls-volume-slider,
-    audio::-webkit-media-controls-fullscreen-button { /* Though fullscreen might not be typical for audio */
-      filter: invert(1) brightness(1.5) contrast(1.5) saturate(0); /* Make icons white/light */
+
+    /* Custom range sliders (e.g., verse navigator) */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      height: 1.25rem; /* provide space for thumb */
     }
-     audio::-webkit-media-controls-timeline {
-       background-color: #475569; /* slate-600 */
-       border-radius: 4px;
-     }
-    /* Style the thumb (scrubber) on the timeline for WebKit browsers */
-    audio::-webkit-media-slider-thumb {
-        -webkit-appearance: none;
-        width: 12px;
-        height: 12px;
-        background: #0ea5e9; /* sky-500 */
-        border-radius: 50%;
-        cursor: pointer;
+    input[type="range"]:focus { outline: none; }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: #475569; /* slate-600 */
+      border-radius: 9999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -5px; /* align with track */
+      border-radius: 9999px;
+      background: #06b6d4; /* cyan-500 */
+      border: 2px solid #e0f2fe;
+      box-shadow: 0 0 0 2px rgba(2,132,199,0.25);
+      cursor: pointer;
+    }
+    /* Firefox */
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: #475569;
+      border-radius: 9999px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 9999px;
+      background: #06b6d4;
+      border: 2px solid #e0f2fe;
+      box-shadow: 0 0 0 2px rgba(2,132,199,0.25);
+      cursor: pointer;
+    }
+    audio.audio-enhanced::-webkit-media-controls-timeline {
+      background-color: #475569; /* slate-600 */
+      border-radius: 9999px;
+    }
+    audio.audio-enhanced::-webkit-media-controls-current-time-display,
+    audio.audio-enhanced::-webkit-media-controls-time-remaining-display {
+      color: #e2e8f0; /* slate-200 */
+    }
+    /* Scrubber thumb for timeline and volume (WebKit/Blink) */
+    audio.audio-enhanced::-webkit-media-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #06b6d4; /* cyan-500 */
+      border: 2px solid #e0f2fe; /* light outline for contrast */
+      border-radius: 9999px;
+      box-shadow: 0 0 0 2px rgba(2,132,199,0.25); /* subtle glow */
+      cursor: pointer;
+    }
+    /* Ensure icons are visible without global invert filters */
+    audio.audio-enhanced::-webkit-media-controls-play-button,
+    audio.audio-enhanced::-webkit-media-controls-mute-button,
+    audio.audio-enhanced::-webkit-media-controls-volume-slider,
+    audio.audio-enhanced::-webkit-media-controls-timeline,
+    audio.audio-enhanced::-webkit-media-controls-time-remaining-display,
+    audio.audio-enhanced::-webkit-media-controls-current-time-display {
+      filter: none;
     }
 
     /* Styles for new VerseDisplay layout */
@@ -88,6 +135,8 @@
       border: none;
       border-radius: 4px;
       background-color: transparent;
+      overscroll-behavior-y: contain;
+      touch-action: pan-y;
     }
 
     .lyric-line-pair {
@@ -118,6 +167,8 @@
       overflow-wrap: break-word;     /* only break extremely long tokens */
       hyphens: none;                 /* no auto-hyphenation */
     }
+    .lyric-line-transliteration { font-size: 1.1rem; }
+    .lyric-line-translation { font-size: 1rem; }
     .lyric-line-transliteration:not(:last-child) {
         margin-bottom: 2px; /* tighter space between translit and translat within a pair */
     }
@@ -134,7 +185,7 @@
 
     /* New: per-word underline for transliteration (no boxes, no reflow) */
     .translit-word {
-      display: inline;
+      display: inline-block;
       text-decoration: underline;
       text-decoration-color: #c084fc; /* purple */
       text-underline-offset: 2px;
@@ -187,8 +238,8 @@
         border: 0; 
         background: transparent; 
       }
-      .lyric-line-transliteration { font-size: 18px; line-height: 1.65; }
-      .lyric-line-translation { font-size: 16px; line-height: 1.65; color: #cbd5e1; }
+      .lyric-line-transliteration { font-size: 20px; line-height: 1.68; }
+      .lyric-line-translation { font-size: 17px; line-height: 1.68; color: #cbd5e1; }
       /* Active lines do not underline entire line; left accent + per-word underline in translit only */
       .active-translit-segment, .active-translation-segment { text-decoration: none; }
     }

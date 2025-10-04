@@ -83,11 +83,13 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
   const activeLinePairRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef<number>(0);
   const autoScrollingRef = useRef<boolean>(false);
+  const userScrollOverrideUntilRef = useRef<number>(0);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     const activeEl = activeLinePairRef.current;
     if (!container || !activeEl) return;
+    if (Date.now() < userScrollOverrideUntilRef.current) return; // user is reviewing lyrics
 
     // Keep the active line centered (or near the center) in the scroll viewport.
     const containerHeight = container.clientHeight;
@@ -111,6 +113,9 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
       if (autoScrollingRef.current) return; // ignore programmatic centering
       const current = el.scrollTop;
       const last = lastScrollTopRef.current;
+      if (!autoScrollingRef.current) {
+        userScrollOverrideUntilRef.current = Date.now() + 4000; // pause auto-centering for a moment
+      }
       // if user scrolled up by a noticeable amount
       if (current < last - 12) {
         onLyricAreaScrollUp && onLyricAreaScrollUp();
@@ -256,8 +261,11 @@ const VerseDisplay: React.FC<VerseDisplayProps> = ({
           </h3>
           <div
             ref={scrollContainerRef}
-            className="lyrics-scroll-container"
-            onPointerDown={() => { if (onLyricAreaFocus) onLyricAreaFocus(); }}
+          className="lyrics-scroll-container"
+            onPointerDown={() => {
+              userScrollOverrideUntilRef.current = Date.now() + 4000;
+              if (onLyricAreaFocus) onLyricAreaFocus();
+            }}
           >
             {renderLyricPairs()}
           </div>
