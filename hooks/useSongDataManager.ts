@@ -34,6 +34,7 @@ export interface UseSongDataManagerReturn {
   loadingMessage: string | null;
   funLoadingMessage: string;
   elapsedLoadingTime: number;
+  analysisProgressPercent: number | null;
   error: string | null;
   isKaraokeMode: boolean;
   currentSongDurationRef: React.RefObject<number | null>;
@@ -69,11 +70,14 @@ export const useSongDataManager = ({
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [funLoadingMessage, setFunLoadingMessage] = useState<string>('');
   const [elapsedLoadingTime, setElapsedLoadingTime] = useState<number>(0);
+  const [analysisProgressPercent, setAnalysisProgressPercent] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isKaraokeMode, setIsKaraokeMode] = useState<boolean>(false);
 
   const processingStartTimeRef = useRef<number | null>(null);
   const currentSongDurationRef = useRef<number | null>(null);
+  const predictedAnalysisMsRef = useRef<number | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     let funMessageIntervalId: number | null = null; 
@@ -115,6 +119,19 @@ export const useSongDataManager = ({
     setSongData(null); 
     processingStartTimeRef.current = Date.now();
 
+    // Heuristic progress (local file only): ~6s/MB + 4s base, cap 120s
+    const sizeMB = Math.max(1, Math.round(file.size / (1024 * 1024)) || 1);
+    const predictedMs = Math.min(120_000, 4_000 + sizeMB * 6_000);
+    predictedAnalysisMsRef.current = predictedMs;
+    setAnalysisProgressPercent(0);
+    if (progressIntervalRef.current) window.clearInterval(progressIntervalRef.current);
+    progressIntervalRef.current = window.setInterval(() => {
+      if (!processingStartTimeRef.current || !predictedAnalysisMsRef.current) return;
+      const elapsed = Date.now() - processingStartTimeRef.current;
+      const pct = Math.min(95, Math.floor((elapsed / predictedAnalysisMsRef.current) * 100));
+      setAnalysisProgressPercent(pct);
+    }, 500);
+
     const onProgressUpdate = (message: string) => setLoadingMessage(message);
 
     try {
@@ -131,6 +148,7 @@ export const useSongDataManager = ({
         setSongData(data); 
       }
       trackEvent('analysis_complete', { verses: data?.verses?.length || 0, secs: processingTimeSeconds ? Math.round(processingTimeSeconds * 1000) / 1000 : 0, model: modelToUse })
+      setAnalysisProgressPercent(100);
       return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: modelToUse };
     } catch (e: any) {
       trackEvent('analysis_error', { reason: (e?.message || 'unknown').slice(0, 120) })
@@ -141,6 +159,13 @@ export const useSongDataManager = ({
       setIsLoading(false);
       setLoadingMessage(null);
       processingStartTimeRef.current = null;
+      predictedAnalysisMsRef.current = null;
+      if (progressIntervalRef.current) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      // Clear progress after a short delay so 100% renders
+      window.setTimeout(() => setAnalysisProgressPercent(null), 600);
     }
   }, [apiKeyMissing]);
 
@@ -261,6 +286,7 @@ export const useSongDataManager = ({
     loadingMessage, 
     funLoadingMessage,
     elapsedLoadingTime,
+    analysisProgressPercent,
     error, setError,
     isKaraokeMode, setIsKaraokeMode,
     currentSongDurationRef,

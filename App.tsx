@@ -104,7 +104,7 @@ const App: React.FC = () => {
 
   const {
     audioFile, audioSrc, targetLanguage, songData, isLoading: isLoadingSongData, loadingMessage,
-    funLoadingMessage, elapsedLoadingTime, error: songProcessingError, isKaraokeMode,
+    funLoadingMessage, elapsedLoadingTime, analysisProgressPercent, error: songProcessingError, isKaraokeMode,
     currentSongDurationRef,
     handleAudioSubmit: smHandleAudioSubmit,
     handleUrlAnalyze: smHandleUrlAnalyze,
@@ -591,6 +591,7 @@ const App: React.FC = () => {
               message={isLoadingSongData ? (loadingMessage || 'Analyzing song…') : 'Fetching audio from YouTube…'}
               funMessage={isLoadingSongData ? funLoadingMessage : (ytFun || undefined)}
               elapsedTime={isLoadingSongData ? elapsedLoadingTime : undefined}
+              progressPercent={isLoadingSongData ? (analysisProgressPercent ?? undefined) : undefined}
             />
           )}
           {appError && !isLoadingSongData && !apiKeyMissing && ( 
