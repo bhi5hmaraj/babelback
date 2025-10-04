@@ -152,12 +152,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
   } else if (audioUrl) {
-    // Minimal retry to reduce transient network flakiness
+    // Minimal retry + timeout to reduce transient network flakiness
     const attempts = 3;
     let lastErr: unknown;
+    let lastErrCode: string | undefined;
     for (let i = 0; i < attempts; i++) {
+      const ac = new AbortController();
+      const t = setTimeout(() => ac.abort(), 20_000); // 20s timeout per attempt
       try {
-        const resp = await fetch(audioUrl, { cache: 'no-store', redirect: 'follow' as const });
+        const resp = await fetch(audioUrl, { cache: 'no-store', redirect: 'follow' as const, signal: ac.signal });
+        clearTimeout(t);
         if (!resp.ok) throw new Error(`fetch(${resp.status})`);
         const arr = await resp.arrayBuffer();
         audioData = Buffer.from(arr);
@@ -167,15 +171,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         try { console.log('[song-analysis] fetched audio url', { attempt: i + 1, bytes: audioData.byteLength, mimeType, fileName, audioUrl }); } catch {}
         break; // success
       } catch (err: any) {
+        clearTimeout(t);
         lastErr = err;
-        const code = (err?.cause && (err.cause.code || err.cause?.code)) || err?.code || 'unknown';
-        try { console.error('[song-analysis] fetch url attempt failed', { attempt: i + 1, code, message: err?.message || String(err) }); } catch {}
+        const code = (err?.cause && (err.cause.code || err.cause?.code)) || err?.code || (err?.name === 'AbortError' ? 'ETIMEDOUT' : 'unknown');
+        lastErrCode = typeof code === 'string' ? code : undefined;
+        const phase = 'fetch_audio_url';
+        try { console.error('[song-analysis] fetch url attempt failed', { phase, attempt: i + 1, code, message: err?.message || String(err) }); } catch {}
+        try {
+          void gaEvent('analysis_fetch_retry', {
+            job_id: parsedBody.jobId,
+            source: 'url',
+            error_type: phase,
+            attempt: i + 1,
+            code: typeof code === 'string' ? code : String(code ?? 'unknown'),
+          });
+        } catch {}
         await new Promise(r => setTimeout(r, 300 * (i + 1)));
       }
     }
     if (!audioData) {
       const message = (lastErr instanceof Error ? lastErr.message : 'Failed to fetch audio url');
+      // Returning 400 signals client to use /api/proxy fallback (already implemented in fetchSongDataFromUrl)
       try { console.error('[song-analysis] fetch url error', { error: message, audioUrl }); } catch {}
+      try {
+        await gaEvent('analysis_error', {
+          source: 'url',
+          error_type: 'fetch_audio_url',
+          job_id: parsedBody.jobId,
+          code: lastErrCode || (lastErr instanceof Error && (lastErr as any)?.code) || 'unknown',
+          message: String(message).slice(0, 120),
+        });
+      } catch {}
       res.status(400).json({ error: `Invalid audioUrl payload: ${message}` });
       return;
     }
@@ -202,20 +228,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const audioBlob = new Blob([audioData], { type: mimeType || 'audio/mpeg' });
 
-    try { console.log('[song-analysis] uploading to gemini'); } catch {}
-    const uploadResult = await geminiClient.files.upload({
-      file: audioBlob,
-      config: {
-        mimeType: audioBlob.type || 'audio/mpeg',
-        displayName: fileName || 'uploaded-audio',
-      },
-    });
+    // 1) Upload to Gemini Files
+    // Gemini SDK types mark some fields optional; we validate after the call
+    let uploadResult: { uri?: string; mimeType?: string };
+    try {
+      try { console.log('[song-analysis] uploading to gemini'); } catch {}
+      uploadResult = await geminiClient.files.upload({
+        file: audioBlob,
+        config: {
+          mimeType: audioBlob.type || 'audio/mpeg',
+          displayName: fileName || 'uploaded-audio',
+        },
+      });
+    } catch (err: any) {
+      const code = err?.code || err?.status || (err?.cause && (err.cause.code || err.cause?.code)) || 'unknown';
+      const msg = err?.message || String(err);
+      try { console.error('[song-analysis] gemini upload failed', { code, message: msg }); } catch {}
+      throw new Error(`Gemini upload failed: ${msg}`);
+    }
 
-    if (!uploadResult.uri || !uploadResult.mimeType) {
+    if (!uploadResult?.uri || !uploadResult?.mimeType) {
       throw new Error('File upload failed; Gemini response missing uri or mimeType');
     }
     try { console.log('[song-analysis] upload ok', { uri: uploadResult.uri, mimeType: uploadResult.mimeType }); } catch {}
 
+    // 2) Generate content
     const userPrompt = getSongAnalysisUserPromptText(targetLanguage, fileName ?? 'uploaded-audio', enableKaraokeMode);
     const parts: Part[] = [
       { fileData: { fileUri: uploadResult.uri, mimeType: uploadResult.mimeType } },
@@ -276,16 +313,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       required: ['title', 'originalLanguage', 'summary', 'detailedAnalysis', 'verses'],
     } as const;
 
-    try { console.log('[song-analysis] generating', { model: resolvedModelId }); } catch {}
-    const generationResponse: GenerateContentResponse = await geminiClient.models.generateContent({
-      model: resolvedModelId,
-      contents: [{ role: 'user', parts }],
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema,
-        systemInstruction,
-      },
-    });
+    let generationResponse: GenerateContentResponse;
+    try {
+      try { console.log('[song-analysis] generating', { model: resolvedModelId }); } catch {}
+      generationResponse = await geminiClient.models.generateContent({
+        model: resolvedModelId,
+        contents: [{ role: 'user', parts }],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema,
+          systemInstruction,
+        },
+      });
+    } catch (err: any) {
+      const code = err?.code || err?.status || (err?.cause && (err.cause.code || err.cause?.code)) || 'unknown';
+      const msg = err?.message || String(err);
+      try { console.error('[song-analysis] gemini generate failed', { code, message: msg }); } catch {}
+      throw new Error(`Gemini generate failed: ${msg}`);
+    }
 
     const rawText = typeof generationResponse.text === 'string'
       ? generationResponse.text.trim()

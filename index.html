@@ -10,10 +10,22 @@
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PVPZ0KEKKW"></script>
   <script>
+    // GA4 base setup with DebugView enablement in dev/local.
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);} 
-    gtag('js', new Date());
-    gtag('config', 'G-PVPZ0KEKKW');
+    function gtag(){ dataLayer.push(arguments); }
+    (function initGA(){
+      const GA_ID = 'G-PVPZ0KEKKW';
+      const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      const qDebug = /([?&])debug_view=1(&|$)/.test(location.search);
+      const lsDebug = (function(){ try { return localStorage.getItem('GA_DEBUG') === '1'; } catch { return false; } })();
+      const debug = isLocal || qDebug || lsDebug;
+      if (debug) { try { console.log('[ga] DebugView enabled'); } catch {}
+      }
+      gtag('js', new Date());
+      // Only send debug_mode flag when enabled; otherwise send a minimal config
+      const cfg = debug ? { debug_mode: true } : undefined;
+      gtag('config', GA_ID, cfg);
+    })();
   </script>
   <style>
     body {

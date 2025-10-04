@@ -8,7 +8,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Language, SongData, LibraryEntry } from '../types';
 import { SUPPORTED_LANGUAGES, AI_THOUGHTS_AND_JOKES } from '../constants';
-import { fetchSongDataFromGemini, fetchSongDataFromUrl } from '../services/geminiService';
+import { fetchSongDataFromGemini, fetchSongDataFromUrl, getLastAnalysisJobId } from '../services/geminiService';
 import { trackEvent } from '../services/analytics';
 
 export interface UseSongDataManagerProps {
@@ -141,6 +141,7 @@ export const useSongDataManager = ({
     try {
       const data = await fetchSongDataFromGemini(file, lang, karaokeEnabled, modelToUse, onProgressUpdate);
       const processingTimeSeconds = processingStartTimeRef.current ? (Date.now() - processingStartTimeRef.current) / 1000 : undefined;
+      const analysisMs = typeof processingTimeSeconds === 'number' ? Math.max(0, Math.round(processingTimeSeconds * 1000)) : undefined;
       const durationToSave = currentSongDurationRef.current;
 
       if (data && (data.verses?.length > 0 || data.originalLanguage === "Instrumental")) {
@@ -151,7 +152,13 @@ export const useSongDataManager = ({
         setError(errorMsg);
         setSongData(data); 
       }
-      trackEvent('analysis_complete', { verses: data?.verses?.length || 0, secs: processingTimeSeconds ? Math.round(processingTimeSeconds * 1000) / 1000 : 0, model: modelToUse })
+      trackEvent('analysis_complete', {
+        source: 'file',
+        job_id: getLastAnalysisJobId(),
+        model_id: modelToUse,
+        verses: data?.verses?.length || 0,
+        ai_duration_ms: analysisMs,
+      })
       setAnalysisProgressPercent(100);
       return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: modelToUse };
     } catch (e: any) {
@@ -217,10 +224,17 @@ export const useSongDataManager = ({
     try {
       const data = await fetchSongDataFromUrl(url, targetLanguage, isKaraokeMode, selectedModelId, { fileName: opts?.fileName, mimeType: opts?.mimeType, jobId: opts?.jobId }, onProgressUpdate);
       const processingTimeSeconds = processingStartTimeRef.current ? (Date.now() - processingStartTimeRef.current) / 1000 : undefined;
+      const analysisMs = typeof processingTimeSeconds === 'number' ? Math.max(0, Math.round(processingTimeSeconds * 1000)) : undefined;
       const durationToSave = currentSongDurationRef.current;
       setSongData(data);
       if (data.originalLanguage === 'Instrumental' && data.verses.length === 0) setError(null);
-      trackEvent('analysis_complete', { verses: data?.verses?.length || 0, secs: processingTimeSeconds ? Math.round(processingTimeSeconds * 1000) / 1000 : 0, model: selectedModelId })
+      trackEvent('analysis_complete', {
+        source: 'url',
+        job_id: opts?.jobId,
+        model_id: selectedModelId,
+        verses: data?.verses?.length || 0,
+        ai_duration_ms: analysisMs,
+      })
       return { songData: data, processingTimeSeconds, songDuration: durationToSave, modelIdUsed: selectedModelId };
     } catch (e: any) {
       trackEvent('analysis_error', { reason: (e?.message || 'unknown').slice(0, 120) })

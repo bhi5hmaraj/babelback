@@ -5,6 +5,9 @@
  */
 
 import { randomUUID } from 'node:crypto'
+import { logEnvSummaryOnce } from './env.js'
+
+let loggedGaKeys = false
 
 type Params = Record<string, unknown>
 
@@ -23,26 +26,51 @@ function sanitize(params?: Params): Record<string, string | number> | undefined 
 export async function gaEvent(name: string, params?: Params, clientId?: string) {
   const measurementId = process.env.GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   const apiSecret = process.env.GA_API_SECRET
+  logEnvSummaryOnce()
+  if (!loggedGaKeys && process.env.NODE_ENV !== 'production') {
+    loggedGaKeys = true
+    try {
+      const keys = Object.keys(process.env).filter((k) => k.startsWith('GA_'))
+      console.log('[ga] env keys', keys)
+    } catch {}
+  }
   if (!measurementId || !apiSecret) return // GA disabled on server
-  const endpoint = process.env.GA_DEBUG === '1'
-    ? 'https://www.google-analytics.com/debug/mp/collect'
-    : 'https://www.google-analytics.com/mp/collect'
+  const endpoints = ['https://www.google-analytics.com/mp/collect']
+  const wantDebug = process.env.GA_DEBUG === '1'
+  if (wantDebug) endpoints.push('https://www.google-analytics.com/debug/mp/collect')
 
   const cid = clientId || `srv.${randomUUID()}`
+  const sanitized = sanitize(params) as Record<string, any> | undefined
+  const finalParams: Record<string, any> = sanitized ? { ...sanitized } : {}
+  if (finalParams.origin == null) finalParams.origin = 'server'
+  if (wantDebug) {
+    // Tag events for DebugView
+    finalParams.debug_mode = 1
+  }
   const body = {
     client_id: cid,
     non_personalized_ads: true,
-    events: [ { name, params: sanitize(params) } ],
+    events: [ { name, params: finalParams } ],
   }
-  const url = `${endpoint}?measurement_id=${encodeURIComponent(measurementId)}&api_secret=${encodeURIComponent(apiSecret)}`
+  const qs = `measurement_id=${encodeURIComponent(measurementId)}&api_secret=${encodeURIComponent(apiSecret)}`
   try {
-    const resp = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
-    if (!resp.ok && process.env.GA_DEBUG === '1') {
-      const txt = await resp.text().catch(() => '')
-      console.warn('[ga] server event failed', resp.status, txt?.slice?.(0, 200))
+    for (const ep of endpoints) {
+      const resp = await fetch(`${ep}?${qs}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      if (!resp.ok && wantDebug) {
+        const txt = await resp.text().catch(() => '')
+        console.warn('[ga] server event failed', ep, resp.status, txt?.slice?.(0, 300))
+      }
+      // For debug/mp/collect, log validation messages to help troubleshooting
+      if (ep.includes('/debug/')) {
+        try {
+          const j = await resp.json()
+          if (Array.isArray(j?.validationMessages) && j.validationMessages.length) {
+            console.warn('[ga] validation', j.validationMessages)
+          }
+        } catch {}
+      }
     }
   } catch (e) {
-    if (process.env.GA_DEBUG === '1') console.warn('[ga] error', (e as Error).message)
+    if (wantDebug) console.warn('[ga] error', (e as Error).message)
   }
 }
-

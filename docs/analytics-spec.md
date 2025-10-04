@@ -44,6 +44,13 @@ Core (implemented)
 - analysis_error (server)
   - duration_ms: number
   - message: string (truncated, no PII)
+  - error_type: 'analysis' | 'fetch_audio_url' | ...
+  - code?: string when error_type='fetch_audio_url'
+- analysis_fetch_retry (server)
+  - error_type: 'fetch_audio_url'
+  - attempt: number (starting at 1)
+  - code: string (e.g., EAI_AGAIN, ETIMEDOUT)
+  - job_id: string (when available)
 
 Optional (future)
 - yt_download_start / yt_download_done / yt_download_error (server)
@@ -65,6 +72,8 @@ Add these in GA4 Admin → Property → Custom definitions.
   - model_id — AI model id
   - lang — target language code
   - error_type — normalized error class (upload|analysis|yt)
+  - error_code — transport/code string (e.g., EAI_AGAIN, ETIMEDOUT) for fetch retries/errors
+  - origin — emitter (`client` | `server`)
   - content_type — MIME type of uploaded audio (optional)
   - mime_type — MIME seen by analysis (optional)
   - ext — file extension (optional)
@@ -77,11 +86,16 @@ Notes
 - No PII: never send emails, raw URLs, tokens, or IDs that can identify a person.
 - Keep error messages truncated and generic.
 
+-## Architecture
 ## Architecture
 - Client (web): GA tag in `index.html`, helper in `services/analytics.ts` routes `trackEvent(name, params)` to `window.gtag('event', ...)`.
+  - In dev/local, DebugView is enabled automatically; you can also force with `?debug_view=1` or `localStorage.GA_DEBUG='1'`.
+  - Adds `origin='client'` to events unless already provided.
 - Server (API): Minimal GA4 Measurement Protocol helper in `api/_lib/ga.ts`.
   - Sends events anonymously (random server client_id) using env vars `GA_MEASUREMENT_ID` and `GA_API_SECRET`.
+  - In debug (`GA_DEBUG=1`), adds `debug_mode:1` and sends to both `/mp/collect` (ingests) and `/debug/mp/collect` (validation).
   - Only emits server‑side events for outcomes (`analysis_done/error`, `upload_done/error`).
+  - Adds `origin='server'` to events unless already provided.
 - Redis: NOT used for events (kept only for progress heuristics).
 
 ## Current Instrumentation Map
@@ -148,7 +162,12 @@ Phase 6 — Heuristic Improvements (PENDING)
 ## Environment Vars
 - `GA_MEASUREMENT_ID` = G‑PVPZ0KEKKW (or use `NEXT_PUBLIC_GA_MEASUREMENT_ID` for client)
 - `GA_API_SECRET` = GA4 Measurement Protocol API Secret
-- (Dev) `GA_DEBUG=1` to use the debug collect endpoint and log failures.
+- (Dev) `GA_DEBUG=1` to show server events in DebugView and validate via `/debug/mp/collect` (we still send to `/mp/collect` so events appear).
+
+### DebugView quick start
+- GA Console → Configure → DebugView.
+- Local/dev website: events are flagged automatically; or append `?debug_view=1` to the URL; or set `localStorage.GA_DEBUG='1'`.
+- Server/API: export `GA_DEBUG=1` so server events include `debug_mode:1` and are also validated.
 
 ---
 

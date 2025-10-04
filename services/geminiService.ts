@@ -9,6 +9,10 @@ import { SongData, Language, Verse, SingingScore } from '../types';
 import { upload } from '@vercel/blob/client';
 import { trackEvent } from './analytics';
 
+// Keep the last analysis job id from the most recent upload/URL analysis
+let lastAnalysisJobId: string | undefined
+export const getLastAnalysisJobId = () => lastAnalysisJobId
+
 const SONG_ANALYSIS_ENDPOINT = '/api/song-analysis';
 const SINGING_FEEDBACK_ENDPOINT = '/api/singing-feedback';
 
@@ -91,6 +95,7 @@ export const fetchSongDataFromGemini = async (
     trackEvent('upload_done', { source: 'file', size_bytes: audioFile.size, upload_duration_ms: Date.now() - upStart, ok: 1 })
     // Emit analysis_start with a job_id so all downstream events can be joined
     if (analysisJobId) {
+      lastAnalysisJobId = analysisJobId
       trackEvent('analysis_start', {
         source: 'file',
         job_id: analysisJobId,
@@ -209,6 +214,8 @@ export const fetchSongDataFromUrl = async (
   const { songData } = await parseJsonResponse<{ songData: SongData }>(response);
   if (!songData || !songData.verses) throw new Error('Server returned invalid song data.');
   if (onProgress) onProgress('Song analysis received. Preparing display...');
+  // Record last job id for client-side completion event joining
+  if (opts?.jobId) lastAnalysisJobId = opts.jobId
   return songData;
 };
 
