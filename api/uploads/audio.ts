@@ -19,19 +19,19 @@ export default async function handler(req: any, res: VercelResponse) {
   const id = crypto.randomUUID()
   const objectPath = `uploads/${id}-${fileName}`
 
-  function makeStorage(): Storage | null {
-    const keyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
-    try {
-      if (keyJson) {
-        const sa = JSON.parse(keyJson)
-        return new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } })
-      }
-      if (process.env.GCP_PROJECT_ID && process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
-        return new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
-      }
-    } catch {}
-    return new Storage()
-  }
+function makeStorage(): Storage {
+  const keyJson = process.env.GCP_SERVICE_ACCOUNT_KEY
+  try {
+    if (keyJson) {
+      const sa = JSON.parse(keyJson)
+      return new Storage({ projectId: sa.project_id, credentials: { client_email: sa.client_email, private_key: String(sa.private_key || '').replace(/\\n/g, '\n') } })
+    }
+    if (process.env.GCP_PROJECT_ID && process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
+      return new Storage({ projectId: process.env.GCP_PROJECT_ID, credentials: { client_email: process.env.GCP_CLIENT_EMAIL!, private_key: String(process.env.GCP_PRIVATE_KEY).replace(/\\n/g, '\n') } })
+    }
+  } catch {}
+  return new Storage()
+}
 
   const storage = makeStorage()
   const bucket = storage.bucket(bucketName)
@@ -65,4 +65,3 @@ export default async function handler(req: any, res: VercelResponse) {
   // Start piping request to GCS
   req.pipe(stream)
 }
-
