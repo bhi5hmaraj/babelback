@@ -84,10 +84,8 @@ const App: React.FC = () => {
 
   const {
     libraryEntries,
-    showLibraryView,
     isLoadingLibrary,
     refreshLibrary,
-    toggleLibraryView
   } = useLibraryManager();
 
   const singingPracticeHooksRef = useRef<UseSingingPracticeReturn | null>(null);
@@ -278,7 +276,6 @@ const App: React.FC = () => {
   };
 
   const handleLoadSongFromLibrary = (entry: LibraryEntry) => {
-    if (showLibraryView) toggleLibraryView();
     smLoadSongFromLibraryEntry(entry, audioPlayerRef);
     setCurrentVerseIndex(0);
     setPlaybackTime(0);
@@ -375,7 +372,7 @@ const App: React.FC = () => {
 
   const currentVerseData: Verse | undefined = songData?.verses[currentVerseIndex];
 
-  if (isAppInitializing || (isLoadingLibrary && libraryEntries.length === 0 && !showLibraryView && currentPage === 'main')) {
+  if (isAppInitializing || (isLoadingLibrary && libraryEntries.length === 0 && currentPage === 'main')) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-100 p-4 md:p-8 flex flex-col items-center justify-center">
         <LoadingSpinner message="Preparing Babelback for you..." />
@@ -391,325 +388,394 @@ const App: React.FC = () => {
 
   const mainContentMaxWidth = currentPage === 'main' && songData ? 'max-w-4xl' : 'max-w-3xl'; // Adjusted for changelog
 
-  const renderMainContent = () => {
-    if (currentPage === 'about') {
-      return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><AboutPage onNavigateBack={() => handleNavigate('main')} /></div>;
-    }
-    if (currentPage === 'techDetails') {
-      return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><TechDetailsPage onNavigateBack={() => handleNavigate('main')} /></div>;
-    }
-    if (currentPage === 'changelog') {
-      return <div className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}><ChangelogPage onNavigateBack={() => handleNavigate('main')} /></div>;
-    }
-
-
-    if (showLibraryView && !apiKeyMissing) {
-      return (
-        <div className="w-full max-w-3xl bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6">
-          {isLoadingLibrary && libraryEntries.length === 0 ?
-            <LoadingSpinner message="Loading library..."/> :
-            <LibraryView
-              entries={libraryEntries}
-              onLoadSong={handleLoadSongFromLibrary}
-              onDeleteSong={handleDeleteSongFromLibrary}
-              currentPlayingLibraryId={currentLibraryEntryId}
-            />
-          }
+  const renderSetupPane = () => (
+    <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}>
+      {!songData && !audioFile && !isLoadingSongData && (
+        <div className="mb-6">
+          <AboutBabelback />
         </div>
+      )}
+
+      <button
+        onClick={toggleDeviceConfig}
+        className="w-full mb-3 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-sky-300 rounded-md transition-colors text-sm flex items-center justify-center disabled:opacity-50"
+        disabled={globalIsLoading || isPracticeActive}
+      >
+        <Icon name={showDeviceConfig ? 'gear-six-slash' : 'gear-six'} weight="bold" className="mr-2" />
+        {showDeviceConfig ? 'Hide Audio Settings' : 'Show Audio Settings'}
+      </button>
+
+      {showDeviceConfig && (
+        <DeviceSelector
+          inputDevices={inputDevices}
+          outputDevices={outputDevices}
+          selectedInputDeviceId={selectedInputDeviceId}
+          selectedOutputDeviceId={selectedOutputDeviceId}
+          onSelectInputDevice={setSelectedInputDeviceId}
+          onSelectOutputDevice={setSelectedOutputDeviceId}
+          onRequestPermissions={requestDevicePermissions}
+          permissionGranted={devicePermissionGranted}
+          isLoading={isLoadingDevices}
+          disabled={globalIsLoading || isPracticeActive}
+          error={rawDeviceError}
+        />
+      )}
+
+      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">1. Choose Source</div>
+      <div className="w-full mb-3 flex items-center justify-center gap-2">
+        <button
+          onClick={() => setSourceMode('file')}
+          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'file' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+        >From File</button>
+        <button
+          onClick={() => setSourceMode('youtube')}
+          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'youtube' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
+        >From YouTube</button>
+      </div>
+      {sourceMode === 'youtube' ? (
+        <YouTubeInput youtubeUrl={ytUrl} setYoutubeUrl={setYtUrl} audioFormat={ytFormat} setAudioFormat={setYtFormat} />
+      ) : (
+        <AudioUpload pickerOnly onFileSelected={setSelectedLocalFile} isLoading={isLoadingSongData} disabled={globalIsLoading || isPracticeActive || apiKeyMissing} />
+      )}
+
+      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">2. AI Model</div>
+      <ModelSelector
+        selectedModelId={selectedModelId}
+        onModelChange={setSelectedModelId}
+        disabled={globalIsLoading || isPracticeActive}
+      />
+
+      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">3. Translate Target Language</div>
+      <LanguageSelector
+        selectedLanguage={targetLanguage}
+        onLanguageChange={handleLanguageChange}
+        disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
+      />
+
+      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">4. Modes</div>
+      <KaraokeModeToggle
+        isKaraokeMode={isKaraokeMode}
+        onToggle={handleKaraokeModeToggleApp}
+        disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
+      />
+      <PracticeModeToggle
+        isPracticeModeEnabled={isPracticeModeGloballyEnabled}
+        onToggle={handlePracticeModeGlobalToggle}
+        disabled={
+          globalIsLoading ||
+          isPracticeActive ||
+          !songData ||
+          !songData.verses ||
+          songData.verses.length === 0 ||
+          !currentLibraryEntryId ||
+          (!selectedInputDeviceId && !devicePermissionGranted) ||
+          apiKeyMissing
+        }
+      />
+
+      <div className="mt-6 flex items-center justify-center">
+        <button
+          className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow flex items-center"
+          disabled={globalIsLoading || isLoadingSongData || isPracticeActive || apiKeyMissing}
+          onClick={async () => {
+            try {
+              if (sourceMode === 'file') {
+                if (!selectedLocalFile) { setAppError('Please choose an audio file.'); return; }
+                await handleAudioSubmit(selectedLocalFile);
+              } else {
+                if (!ytUrl || !/^https?:\/\//i.test(ytUrl)) { setAppError('Please paste a valid YouTube URL.'); return; }
+                setAppError(null);
+                setYtWorking(true);
+                const jokes = AI_THOUGHTS_AND_JOKES;
+                let i = 0;
+                const interval = window.setInterval(() => { setYtFun(jokes[i++ % jokes.length]); }, 2500);
+                try {
+                  const { startDownload, getDownloadStatus } = await import('./services/downloadsService');
+                  const start = await startDownload(ytUrl, ytFormat);
+                  let status = await getDownloadStatus(start.jobId);
+                  const t0 = Date.now();
+                  while (status.status !== 'completed' && status.status !== 'failed' && Date.now() - t0 < 15 * 60 * 1000) {
+                    await new Promise((r) => setTimeout(r, 2000));
+                    status = await getDownloadStatus(start.jobId);
+                  }
+                  if (status.status !== 'completed' || !status.url) { setAppError('Failed to process YouTube audio.'); return; }
+                  setYtWorking(false);
+                  setYtFun('');
+                  const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType, jobId: start.jobId });
+                  if (result && result.songData) {
+                    try {
+                      const resp = await fetch(`/api/proxy?url=${encodeURIComponent(status.url)}`);
+                      const buf = await resp.arrayBuffer();
+                      const blob = new Blob([buf], { type: status.gcsObject?.contentType || 'audio/mpeg' });
+                      const fileName = status.gcsObject?.path?.split('/')?.pop() || 'downloaded-audio';
+                      const file = new File([blob], fileName, { type: blob.type });
+                      const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
+                        title: result.songData.title || fileName,
+                        originalLanguage: result.songData.originalLanguage,
+                        targetLanguage: targetLanguage,
+                        timestamp: Date.now(),
+                        audioFileBlob: file,
+                        audioFileName: file.name,
+                        audioFileType: file.type,
+                        songData: result.songData,
+                        processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
+                        songDurationSeconds: result.songDuration ? parseFloat((result.songDuration || 0).toFixed(1)) : undefined,
+                        modelIdUsed: result.modelIdUsed,
+                      };
+                      const newId = await addSongToLibrary(newLibraryEntry);
+                      setCurrentLibraryEntryId(newId);
+                      await refreshLibrary();
+                      setActiveTab('lyrics');
+                      setHeaderCollapsed(true);
+                    } catch (e) {
+                      console.error('[AnalyzeFromUrl] failed to cache in library', e);
+                    }
+                  }
+                } finally {
+                  window.clearInterval(interval);
+                  setYtWorking(false);
+                  setYtFun('');
+                }
+              }
+            } catch (e) {
+              setAppError(e instanceof Error ? e.message : String(e));
+            }
+          }}
+        >
+          <Icon name="sparkle" className="mr-2" /> Babelback
+        </button>
+      </div>
+    </section>
+  );
+
+  const renderLyricsPane = () => {
+    if (!songData) {
+      return (
+        <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-6 rounded-xl shadow-2xl mt-6 text-center text-slate-300`}>
+          <Icon name="music-notes-simple" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+          <p className="text-lg">Process a song to explore synchronized lyrics.</p>
+          <p className="text-xs mt-2">Upload audio from the Setup tab or fetch from YouTube.</p>
+        </section>
+      );
+    }
+
+    const verse = currentVerseData;
+    const isInstrumental = songData.originalLanguage === 'Instrumental' && songData.verses.length === 0;
+
+    return (
+      <section className={`w-full ${mainContentMaxWidth} p-2 mt-2`}>
+        <div className="mb-4 text-center">
+          <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : 'Uploaded Track')}</h2>
+          {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
+        </div>
+
+        {isInstrumental ? (
+          <div className="text-center py-6 text-slate-300">
+            <Icon name="speaker-simple-slash" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+            <p className="text-lg">This track appears to be instrumental.</p>
+            <p className="text-xs mt-1">No lyrical verses found.</p>
+          </div>
+        ) : (
+          <>
+            <PanelToggle panelVisibility={panelVisibility} onToggle={handlePanelToggle} />
+            {verse && (
+              <VerseDisplay
+                verse={verse}
+                targetLanguage={targetLanguage}
+                originalLanguageLabel={songData.originalLanguage}
+                panelVisibility={panelVisibility}
+                currentTime={playbackTime}
+                isKaraokeMode={isKaraokeMode}
+                onLyricAreaFocus={() => setHeaderCollapsed(true)}
+                onLyricAreaScrollUp={() => setHeaderCollapsed(false)}
+              />
+            )}
+            {isPracticeModeGloballyEnabled && songData.verses.length > 0 && songData.originalLanguage !== 'Instrumental' && verse && (
+              <button
+                onClick={() => handleInitiatePracticeForVerse(verse)}
+                className="mt-4 w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors text-sm flex items-center justify-center disabled:bg-slate-500 disabled:opacity-70"
+                disabled={
+                  globalIsLoading ||
+                  isPracticeActive ||
+                  !audioPlayerRef.current ||
+                  !currentSongDurationRef.current ||
+                  currentSongDurationRef.current <= 0 ||
+                  (!selectedInputDeviceId && !devicePermissionGranted) ||
+                  !currentLibraryEntryId ||
+                  apiKeyMissing
+                }
+              >
+                <Icon name="waveform" weight="bold" className="mr-2" /> Practice this Verse
+              </button>
+            )}
+          </>
+        )}
+      </section>
+    );
+  };
+
+  const renderMeaningPane = () => {
+    if (!songData) {
+      return (
+        <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-6 rounded-xl shadow-2xl mt-6 text-center text-slate-300`}>
+          <Icon name="book-open" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+          <p className="text-lg">Process a song to view summaries and analysis.</p>
+        </section>
       );
     }
 
     return (
-      <>
-        {!apiKeyMissing && !audioFile && currentPage === 'main' && (
-          <div className={`w-full ${mainContentMaxWidth}`}>
-             <AboutBabelback />
+      <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}>
+        <div className="mb-4 text-center">
+          <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : 'Track')}</h2>
+          {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
+        </div>
+
+        {songData.summary && (
+          <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
+            <h3 className="text-md font-semibold text-sky-400 mb-2 flex items.center"><Icon name="info" weight="bold" className="mr-2" /> Song Summary</h3>
+            <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.summary}</p>
           </div>
         )}
-        <div className={`w-full ${mainContentMaxWidth} ${activeTab === 'lyrics' ? 'p-2 mt-2' : 'bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6'}`}>
-          {apiKeyMissing && (
-              <div className="my-6 p-4 bg-red-800/80 border border-red-600 text-red-100 rounded-lg shadow text-center">
-                  <Icon name="warning-octagon" weight="bold" className="inline-block mr-2 text-red-300" size="lg"/>
-                  <strong>Configuration Error:</strong> {appError || "Gemini API Key is missing or invalid."}
-              </div>
-          )}
 
-          {!apiKeyMissing && (
-              <>
-                  <button
-                    onClick={toggleDeviceConfig}
-                    className="w-full mb-3 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-sky-300 rounded-md transition-colors text-sm flex items-center justify-center disabled:opacity-50"
-                    disabled={globalIsLoading || isPracticeActive}
-                  >
-                    <Icon name={showDeviceConfig ? "gear-six-slash" : "gear-six"} weight="bold" className="mr-2" />
-                    {showDeviceConfig ? "Hide Audio Settings" : "Show Audio Settings"}
-                  </button>
-                  {showDeviceConfig && (
-                    <DeviceSelector
-                        inputDevices={inputDevices}
-                        outputDevices={outputDevices}
-                        selectedInputDeviceId={selectedInputDeviceId}
-                        selectedOutputDeviceId={selectedOutputDeviceId}
-                        onSelectInputDevice={setSelectedInputDeviceId}
-                        onSelectOutputDevice={setSelectedOutputDeviceId}
-                        onRequestPermissions={requestDevicePermissions}
-                        permissionGranted={devicePermissionGranted}
-                        isLoading={isLoadingDevices}
-                        disabled={globalIsLoading || isPracticeActive}
-                        error={rawDeviceError} 
-                    />
-                  )}
-                  {/* Setup Pane content */}
-                  {activeTab === 'setup' && (
-                    <>
-                      <div className="text-sm text-slate-300 font-semibold mb-1">1. Choose Source</div>
-                      <div className="w-full mb-3 flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setSourceMode('file')}
-                          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'file' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
-                        >From File</button>
-                        <button
-                          onClick={() => setSourceMode('youtube')}
-                          className={`px-3 py-1.5 rounded-md text-xs ${sourceMode === 'youtube' ? 'bg-sky-600 text-white' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}
-                        >From YouTube</button>
-                      </div>
-                      {sourceMode === 'youtube' ? (
-                        <YouTubeInput youtubeUrl={ytUrl} setYoutubeUrl={setYtUrl} audioFormat={ytFormat} setAudioFormat={setYtFormat} />
-                      ) : (
-                        <AudioUpload pickerOnly onFileSelected={setSelectedLocalFile} isLoading={isLoadingSongData} disabled={globalIsLoading || isPracticeActive || apiKeyMissing} />
-                      )}
+        {songData.detailedAnalysis && (
+          <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
+            <h3 className="text-md font-semibold text-teal-400 mb-2 flex items-center"><Icon name="chart-line" weight="bold" className="mr-2" /> Detailed Analysis</h3>
+            <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.detailedAnalysis}</p>
+          </div>
+        )}
 
-                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">2. AI Model</div>
-                      <ModelSelector
-                        selectedModelId={selectedModelId}
-                        onModelChange={setSelectedModelId}
-                        disabled={globalIsLoading || isPracticeActive}
-                      />
-
-                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">3. Translate Target Language</div>
-                      <LanguageSelector
-                          selectedLanguage={targetLanguage}
-                          onLanguageChange={handleLanguageChange}
-                          disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
-                      />
-
-                      <div className="text-sm text-slate-300 font-semibold mt-5 mb-1">4. Modes</div>
-                      <KaraokeModeToggle
-                          isKaraokeMode={isKaraokeMode}
-                          onToggle={handleKaraokeModeToggleApp}
-                          disabled={globalIsLoading || isPracticeActive || apiKeyMissing}
-                      />
-                      <PracticeModeToggle
-                          isPracticeModeEnabled={isPracticeModeGloballyEnabled}
-                          onToggle={handlePracticeModeGlobalToggle}
-                          disabled={globalIsLoading || !songData || !songData.verses || songData.verses.length === 0 || !currentLibraryEntryId || (!selectedInputDeviceId && !devicePermissionGranted) || apiKeyMissing }
-                      />
-
-                      <div className="mt-6 flex items-center justify-center">
-                        <button
-                          className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg shadow flex items-center"
-                          disabled={globalIsLoading || isLoadingSongData || isPracticeActive || apiKeyMissing}
-                          onClick={async () => {
-                          try {
-                            if (sourceMode === 'file') {
-                              if (!selectedLocalFile) { setAppError('Please choose an audio file.'); return }
-                              await handleAudioSubmit(selectedLocalFile)
-                            } else {
-                            if (!ytUrl || !/^https?:\/\//i.test(ytUrl)) { setAppError('Please paste a valid YouTube URL.'); return }
-                            setAppError(null)
-                            // Lightweight poller with fun messages
-                            setYtWorking(true)
-                            const jokes = AI_THOUGHTS_AND_JOKES
-                            let i = 0
-                            const interval = window.setInterval(() => { setYtFun(jokes[i++ % jokes.length]) }, 2500)
-                            try {
-                              const { startDownload, getDownloadStatus } = await import('./services/downloadsService')
-                              const start = await startDownload(ytUrl, ytFormat)
-                              let status = await getDownloadStatus(start.jobId)
-                              const t0 = Date.now()
-                              while (status.status !== 'completed' && status.status !== 'failed' && Date.now() - t0 < 15 * 60 * 1000) {
-                                await new Promise(r => setTimeout(r, 2000))
-                                status = await getDownloadStatus(start.jobId)
-                              }
-                              if (status.status !== 'completed' || !status.url) { setAppError('Failed to process YouTube audio.'); return }
-                              // Switch loader context from fetching → analyzing
-                              setYtWorking(false)
-                              setYtFun('')
-                              const result = await smHandleUrlAnalyze(status.url, { fileName: status.gcsObject?.path?.split('/')?.pop(), mimeType: status.gcsObject?.contentType, jobId: start.jobId })
-                              if (result && result.songData) {
-                                try {
-                                  const resp = await fetch(`/api/proxy?url=${encodeURIComponent(status.url)}`)
-                                  const buf = await resp.arrayBuffer()
-                                  const blob = new Blob([buf], { type: status.gcsObject?.contentType || 'audio/mpeg' })
-                                  const fileName = status.gcsObject?.path?.split('/')?.pop() || 'downloaded-audio'
-                                  const file = new File([blob], fileName, { type: blob.type })
-                                  const newLibraryEntry: Omit<LibraryEntry, 'id'> = {
-                                    title: result.songData.title || fileName,
-                                    originalLanguage: result.songData.originalLanguage,
-                                    targetLanguage: targetLanguage,
-                                    timestamp: Date.now(),
-                                    audioFileBlob: file,
-                                    audioFileName: file.name,
-                                    audioFileType: file.type,
-                                    songData: result.songData,
-                                    processingTimeSeconds: result.processingTimeSeconds ? parseFloat(result.processingTimeSeconds.toFixed(1)) : undefined,
-                                    songDurationSeconds: result.songDuration ? parseFloat((result.songDuration || 0).toFixed(1)) : undefined,
-                                    modelIdUsed: result.modelIdUsed,
-                                  }
-                                  const newId = await addSongToLibrary(newLibraryEntry)
-                                  setCurrentLibraryEntryId(newId)
-                                  await refreshLibrary()
-                                  setActiveTab('lyrics')
-                                  setHeaderCollapsed(true)
-                                } catch (e) {
-                                  console.error('[AnalyzeFromUrl] failed to cache in library', e)
-                                }
-                              }
-                            } finally {
-                              window.clearInterval(interval)
-                              setYtWorking(false)
-                              setYtFun('')
-                            }
-                          }
-                        } catch (e) {
-                          setAppError(e instanceof Error ? e.message : String(e))
-                        }
-                      }}
-                        >
-                          <Icon name="sparkle" className="mr-2" /> Babelback
-                        </button>
-                      </div>
-                    </>
-                  )}
-              </>
-          )}
-
-          {/* Unified loader: reuse LoadingSpinner for both YouTube fetch and analysis */}
-          {(ytWorking || isLoadingSongData) && (
-            <LoadingSpinner
-              message={isLoadingSongData ? (loadingMessage || 'Analyzing song…') : 'Fetching audio from YouTube…'}
-              funMessage={isLoadingSongData ? funLoadingMessage : (ytFun || undefined)}
-              
-              progressPercent={isLoadingSongData ? (analysisProgressPercent ?? undefined) : undefined}
-            />
-          )}
-          {appError && !isLoadingSongData && !apiKeyMissing && ( 
-            <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
-              <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
-              <strong>Error:</strong> {appError}
-            </div>
-          )}
-          {appError && apiKeyMissing && !rawInitializationError?.includes("Gemini API Key is missing") && ( 
-             <div className="my-6 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
-              <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg"/>
-              <strong>Error:</strong> {appError}
-            </div>
-          )}
-
-
-          <RecordingInfoBanner isVisible={showRecordingHelpBanner} />
-
-          {activeTab === 'practice' && isPracticeActive && !apiKeyMissing && (
-              <PracticeVersePanel
-                  practiceTargetVerses={singingPractice.activePracticeVerses}
-                  status={singingPractice.practiceVerseStatus}
-                  score={singingPractice.practiceScore}
-                  error={singingPractice.practiceError}
-                  recordedAudioUrl={singingPractice.userPracticeAudioUrl}
-                  onStartRecording={singingPracticeHooksRef.current.startRecording}
-                  onStopRecording={singingPracticeHooksRef.current.stopRecording}
-                  onTryAgain={singingPracticeHooksRef.current.tryAgainPractice}
-                  onSubmitForScoring={singingPracticeHooksRef.current.submitForScoring}
-                  onExit={() => singingPracticeHooksRef.current.exitPractice(false)}
-                  currentTimeForHighlight={playbackTime}
-                  isKaraokeModeEnabled={isKaraokeMode}
-                  recordingFormattedTime={singingPractice.recordingFormattedTime}
-                  originalSongDataForDisplay={songData}
-              />
-          )}
-
-          {/* Meaning pane: show song-level summary and analysis */}
-          {activeTab === 'meaning' && songData && !isLoadingSongData && !apiKeyMissing && !isPracticeActive && (
-            <>
-              <div className="mb-4 text-center">
-                <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : 'Track')}</h2>
-                {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
-              </div>
-              {songData.summary && (
-                <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
-                  <h3 className="text-md font-semibold text-sky-400 mb-2 flex items-center"><Icon name="info" weight="bold" className="mr-2"/> Song Summary</h3>
-                  <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.summary}</p>
-                </div>
-              )}
-              {songData.detailedAnalysis && (
-                <div className="my-4 p-4 bg-slate-700/60 backdrop-blur-sm rounded-lg shadow">
-                  <h3 className="text-md font-semibold text-teal-400 mb-2 flex items-center"><Icon name="chart-line" weight="bold" className="mr-2"/> Detailed Analysis</h3>
-                  <p className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">{songData.detailedAnalysis}</p>
-                </div>
-              )}
-              {!songData.summary && !songData.detailedAnalysis && (
-                <div className="text-center py-6 text-slate-300">No analysis available for this song yet.</div>
-              )}
-            </>
-          )}
-
-
-          {songData && !isLoadingSongData && !apiKeyMissing && !isPracticeActive && activeTab === 'lyrics' && (
-            <>
-              <div className="mb-4 text-center">
-                <h2 className="text-2xl font-semibold text-sky-300">{songData.title || (audioFile ? audioFile.name : "Uploaded Track")}</h2>
-                {songData.originalLanguage && <p className="text-sm text-slate-400">(Original Lyrics: {songData.originalLanguage})</p>}
-              </div>
-              {/* Summary/Analysis moved to Meaning tab for a cleaner Lyrics view */}
-
-              {currentVerseData ? (
-                <>
-                  <PanelToggle panelVisibility={panelVisibility} onToggle={handlePanelToggle} />
-                  <VerseDisplay
-                    verse={currentVerseData}
-                    targetLanguage={targetLanguage}
-                    originalLanguageLabel={songData.originalLanguage}
-                    panelVisibility={panelVisibility}
-                    currentTime={playbackTime}
-                    isKaraokeMode={isKaraokeMode}
-                    onLyricAreaFocus={() => setHeaderCollapsed(true)}
-                    onLyricAreaScrollUp={() => setHeaderCollapsed(false)}
-                  />
-                  {isPracticeModeGloballyEnabled && songData.verses.length > 0 && songData.originalLanguage !== "Instrumental" && (
-                      <button
-                          onClick={() => handleInitiatePracticeForVerse(currentVerseData)}
-                          className="mt-4 w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors text-sm flex items-center justify-center disabled:bg-slate-500 disabled:opacity-70"
-                          disabled={globalIsLoading ||
-                                    isPracticeActive ||
-                                    !audioPlayerRef.current ||
-                                    !currentSongDurationRef.current ||
-                                    currentSongDurationRef.current <= 0 ||
-                                    (!selectedInputDeviceId && !devicePermissionGranted) || 
-                                    !currentLibraryEntryId || apiKeyMissing
-                                   }
-                      >
-                          <Icon name="waveform" weight="bold" className="mr-2" /> Practice this Verse
-                      </button>
-                  )}
-          {/* Verse navigation moved to bottom PlayerBar */}
-                </>
-              ) : ( songData.originalLanguage === "Instrumental" && songData.verses.length === 0 && !appError && ( <div className="text-center py-6 text-slate-300"> <Icon name="speaker-simple-slash" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">This track appears to be instrumental.</p> <p className="text-xs mt-1">No lyrical verses found.</p> </div> ))}
-
-            </>
-          )}
-
-          {/* Audio element moved to sticky PlayerBar */}
-
-          {!songData && !isLoadingSongData && !appError && !apiKeyMissing && !showLibraryView && !isPracticeActive && ( <div className="text-center py-10 text-slate-400"> <Icon name="music-notes-simple" weight="bold" size="2xl" className="mb-3 text-sky-400" /> <p className="text-lg">Configure audio devices & AI model, then upload audio and select language to begin.</p> <p className="text-xs mt-2">Enable Karaoke Mode for word-by-word synchronized transliteration!</p> </div> )}
-        </div>
-        <EarphoneConsentModal
-          isOpen={singingPractice.showEarphoneModal}
-          onConfirm={singingPracticeHooksRef.current.confirmEarphoneConsent}
-          onCancel={singingPracticeHooksRef.current.cancelEarphoneConsent}
-        />
-      </>
+        {!songData.summary && !songData.detailedAnalysis && (
+          <div className="text-center py-6 text-slate-300">No analysis available for this song yet.</div>
+        )}
+      </section>
     );
   };
+
+  const renderPracticePane = () => {
+    if (!songData) {
+      return (
+        <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-6 rounded-xl shadow-2xl mt-6 text-center text-slate-300`}>
+          <Icon name="microphone" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+          <p className="text-lg">Process a song and enable Practice Mode in Setup to begin.</p>
+        </section>
+      );
+    }
+
+    if (!isPracticeModeGloballyEnabled) {
+      return (
+        <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-6 rounded-xl shadow-2xl mt-6 text-center text-slate-300`}>
+          <Icon name="headset" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+          <p className="text-lg">Turn on Practice Mode in Setup and grant microphone access.</p>
+          <p className="text-xs mt-2">Once enabled, start practice from Lyrics or from this tab.</p>
+        </section>
+      );
+    }
+
+    return (
+      <section className={`w-full ${mainContentMaxWidth} bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6`}>
+        {isPracticeActive ? (
+          <PracticeVersePanel
+            practiceTargetVerses={singingPractice.activePracticeVerses}
+            status={singingPractice.practiceVerseStatus}
+            score={singingPractice.practiceScore}
+            error={singingPractice.practiceError}
+            recordedAudioUrl={singingPractice.userPracticeAudioUrl}
+            onStartRecording={singingPracticeHooksRef.current.startRecording}
+            onStopRecording={singingPracticeHooksRef.current.stopRecording}
+            onTryAgain={singingPracticeHooksRef.current.tryAgainPractice}
+            onSubmitForScoring={singingPracticeHooksRef.current.submitForScoring}
+            onExit={() => singingPracticeHooksRef.current.exitPractice(false)}
+            currentTimeForHighlight={playbackTime}
+            isKaraokeModeEnabled={isKaraokeMode}
+            recordingFormattedTime={singingPractice.recordingFormattedTime}
+            originalSongDataForDisplay={songData}
+          />
+        ) : (
+          <div className="text-center text-slate-300 py-10">
+            <Icon name="waveform" weight="bold" size="2xl" className="mb-3 text-sky-400" />
+            <p className="text-lg">Pick a verse from Lyrics and tap “Practice this Verse.”</p>
+            <p className="text-xs mt-2">You can also start recording from this tab once a verse is selected.</p>
+          </div>
+        )}
+      </section>
+    );
+  };
+
+  const renderLibraryPane = () => (
+    <section className="w-full max-w-3xl bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6">
+      {isLoadingLibrary && libraryEntries.length === 0 ? (
+        <LoadingSpinner message="Loading library..." />
+      ) : (
+        <LibraryView
+          entries={libraryEntries}
+          onLoadSong={handleLoadSongFromLibrary}
+          onDeleteSong={handleDeleteSongFromLibrary}
+          currentPlayingLibraryId={currentLibraryEntryId}
+        />
+      )}
+    </section>
+  );
+
+  const renderMainTabs = () => {
+    let content: JSX.Element | null;
+    switch (activeTab) {
+      case 'setup':
+        content = renderSetupPane();
+        break;
+      case 'lyrics':
+        content = renderLyricsPane();
+        break;
+      case 'meaning':
+        content = renderMeaningPane();
+        break;
+      case 'practice':
+        content = renderPracticePane();
+        break;
+      case 'library':
+        content = renderLibraryPane();
+        break;
+      default:
+        content = renderSetupPane();
+        break;
+    }
+
+    if (!content) return null;
+
+    if (apiKeyMissing) {
+      return (
+        <div className="w-full flex flex-col items-center gap-3">
+          <div className="w-full max-w-3xl my-3 p-4 bg-red-800/80 border border-red-600 text-red-100 rounded-lg shadow text-center">
+            <Icon name="warning-octagon" weight="bold" className="inline-block mr-2 text-red-300" size="lg" />
+            <strong>Configuration Error:</strong> {appError || 'Gemini API Key is missing or invalid.'}
+          </div>
+          {content}
+        </div>
+      );
+    }
+
+    return content;
+  };
+
+  const infoPageClass = 'w-full max-w-4xl bg-slate-800/70 backdrop-blur-md p-5 md:p-8 rounded-xl shadow-2xl mt-6';
+
+  const renderPageContent = () => {
+    if (currentPage === 'about') {
+      return <div className={infoPageClass}><AboutPage onNavigateBack={() => handleNavigate('main')} /></div>;
+    }
+    if (currentPage === 'techDetails') {
+      return <div className={infoPageClass}><TechDetailsPage onNavigateBack={() => handleNavigate('main')} /></div>;
+    }
+    if (currentPage === 'changelog') {
+      return <div className={infoPageClass}><ChangelogPage onNavigateBack={() => handleNavigate('main')} /></div>;
+    }
+    return renderMainTabs();
+  };
+
+  const mainPaneScrollClass = currentPage === 'main' && activeTab === 'lyrics'
+    ? 'overflow-y-hidden'
+    : 'overflow-y-auto';
+
 
 
   return (
@@ -777,8 +843,7 @@ const App: React.FC = () => {
       )}
 
       {/* Content pane that can scroll while the page remains fixed */}
-      <main className="w-full flex-1 overflow-auto flex flex-col items-center pb-24">
-        {/* Tabs for fixed-screen shell (always visible in Main) */}
+      <main className="w-full flex-1 flex flex-col items-center pb-24 overflow-hidden">
         {currentPage === 'main' && (
           <div className="w-full max-w-5xl sticky top-0 z-20 py-1 bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-transparent backdrop-blur-sm">
             <TabsBar
@@ -790,20 +855,45 @@ const App: React.FC = () => {
                 { id: 'library', label: 'Library', icon: 'books' },
               ]}
               activeTab={activeTab}
-              onChange={(id) => {
-                setActiveTab(id as any);
-                if (id === 'library') {
-                  if (!showLibraryView) toggleLibraryView();
-                } else {
-                  if (showLibraryView) toggleLibraryView();
-                }
-              }}
+              onChange={(id) => setActiveTab(id as any)}
               disabled={isPracticeActive}
             />
           </div>
         )}
-        {renderMainContent()}
+
+        {(ytWorking || isLoadingSongData) && (
+          <div className="w-full max-w-5xl mt-3">
+            <LoadingSpinner
+              message={isLoadingSongData ? (loadingMessage || 'Analyzing song…') : 'Fetching audio from YouTube…'}
+              funMessage={isLoadingSongData ? funLoadingMessage : (ytFun || undefined)}
+              progressPercent={isLoadingSongData ? (analysisProgressPercent ?? undefined) : undefined}
+            />
+          </div>
+        )}
+
+        {showRecordingHelpBanner && (
+          <div className="w-full max-w-5xl mt-2">
+            <RecordingInfoBanner isVisible={showRecordingHelpBanner} />
+          </div>
+        )}
+
+        {appError && !isLoadingSongData && !apiKeyMissing && (
+          <div className="w-full max-w-5xl my-3 p-4 bg-red-700/60 border border-red-500 text-red-200 rounded-lg shadow text-center">
+            <Icon name="warning-circle" weight="bold" className="inline-block mr-2" size="lg" />
+            <strong>Error:</strong> {appError}
+          </div>
+        )}
+
+        <div className={`w-full flex-1 ${mainPaneScrollClass} flex justify-center`}>
+          {renderPageContent()}
+        </div>
       </main>
+
+      <EarphoneConsentModal
+        isOpen={singingPractice.showEarphoneModal}
+        onConfirm={singingPracticeHooksRef.current.confirmEarphoneConsent}
+        onCancel={singingPracticeHooksRef.current.cancelEarphoneConsent}
+      />
 
       {/* Sticky bottom playback bar */}
       <PlayerBar
