@@ -41,7 +41,9 @@ type CurrentAppPage = 'main' | 'about' | 'techDetails' | 'changelog'; // Add 'ch
 const App: React.FC = () => {
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const [activeTab, setActiveTab] = useState<'setup' | 'lyrics' | 'meaning' | 'practice' | 'library'>('setup');
-  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [headerCollapsed, setHeaderCollapsed] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
   const [currentPage, setCurrentPage] = useState<CurrentAppPage>('main');
   const [currentLibraryEntryId, setCurrentLibraryEntryId] = useState<number | null>(null);
   const [panelVisibility, setPanelVisibility] = useState<PanelVisibility>(INITIAL_PANEL_VISIBILITY);
@@ -137,14 +139,6 @@ const App: React.FC = () => {
     singingPracticeHooksRef.current = singingPractice;
   }, [singingPractice]);
 
-  // Auto-collapse header when playback starts or when not on Setup
-  useEffect(() => {
-    if ((audioSrc && playbackTime > 0) || (audioSrc && activeTab !== 'setup')) {
-      setHeaderCollapsed(true);
-    }
-  }, [audioSrc, playbackTime, activeTab]);
-
-
   useEffect(() => {
     if (rawInitializationError) {
       setAppError(rawInitializationError);
@@ -176,6 +170,26 @@ const App: React.FC = () => {
       setShowRecordingHelpBanner(false);
     }
   }, [singingPractice.practiceVerseStatus]);
+
+  useEffect(() => {
+    if (!audioSrc) return;
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : true;
+    if (!isMobile) return;
+    if (playbackTime > 0 || activeTab !== 'setup') {
+      setHeaderCollapsed(true);
+    }
+  }, [audioSrc, playbackTime, activeTab]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      if (window.innerWidth >= 640) {
+        setHeaderCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const prevSelectedModelIdRef = useRef(selectedModelId);
   useEffect(() => {
