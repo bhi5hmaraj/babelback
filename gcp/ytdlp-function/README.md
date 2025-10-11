@@ -1,4 +1,7 @@
-Google Cloud Functions (2nd gen) — YouTube → GCS (audio‑only)
+# DEPRECATED (check the apify actor)
+
+
+# Google Cloud Functions (2nd gen) — YouTube → GCS (audio‑only) 
 
 Overview
 - HTTP function downloads YouTube audio with `yt-dlp`, uploads to a Google Cloud Storage bucket, and returns a V4 signed URL you can pass to your existing `api/song-analysis` as `audioUrl`.
