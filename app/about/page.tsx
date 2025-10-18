@@ -79,6 +79,36 @@ export default function AboutPage() {
           </div>
         </section>
 
+        <section className="rounded-3xl border border-[#dbd0ba]/60 bg-[#fffaf2]/95 px-6 py-8 shadow-[0_18px_48px_rgba(74,63,53,0.1)] space-y-3">
+          <h2 className="mobile-serif text-2xl font-semibold">Why “BabelBack”?</h2>
+          <p className="text-sm leading-relaxed text-[#7d6b56]">
+            The name is a mash-up of two references that always make us smile:
+          </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-[#dbd0ba]/50 bg-white/85 p-4 shadow-[0_10px_26px_rgba(74,63,53,0.08)]">
+              <div className="flex items-center gap-2">
+                <Icon name="fish-simple" className="text-[#a67c52]" />
+                <h3 className="mobile-serif text-lg font-semibold">Babel Fish</h3>
+              </div>
+              <p className="mt-2 text-sm text-[#7d6b56] leading-relaxed">
+                Douglas Adams imagined a tiny fish that lets anyone understand any language instantly. That spirit of effortless translation is exactly what we want for lyrics.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#dbd0ba]/50 bg-white/85 p-4 shadow-[0_10px_26px_rgba(74,63,53,0.08)]">
+              <div className="flex items-center gap-2">
+                <Icon name="whale" className="text-[#a67c52]" />
+                <h3 className="mobile-serif text-lg font-semibold">Humpback Songs</h3>
+              </div>
+              <p className="mt-2 text-sm text-[#7d6b56] leading-relaxed">
+                Humpback whales sing across oceans—haunting, beautiful, and universal. Music connects us even when the words don’t, and BabelBack celebrates that shared pulse.
+              </p>
+            </div>
+          </div>
+          <p className="text-sm leading-relaxed text-[#7d6b56]">
+            Together, “Babel” and “Back” remind us to translate richly and to bring every verse back to life for anyone, anywhere.
+          </p>
+        </section>
+
         <section className="grid gap-4 md:grid-cols-2">
           {highlights.map((feature) => (
             <div key={feature.title} className="rounded-3xl border border-[#dbd0ba]/60 bg-white/92 px-5 py-6 shadow-[0_16px_40px_rgba(74,63,53,0.1)]">
@@ -114,22 +144,31 @@ export default function AboutPage() {
         <section className="rounded-3xl border border-[#dbd0ba]/60 bg-[#fffaf2]/92 px-6 py-8 shadow-[0_18px_48px_rgba(74,63,53,0.1)] space-y-4">
           <h2 className="mobile-serif text-2xl font-semibold">Deep dive for nerds</h2>
           <p className="text-sm leading-relaxed text-[#7d6b56] max-w-3xl">
-            Building something handcrafted means obsessing over the details. If you like peeking under the hood, here are a few things we care about:
+            Curious about how things work? Here’s the high-level tour—see the README for deeper schematics.
           </p>
-          <ul className="space-y-3 text-sm text-[#7d6b56]">
-            <li className="flex gap-3">
-              <Icon name="shield-check" className="mt-[2px] text-[#a67c52]" />
-              <span>Uploads stream straight to your browser session; we sign playback links per session but don’t persist audio once you close the tab.</span>
-            </li>
-            <li className="flex gap-3">
-              <Icon name="database" className="mt-[2px] text-[#a67c52]" />
-              <span>Your library lives in IndexedDB, so it loads instantly and works offline.</span>
-            </li>
-            <li className="flex gap-3">
-              <Icon name="bug" className="mt-[2px] text-[#a67c52]" />
-              <span>Enable debug mode (`localStorage.setItem('bb:debug','1')`) to see buffer progress, signed URLs, and cache hits—handy for contributors.</span>
-            </li>
-          </ul>
+          <div className="grid gap-4 md:grid-cols-3 text-sm text-[#7d6b56]">
+            <div className="rounded-2xl border border-[#dbd0ba]/50 bg-white/85 p-4 shadow-[0_10px_26px_rgba(74,63,53,0.08)]">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="circuit-board" className="text-[#a67c52]" />
+                <span className="font-semibold">Architecture</span>
+              </div>
+              <p className="leading-relaxed">Next.js App Router on Vercel serves both UI and serverless APIs. Upload, analysis, and downloads share the same edge-friendly stack.</p>
+            </div>
+            <div className="rounded-2xl border border-[#dbd0ba]/50 bg-white/85 p-4 shadow-[0_10px_26px_rgba(74,63,53,0.08)]">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="brain" className="text-[#a67c52]" />
+                <span className="font-semibold">Analysis pipeline</span>
+              </div>
+              <p className="leading-relaxed">Audio uploads stream to GCS; Gemini generates lyrics, translations, and meaning. Seeds are cached so favorite songs open instantly.</p>
+            </div>
+            <div className="rounded-2xl border border-[#dbd0ba]/50 bg-white/85 p-4 shadow-[0_10px_26px_rgba(74,63,53,0.08)]">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name="shield-check" className="text-[#a67c52]" />
+                <span className="font-semibold">Data + quality</span>
+              </div>
+              <p className="leading-relaxed">Processed songs stay in IndexedDB on your device, and Playwright/Jest keep regressions in check before we ship.</p>
+            </div>
+          </div>
         </section>
       </div>
     </main>
