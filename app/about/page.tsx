@@ -28,15 +28,15 @@ const highlights = [
 const values = [
   {
     kicker: 'Curiosity first',
-    body: 'BabelBack began as a way to make lyrics from other languages feel approachable. Every UI decision leans into warmth, serif typography, and minimal chrome so the story of the song stays in front.'
+    body: 'BabelBack began as a way to make unfamiliar lyrics feel welcoming. The parchment aesthetic and serif headings keep the story in focus, not the chrome around it.'
   },
   {
-    kicker: 'Own your library',
-    body: 'Analysed songs live in IndexedDB on your device. We sign media per session for security but never keep the audio once you close the tab.'
+    kicker: 'Always in the moment',
+    body: 'The player stays anchored while verses glide past, so you can read, listen, and practice without hunting for controls.'
   },
   {
-    kicker: 'Debug-friendly by design',
-    body: 'A single debug toggle surfaces buffer progress, signed URLs, and cache hits so future contributors can ship fast without guessing.'
+    kicker: 'Keep what resonates',
+    body: 'Your saved songs live right on your device. Reopen them instantly, change languages, and share the context with friends.'
   }
 ]
 
@@ -110,8 +110,28 @@ export default function AboutPage() {
             </Link>
           </div>
         </section>
+
+        <section className="rounded-3xl border border-[#dbd0ba]/60 bg-[#fffaf2]/92 px-6 py-8 shadow-[0_18px_48px_rgba(74,63,53,0.1)] space-y-4">
+          <h2 className="mobile-serif text-2xl font-semibold">Deep dive for nerds</h2>
+          <p className="text-sm leading-relaxed text-[#7d6b56] max-w-3xl">
+            Building something handcrafted means obsessing over the details. If you like peeking under the hood, here are a few things we care about:
+          </p>
+          <ul className="space-y-3 text-sm text-[#7d6b56]">
+            <li className="flex gap-3">
+              <Icon name="shield-check" className="mt-[2px] text-[#a67c52]" />
+              <span>Uploads stream straight to your browser session; we sign playback links per session but don’t persist audio once you close the tab.</span>
+            </li>
+            <li className="flex gap-3">
+              <Icon name="database" className="mt-[2px] text-[#a67c52]" />
+              <span>Your library lives in IndexedDB, so it loads instantly and works offline.</span>
+            </li>
+            <li className="flex gap-3">
+              <Icon name="bug" className="mt-[2px] text-[#a67c52]" />
+              <span>Enable debug mode (`localStorage.setItem('bb:debug','1')`) to see buffer progress, signed URLs, and cache hits—handy for contributors.</span>
+            </li>
+          </ul>
+        </section>
       </div>
     </main>
   )
 }
-
