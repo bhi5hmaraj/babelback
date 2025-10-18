@@ -21,6 +21,9 @@ export default function HomePage() {
             <Link href="/library" className="rounded-full border border-[#dbd0ba] px-4 py-2 hover:bg-white">
               My Library
             </Link>
+            <Link href="/about" className="rounded-full border border-[#dbd0ba] px-4 py-2 hover:bg-white">
+              About
+            </Link>
           </nav>
         </header>
 

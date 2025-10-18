@@ -117,6 +117,7 @@ export default function SongExplorerScreen() {
         <div className="flex items-center gap-2 text-xs font-semibold text-[#7d6b56]">
           <Link href="/" className="rounded-full border border-[#dbd0ba] px-3 py-1 hover:bg-white">Home</Link>
           <Link href="/library" className="rounded-full border border-[#dbd0ba] px-3 py-1 hover:bg-white">Library</Link>
+          <Link href="/about" className="rounded-full border border-[#dbd0ba] px-3 py-1 hover:bg-white">About</Link>
         </div>
         <div className="mx-2 flex-1 text-center">
           <h1 className="mobile-serif text-sm font-semibold leading-snug">
