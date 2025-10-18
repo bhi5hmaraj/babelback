@@ -39,6 +39,22 @@ export interface SongData {
   verses: Verse[];
 }
 
+export interface SeedSongPayload {
+  songData: SongData;
+  audioUrl?: string;
+  youtubeUrl?: string;
+  targetLanguage?: Language;
+  modelId?: string;
+  karaokeMode?: boolean;
+  tags?: string[];
+  gcsObject?: {
+    bucket: string;
+    path: string;
+    contentType?: string;
+    size?: number;
+  };
+}
+
 export interface PanelVisibility {
   lyrics: boolean; // Changed from 'transliteration' to 'lyrics' for combined view
   meaning: boolean;

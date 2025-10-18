@@ -22,10 +22,9 @@ export function trackEvent(name: string, props?: Props) {
       try {
         const q = /([?&])debug_view=1(&|$)/.test(location.search)
         const ls = localStorage.getItem('GA_DEBUG') === '1'
-        // Vite sets import.meta.env.DEV in development; guard access in try/catch
-        let dev = false
-        try { dev = Boolean((import.meta as any)?.env?.DEV) } catch {}
-        return Boolean(q || ls || dev || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        const dev = Boolean(process?.env?.NODE_ENV && process.env.NODE_ENV !== 'production')
+        const hostDebug = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        return Boolean(q || ls || dev || hostDebug)
       } catch { return false }
     })()
     if (isDebug) (p as any).debug_mode = true
