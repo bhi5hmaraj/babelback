@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react';
 import Icon from './Icon';
 import { AVAILABLE_MODELS } from '../constants'; // Assuming AVAILABLE_MODELS is an array of {id: string, name: string, description: string}

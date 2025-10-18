@@ -1,3 +1,4 @@
+"use client"
 
 import React from 'react';
 import { SingingScore, VerseSingingScore, SongData, Verse } from '../types'; // Added SongData, Verse

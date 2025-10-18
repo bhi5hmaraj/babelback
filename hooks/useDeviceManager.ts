@@ -19,20 +19,30 @@ export interface UseDeviceManagerReturn {
 export const useDeviceManager = (): UseDeviceManagerReturn => {
   const [inputDevices, setInputDevices] = useState<AudioDevice[]>([]);
   const [outputDevices, setOutputDevices] = useState<AudioDevice[]>([]);
-  const [selectedInputDeviceId, setSelectedInputDeviceIdInternal] = useState<string | null>(localStorage.getItem('babelback_selectedInputDeviceId') || null);
-  const [selectedOutputDeviceId, setSelectedOutputDeviceIdInternal] = useState<string | null>(localStorage.getItem('babelback_selectedOutputDeviceId') || null);
+  const getStoredDeviceId = (key: string) =>
+    typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+  const [selectedInputDeviceId, setSelectedInputDeviceIdInternal] = useState<string | null>(
+    getStoredDeviceId('babelback_selectedInputDeviceId'),
+  );
+  const [selectedOutputDeviceId, setSelectedOutputDeviceIdInternal] = useState<string | null>(
+    getStoredDeviceId('babelback_selectedOutputDeviceId'),
+  );
   const [deviceError, setDeviceError] = useState<string | null>(null);
   const [isLoadingDevices, setIsLoadingDevices] = useState<boolean>(true);
   const [permissionGranted, setPermissionGranted] = useState<boolean>(false); // Initially false
 
   const setSelectedInputDeviceId = (deviceId: string) => {
     setSelectedInputDeviceIdInternal(deviceId);
-    localStorage.setItem('babelback_selectedInputDeviceId', deviceId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('babelback_selectedInputDeviceId', deviceId);
+    }
   };
 
   const setSelectedOutputDeviceId = (deviceId: string) => {
     setSelectedOutputDeviceIdInternal(deviceId);
-    localStorage.setItem('babelback_selectedOutputDeviceId', deviceId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('babelback_selectedOutputDeviceId', deviceId);
+    }
   };
 
 
@@ -112,11 +122,19 @@ export const useDeviceManager = (): UseDeviceManagerReturn => {
   }, [selectedInputDeviceId, selectedOutputDeviceId, permissionGranted]); // Added permissionGranted
 
   useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices) {
+      setIsLoadingDevices(false);
+      setDeviceError(
+        'Audio device APIs are unavailable in this environment. Please switch to a browser that supports navigator.mediaDevices.',
+      );
+      return () => {};
+    }
+
     const handleDeviceChange = () => {
       fetchDevices(); // Call fetchDevices without arguments or with a default
     };
 
-    fetchDevices(); 
+    fetchDevices();
     navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);

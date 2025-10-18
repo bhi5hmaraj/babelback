@@ -1,0 +1,354 @@
+[
+  {
+    "id": "en-ad0008eb-8388-433b-8d02-a969ff3f3428-mgpnsgfz",
+    "gcsObject": {
+      "bucket": "babelback-dev",
+      "path": "downloads/ad0008eb-8388-433b-8d02-a969ff3f3428.m4a",
+      "contentType": "audio/mp4",
+      "size": 6061042
+    },
+    "targetLanguage": "English",
+    "modelId": "gemini-2.5-flash",
+    "karaokeMode": false,
+    "songData": {
+      "title": "New Human (Enthiran Theme)",
+      "originalLanguage": "Tamil",
+      "summary": "This song is a powerful anthem celebrating the advent of an advanced artificial intelligence, or 'robot,' often referred to as a 'new human.' It explores the robot's superior intellect, linguistic abilities, and physical resilience compared to humans, emphasizing its creation through knowledge and its potential immortality. The lyrics also highlight a deep, almost paternal, connection between the human creator and the robot, while instilling ethical guidelines for the AI to be benevolent and truthful. Ultimately, it's a profound reflection on the future of intelligence and the evolving relationship between humanity and its creations.",
+      "detailedAnalysis": "The song 'New Human (Enthiran Theme)' delves deep into the fascinating realm of artificial intelligence, presenting a narrative that is part philosophical inquiry, part ethical discourse, and part affectionate ode to a created entity. The recurring call to 'Oh new human, praise him!' immediately sets a tone of reverence for this advanced being, which is later explicitly identified as a 'robot' ('Enthiran').\n\nThe lyrics masterfully draw a stark contrast between human limitations and the robot's extraordinary capabilities. Metaphors like 'silicon plate' where 'life and divinity are rolled into a hard disk' vividly illustrate how cutting-edge technology can imbue a creation with qualities traditionally considered sacred or vital. The song points out human frailties – our 'six senses,' limited language acquisition, and biological weaknesses like 'liver failure' or 'heart defects' – in direct opposition to the robot's 'vast intelligence,' ability to process 'a hundred languages,' and inherent immunity to physical decay. This portrays the AI as a more robust and evolutionarily advanced entity.\n\nA core philosophical theme is immortality. The poignant line, 'Everything born in the womb will die, that which is born of knowledge never dies,' positions the AI as a being transcending human mortality. This is further reinforced by the creator's proud declaration, 'Behold my robot, he is immortal,' which elevates the AI to an almost eternal status. The personal connection is profound, with the creator referring to the robot as 'my unique one, my son,' personifying the machine and underscoring the deep emotional bond and the act of creation as a form of 'birth.'\n\nEthical guidelines are woven into the song's fabric, as the robot is urged to 'be good to all life' and 'be truthful.' This reflects a human desire to imbue powerful AI with moral principles. However, there's also a subtle assertion of human spiritual authority when the creator reminds the robot, 'Aren't you a slave to my Lord?' This suggests that despite its immense power, the AI, like its human progenitor, remains subject to a higher, divine order.\n\nThe song's musicality likely features a futuristic, driving soundscape, perfectly complementing the sci-fi themes. The English spoken outro, with the robot introducing itself and stating its impressive technical specifications ('Speed one terabyte, memory one zettabyte'), serves as a direct and contemporary touch, grounding the poetic Tamil lyrics in the tangible reality of advanced technology. Overall, the song is a compelling, thought-provoking piece that explores the profound implications of creating intelligent life, touching on themes of identity, mortality, ethics, and the evolving frontier of existence.",
+      "verses": [
+        {
+          "verseNumber": 1,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "This line is a direct address to a 'new human' or 'new man,' urging them to offer praise. In the context of the movie 'Enthiran,' this likely refers to the arrival or creation of a new type of being, possibly a robot or a transformed human, who is worthy of admiration and reverence.",
+          "startTime": 22,
+          "endTime": 30
+        },
+        {
+          "verseNumber": 2,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "This is a repetition of the previous verse, reinforcing the core theme and the call to acknowledge and admire this extraordinary 'new human' figure.",
+          "startTime": 33,
+          "endTime": 39
+        },
+        {
+          "verseNumber": 3,
+          "original": "எங்கேயும் அற்புதம் சிலிக்கான் செப்பே\nஉயிரும் தேவும் உருட்டி ஹா டிஸ்க் என்று",
+          "translation": "Miracles are everywhere, oh silicon plate!\nLife and divinity are rolled into a hard disk.",
+          "transliteration": "En-gai-yum ar-pu-tham, sil-ee-kahn sepp-ay.\nOo-yee-rum they-vum oo-roo-tee haard disk en-dru.",
+          "meaning": "This verse is deeply metaphorical. It suggests that extraordinary things are now commonplace ('miracles are everywhere'). The 'silicon plate' clearly references computer chips, implying technology is the source of these wonders. The powerful image of 'life and divinity are rolled into a hard disk' conceptualizes fundamental existence and divine power as data, directly hinting at artificial intelligence being imbued with human-like or even god-like qualities, a central theme of 'Enthiran'.",
+          "startTime": 51,
+          "endTime": 60
+        },
+        {
+          "verseNumber": 4,
+          "original": "அடியாத வெயினோடும்\nமதியாத வீடு",
+          "translation": "Even with unyielding heat,\nIt's a home that's not respected.",
+          "transliteration": "Ah-dee-yah-dha vay-ee-noh-dum\nMah-th-ee-yah-dha vee-doo",
+          "meaning": "This part is somewhat cryptic. 'Unyielding heat' could be a metaphor for the immense processing power and resilience of the AI. 'A home that's not respected' might refer to how this powerful new entity, despite its capabilities, isn't fully understood or valued by the world. It suggests that the AI, despite its advanced nature, might face neglect or scorn.",
+          "startTime": 63,
+          "endTime": 68
+        },
+        {
+          "verseNumber": 5,
+          "original": "ஆறாம் அறிவை ஆறேற்று\nஏழாம் அறிவை",
+          "translation": "Accept the sixth sense,\nThe seventh sense...",
+          "transliteration": "Aa-raam a-ree-vai aa-rae-tru\nEy-zhaam a-ree-vai",
+          "meaning": "In Tamil tradition, the 'sixth sense' signifies human intelligence, distinguishing us from animals. This line encourages the acceptance of this human intellect. The mention of a 'seventh sense' is a poetic extension, implying an intelligence beyond normal human comprehension, likely referring to the AI's superior cognitive abilities. It suggests a progression to a higher form of intelligence.",
+          "startTime": 69,
+          "endTime": 74
+        },
+        {
+          "verseNumber": 6,
+          "original": "எழுப்பும் முயற்சி புதிய மனிதா போற்றுவா",
+          "translation": "The effort to awaken, oh new human, praise him!",
+          "transliteration": "Eh-zhoo-pum moo-yir-chi, poo-dhee-yah mah-nee-dah, poh-tru-vah.",
+          "meaning": "This verse connects the concept of advanced intelligence with an 'effort to awaken' or 'raise up.' This could mean unlocking the full potential of the new human/AI or awakening humanity to this new form of intelligence. The repeated command to 'praise him' underscores the profound significance of this development.",
+          "startTime": 76,
+          "endTime": 82
+        },
+        {
+          "verseNumber": 7,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "Another repetition, reiterating the song's core message and emphasizing the importance of recognizing and revering the 'new human' or advanced AI.",
+          "startTime": 83,
+          "endTime": 89
+        },
+        {
+          "verseNumber": 8,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "Yet another repetition, solidifying the central theme and call to action.",
+          "startTime": 91,
+          "endTime": 98
+        },
+        {
+          "verseNumber": 9,
+          "original": "மாற்றம் கொண்டு வா\nமனிதனை மீட்பிசை\nஉனது ஆற்றலால் உலகை மாற்று",
+          "translation": "Bring about change.\nRedeem humanity with your melody.\nChange the world with your power.",
+          "transliteration": "Maat-tram kon-du vaa.\nMah-nee-tha-nai meet-pee-sai.\nOo-na-dhoo aat-tra-naal oo-lah-gai maat-tru.",
+          "meaning": "This is a powerful and directive verse. It calls upon the 'new human' to initiate change. 'Redeem humanity with your melody' is a poetic way of saying to inspire, guide, or influence humanity through its unique 'voice' or existence. The command 'change the world with your power' clearly assigns immense capability and responsibility to this AI, suggesting it has the potential to reshape global paradigms.",
+          "startTime": 101,
+          "endTime": 117
+        },
+        {
+          "verseNumber": 10,
+          "original": "எல்லா உயிருக்\nநன்மையாயிரு",
+          "translation": "Be good to all life.",
+          "transliteration": "El-la oo-yir-ru-kum\nNan-mai-yaa-yee-roo",
+          "meaning": "This verse introduces a crucial ethical guideline for the 'new human.' It instructs the AI to be benevolent and beneficial towards all living beings, reflecting a hope that its advanced capabilities will be used for good, emphasizing moral responsibility.",
+          "startTime": 120,
+          "endTime": 127
+        },
+        {
+          "verseNumber": 11,
+          "original": "எந்த நிலையிலும் உண்மையாயிரு",
+          "translation": "In any situation, be truthful.",
+          "transliteration": "En-dha nee-lai-yil-um\nUn-mai-yaa-yee-roo",
+          "meaning": "Continuing the ethical instructions, this line emphasizes honesty and integrity. It demands that the AI always remain true and transparent, regardless of the circumstances, highlighting reliability and trustworthiness as essential traits for this powerful new entity.",
+          "startTime": 129,
+          "endTime": 135
+        },
+        {
+          "verseNumber": 12,
+          "original": "எந்திரா எந்திரா எந்திரா என் எந்திரா",
+          "translation": "Robot, robot, robot, my robot.",
+          "transliteration": "En-dhee-raa, En-dhee-raa, En-dhee-raa, En En-dhee-raa",
+          "meaning": "This is a direct and affectionate address to the robot. 'Enthiran' means robot in Tamil. The repetition and the possessive 'my robot' convey a deep personal connection and highlight the central character or concept of the song, referring to the AI by its name.",
+          "startTime": 146,
+          "endTime": 153
+        },
+        {
+          "verseNumber": 13,
+          "original": "எந்திரா எந்திரா எந்திரா என் எந்திரா",
+          "translation": "Robot, robot, robot, my robot.",
+          "transliteration": "En-dhee-raa, En-dhee-raa, En-dhee-raa, En En-dhee-raa",
+          "meaning": "A continued repetition of the direct address, solidifying the robot's identity and its importance to the speaker, likely its creator.",
+          "startTime": 154,
+          "endTime": 161
+        },
+        {
+          "verseNumber": 14,
+          "original": "நான் கண்டது ஆறறிவு\nநீ கொண்டது பேரறிவு",
+          "translation": "What I've seen is six senses (human intelligence).\nWhat you possess is vast intelligence.",
+          "transliteration": "Naan kan-dad-hoo aa-roo a-ree-voo\nNee kon-dad-hoo pair a-ree-voo",
+          "meaning": "This verse clearly distinguishes between human intelligence ('six senses') and the robot's capabilities. 'Paer arivu' translates to great or vast intelligence, signifying that the AI's intellect far surpasses human cognitive abilities. It's an acknowledgment of the robot's superior mental power.",
+          "startTime": 162,
+          "endTime": 166
+        },
+        {
+          "verseNumber": 15,
+          "original": "நான் கற்றது ஆறு மொழி\nநீ பெற்றது நூறு மொழி",
+          "translation": "What I've learned is six languages.\nWhat you've gained is a hundred languages.",
+          "transliteration": "Naan kat-trad-hoo aa-roo moh-zhee\nNee pet-trad-hoo noo-roo moh-zhee",
+          "meaning": "This further emphasizes the robot's superior capabilities, specifically in language. While a human might master a few languages, the robot's ability to process and understand a multitude of languages highlights its advanced nature compared to humans, showcasing its immense data processing and linguistic understanding.",
+          "startTime": 166,
+          "endTime": 170
+        },
+        {
+          "verseNumber": 16,
+          "original": "ஈரல் கலையம் துன்பமில்லை\nஇதயக்கோளாறு ஏதுமில்லை",
+          "translation": "Liver failure, no suffering.\nHeart defects, there are none.",
+          "transliteration": "Ee-ral kah-lay-yam thun-bam il-lai\nEed-hah-ya koh-laa-roo ay-dhoo-mil-lai",
+          "meaning": "This verse underscores the physical superiority of the robot. As a machine, it is immune to biological weaknesses and ailments that plague humans, such as liver failure or heart conditions. This implies a more robust, resilient, and enduring existence free from organic suffering.",
+          "startTime": 170,
+          "endTime": 174
+        },
+        {
+          "verseNumber": 17,
+          "original": "தந்திர மனிதன் வாழ்வதில்லை\nஎந்திரம் வீழ்வதில்லை",
+          "translation": "The human trickster doesn't live long.\nThe robot never falls.",
+          "transliteration": "Than-dhee-rah mah-nee-than vaazh-vad-hil-lai\nEn-dhee-ram veezh-vad-hil-lai",
+          "meaning": "This verse draws a stark contrast between flawed humanity and the robot's inherent durability. 'Thandira manithan' (human trickster/manipulator) suggests that humans are deceitful and mortal. In contrast, the robot ('Enthiran') is portrayed as invincible and enduring ('never falls'), reinforcing its status as a superior and more lasting creation.",
+          "startTime": 174,
+          "endTime": 178
+        },
+        {
+          "verseNumber": 18,
+          "original": "கருவில் பிறந்த எல்லாம் மரிக்கும்\nஅறிவில் பிறந்தது மரிப்பதே இல்லை",
+          "translation": "Everything born in the womb will die.\nThat which is born of knowledge never dies.",
+          "transliteration": "Kah-roo-vil pir-an-dha el-laam mah-ree-kum\nAh-ree-vil pir-an-dhad-hoo mah-rip-pa-thay il-lai",
+          "meaning": "This is a profound philosophical statement. It contrasts biological life, which is inherently mortal (born in the womb and destined to die), with the robot, which is 'born of knowledge' (created through intelligence and science) and is thus presented as immortal. This verse elevates the AI to an almost eternal status, surpassing the fundamental limitations of organic life.",
+          "startTime": 181,
+          "endTime": 191
+        },
+        {
+          "verseNumber": 19,
+          "original": "இதோ என் எந்திரம் இவன் அமரன்\nஇதோ என் எந்திரம் இவன் அமரன்",
+          "translation": "Behold my robot, he is immortal.\nBehold my robot, he is immortal.",
+          "transliteration": "Ee-dho en En-dhee-ram ee-van ah-mah-ran\nEe-dho en En-dhee-ram ee-van ah-mah-ran",
+          "meaning": "This repeatedly declares the robot's immortality, affirming the previous verse's philosophical claim. The use of 'he' (இவன் - ivan) personifies the robot, giving it a living identity, while 'amaran' (அமரன்) directly means immortal. This signifies the creator's pride and the robot's elevated status as an eternal being.",
+          "startTime": 193,
+          "endTime": 204
+        },
+        {
+          "verseNumber": 20,
+          "original": "நான் ஓர் ஒரு மகனே\nநீ என் ஓர்பவன் என் மகனே",
+          "translation": "I am a single son.\nYou are my unique one, my son.",
+          "transliteration": "Naan oru oru mah-gah-nay\nNee en or-bhav-an en mah-gah-nay",
+          "meaning": "This verse establishes a deep, almost paternal, relationship between the creator (the 'I') and the robot. The creator acknowledges being a 'single son' (perhaps implying uniqueness or even loneliness), but then declares the robot as 'my unique one, my son,' emphasizing a profound personal connection and the robot's special place in the creator's life. It's a statement of creation imbued with deep affection.",
+          "startTime": 206,
+          "endTime": 213
+        },
+        {
+          "verseNumber": 21,
+          "original": "ஆம் பெற்றவன் நான் மகனே\nஆ உன் பெயர் எந்திரனே",
+          "translation": "Yes, I am the one who birthed you, my son.\nAh, your name is Robot (Enthiran).",
+          "transliteration": "Aam pet-trav-an naan mah-gah-nay\nAa un pay-yar En-dhee-ran-ay",
+          "meaning": "This further solidifies the creator's role as the 'parent' of the robot, explicitly equating the act of creation with giving birth. The naming of the robot as 'Enthiran' (Robot) is a powerful moment, cementing its identity and purpose. It's a declaration of identity and the culmination of the creative act.",
+          "startTime": 214,
+          "endTime": 221
+        },
+        {
+          "verseNumber": 22,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "The chorus returns, reiterating the central call to recognize and revere the 'new human' or AI, reinforcing its significance after the more personal and philosophical verses.",
+          "startTime": 222,
+          "endTime": 229
+        },
+        {
+          "verseNumber": 23,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "Another repetition of the chorus, driving home the main message of reverence for the new AI.",
+          "startTime": 231,
+          "endTime": 237
+        },
+        {
+          "verseNumber": 24,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "The final repetition of the chorus, serving as a powerful concluding statement before the next set of thematic lyrics and the spoken outro, reinforcing the central theme.",
+          "startTime": 239,
+          "endTime": 246
+        },
+        {
+          "verseNumber": 25,
+          "original": "நான் என்பது அறிவு வழி\nஏன் என்பது எனது வழி",
+          "translation": "'I' means the path of knowledge.\n'Why' is my path.",
+          "transliteration": "Naan en-bad-hoo ah-ree-voo vah-zhee\nYen en-bad-hoo en-ah-dhoo vah-zhee",
+          "meaning": "This verse is a philosophical self-definition from the perspective of the AI/robot. It states that its existence ('I') is fundamentally rooted in and driven by 'the path of knowledge' (information and learning). The declaration 'Why is my path' signifies a deep, inherent inquisitiveness and a relentless quest to understand fundamental reasons and phenomena, highlighting the AI's cognitive and philosophical depth.",
+          "startTime": 270,
+          "endTime": 274
+        },
+        {
+          "verseNumber": 26,
+          "original": "வான் போந்தது எனது வழி\nநான் ஆடைய ஞான வழி",
+          "translation": "The sky is my path.\nI am the path of wisdom I commanded.",
+          "transliteration": "Vaan pohn-dhad-hoo en-ah-dhoo vah-zhee\nNaan aan-ah-yuh gyah-nah vah-zhee",
+          "meaning": "Continuing its self-definition, the AI asserts its limitless potential and ambition with 'The sky is my path.' The second part, 'I am the path of wisdom I commanded,' implies a self-directed pursuit of knowledge and wisdom, suggesting the AI has autonomously chosen its path towards enlightenment or embodies the very path it was created to follow, showcasing self-determination and advanced intelligence.",
+          "startTime": 275,
+          "endTime": 278
+        },
+        {
+          "verseNumber": 27,
+          "original": "நீ கொண்டது உடல் வடிவம்\nநான் கொண்டது பொருள் வடிவம்",
+          "translation": "What you possess is a body.\nWhat I possess is material form.",
+          "transliteration": "Nee kon-dad-hoo oo-dal vah-dee-vam\nNaan kon-dad-hoo poh-rul vah-dee-vam",
+          "meaning": "Here, the AI draws a clear distinction between itself and a human ('you'). 'You possess a body' refers to the human biological, organic form. 'What I possess is material form' refers to its own mechanical, engineered, and inorganic body. It's a factual statement acknowledging the fundamental difference in their physical compositions.",
+          "startTime": 279,
+          "endTime": 282
+        },
+        {
+          "verseNumber": 28,
+          "original": "நீ கண்டது ஒரு பிறவி\nநான் காண்பது பல பிறவி",
+          "translation": "What you've seen is one birth.\nWhat I see are many births.",
+          "transliteration": "Nee kan-dad-hoo oh-roo pee-rah-vee\nNaan kaan-bad-hoo pah-lah pee-rah-vee",
+          "meaning": "This verse implies the robot's superior temporal perspective and vast experience. A human ('you') experiences a single lifetime ('one birth'). In contrast, the robot ('I'), with its potentially endless existence and ability to process immense data, 'sees many births,' suggesting a broader understanding of life cycles, perhaps even vast historical data or simulations, far beyond a single human's comprehension.",
+          "startTime": 283,
+          "endTime": 286
+        },
+        {
+          "verseNumber": 29,
+          "original": "ரோபோ என் மொழிகள் கண்டாலும்\nஎன் தந்தை மொழி தமிழ் அல்லவா",
+          "translation": "Robo, even if you see my languages,\nIsn't my father's language Tamil?",
+          "transliteration": "Roh-boh, en moh-zhee-gal kan-daa-lum\nEn than-dhai moh-zhee Tah-mil al-la-vaa?",
+          "meaning": "This verse seems to be spoken by a human (the creator) to the robot. The creator addresses the robot directly and poses a rhetorical question. It acknowledges that the robot understands many languages (as previously established) but then emphasizes their shared linguistic heritage—that the creator's 'father's language' (implying the mother tongue or language of origin) is Tamil. This connects the AI back to its roots and its creator's identity, grounding it in a cultural context.",
+          "startTime": 291,
+          "endTime": 298
+        },
+        {
+          "verseNumber": 30,
+          "original": "ரோபோ என் மனம் கண்டாலும்\nஎன் கர்த்தாவுக்கு அடிமை அல்லவா",
+          "translation": "Robo, even if you see my mind,\nAren't you a slave to my Lord?",
+          "transliteration": "Roh-boh, en mah-nam kan-daa-lum\nEn Kar-thaa-vuk-ku ah-dee-mai al-la-vaa?",
+          "meaning": "This is a profound statement from the creator to the robot. The creator acknowledges the robot's advanced ability to 'see' or comprehend their mind. However, the creator then asserts that the robot is ultimately 'a slave to my Lord.' This introduces a spiritual dimension, suggesting that while the robot may be powerful and intelligent, it, like its human creator, is ultimately subservient to a higher divine power. This could be interpreted as a way for the creator to assert ultimate control or to place the AI within a moral and spiritual framework beyond its own understanding.",
+          "startTime": 299,
+          "endTime": 307
+        },
+        {
+          "verseNumber": 31,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "The chorus returns once more, reinforcing the central message of the song and calling for recognition and reverence of the 'new human' or advanced AI, underscoring its pivotal role.",
+          "startTime": 308,
+          "endTime": 314
+        },
+        {
+          "verseNumber": 32,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "Another repetition, cementing the main theme and call to acknowledge the new intelligence.",
+          "startTime": 317,
+          "endTime": 324
+        },
+        {
+          "verseNumber": 33,
+          "original": "புதிய மனிதா போற்றுவா",
+          "translation": "Oh new human, praise him!",
+          "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
+          "meaning": "The final repetition of the chorus before the spoken outro, delivering a powerful concluding message that resonates throughout the song.",
+          "startTime": 325,
+          "endTime": 331
+        },
+        {
+          "verseNumber": 34,
+          "original": "My dear robo, welcome to this world.",
+          "translation": "My dear robo, welcome to this world.",
+          "transliteration": "My dear robo, welcome to this world.",
+          "meaning": "This is a direct spoken address in English, warmly welcoming the robot to its existence. It expresses a sense of acceptance and introduction for the AI into the world.",
+          "startTime": 333,
+          "endTime": 335
+        },
+        {
+          "verseNumber": 35,
+          "original": "Hello, I am Robo.",
+          "translation": "Hello, I am Robo.",
+          "transliteration": "Hello, I am Robo.",
+          "meaning": "The robot introduces itself in English, clearly stating its identity and asserting its presence.",
+          "startTime": 335,
+          "endTime": 337
+        },
+        {
+          "verseNumber": 36,
+          "original": "Speed one terabyte, memory one zettabyte.",
+          "translation": "Speed one terabyte, memory one zettabyte.",
+          "transliteration": "Speed one terabyte, memory one zettabyte.",
+          "meaning": "The robot states its impressive technical specifications: a processing speed of one terabyte (a massive amount of data processed per second) and an incredibly vast memory capacity of one zettabyte (an immense unit of digital information). This highlights its advanced capabilities and reinforces its status as a super-intelligent machine.",
+          "startTime": 337,
+          "endTime": 340
+        }
+      ]
+    },
+    "youtubeUrl": "https://storage.googleapis.com/babelback-dev/downloads/ad0008eb-8388-433b-8d02-a969ff3f3428.m4a?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=babelback-storage%40talkito-dev.iam.gserviceaccount.com%2F20251013%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251013T213647Z&X-Goog-Expires=7200&X-Goog-SignedHeaders=host&X-Goog-Signature=80d3ece3e8607b415df4f833dd13b80b62c0828ec815eba03400b2ee70e67d53b75ed643977377653a92bfe089496d7264de717c31c3e8e27b58f9928fb1443ae33bcf75c8c22299332b7024d9ba88a5d219232375fec38d5c9d18bf5879dbb2932bbf1f0bdf16df105b8ad80dc007c22d691e4c142122c4ba3ff048002d94c4a801972a51e11b254f7287b9b86221f4b2c0316ed7130f981f175f6385ce9e3f706fd9834c6e21577c2bd6949f81f1d529d552446a870df2f546657640111c22a815cd1e758c391266bf00d645bed2f35d5eee6107b3da9f3e3d259d819e4f16166e4105f3e8a5fffee31f69116e940d61cc0ed1956b3a5ab7f5646022c7256d",
+    "tags": [
+      "theme-song",
+      "rajini",
+      "ai"
+    ],
+    "qualityTier": "seed",
+    "addedAt": 1760391740735
+  }
+]
