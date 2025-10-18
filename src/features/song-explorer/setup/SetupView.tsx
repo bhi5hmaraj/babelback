@@ -38,7 +38,7 @@ export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProce
   }
 
   return (
-    <div className={cn('mobile-brown-theme min-h-screen pb-24 text-[#4a3f35]')}>
+    <div className={cn('parchment-shell min-h-screen pb-24 text-[#4a3f35]')}>
       <div className="safe-top" />
       <div className="mx-auto mt-12 w-full max-w-xl rounded-[32px] parchment-card p-8 shadow-[0_20px_45px_rgba(74,63,53,0.15)] backdrop-blur">
         <h1 className="mt-1 text-3xl font-semibold">Start a New Session</h1>

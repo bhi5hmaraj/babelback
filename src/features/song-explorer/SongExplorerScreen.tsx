@@ -1,7 +1,6 @@
 "use client"
 import * as React from 'react'
 import Link from 'next/link'
-import { Libre_Baskerville, IBM_Plex_Mono, Lora } from 'next/font/google'
 import { ViewTabs, type ViewTier } from './components/ViewTabs'
 import { PlayerFooter } from './components/PlayerFooter'
 import { BasicView } from './views/BasicView'
@@ -19,10 +18,6 @@ import LoadingSpinner from '@/components/LoadingSpinner'
 import { dbg } from '@/lib/debug'
 
 import '@/styles/mobile-brown-theme.css'
-
-const libreBaskerville = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], variable: '--mobile-font-sans' })
-const lora = Lora({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--mobile-font-serif' })
-const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--mobile-font-mono' })
 
 export default function SongExplorerScreen() {
   const ctrl = useSongExplorerController()
@@ -106,7 +101,7 @@ export default function SongExplorerScreen() {
   }, [seedKey, ctrl.songData, ctrl.loadSeedById, ctrl.loadSeed])
 
   return (
-    <div className={cn('mobile-brown-theme flex h-screen flex-col text-[#4a3f35]', libreBaskerville.variable, lora.variable, ibmPlexMono.variable)}>
+    <div className={cn('parchment-shell flex h-screen flex-col text-[#4a3f35]')}>
       <audio
         ref={ctrl.audioRef}
         src={ctrl.audioSrc ?? undefined}

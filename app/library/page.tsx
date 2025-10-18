@@ -29,7 +29,7 @@ export default function LibraryPage() {
   }
 
   return (
-    <main className="mobile-brown-theme min-h-screen px-4 pb-16 pt-6 text-[#4a3f35]">
+    <main className="parchment-shell min-h-screen px-4 pb-16 pt-6 text-[#4a3f35]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Link href="/" className="mobile-serif text-3xl font-semibold tracking-tight">

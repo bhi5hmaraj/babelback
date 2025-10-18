@@ -1,21 +1,14 @@
 import React from 'react'
 import '@/styles/mobile-brown-theme.css'
 import Link from 'next/link'
-import { Libre_Baskerville, IBM_Plex_Mono, Lora } from 'next/font/google'
 import Icon from '@/components/Icon'
 import seedsData from '@/data/seed-songs.json'
-
-const libreBaskerville = Libre_Baskerville({ subsets: ['latin'], weight: ['400', '700'], variable: '--mobile-font-sans' })
-const lora = Lora({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--mobile-font-serif' })
-const ibmPlexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--mobile-font-mono' })
 
 const seedHighlights = seedsData.slice(0, 3)
 
 export default function HomePage() {
   return (
-    <main
-      className={`mobile-brown-theme min-h-screen px-4 pb-16 pt-8 text-[#4a3f35] ${libreBaskerville.variable} ${lora.variable} ${ibmPlexMono.variable}`}
-    >
+    <main className="parchment-shell min-h-screen px-4 pb-16 pt-8 text-[#4a3f35]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
         <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <Link href="/" className="mobile-serif text-3xl font-semibold tracking-tight">
