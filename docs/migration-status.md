@@ -17,6 +17,7 @@ _Updated: 2025-10-18_
 | Remove legacy prototype | 🔄 (babelback-109) | Cleanup once new screen is primary.
 | Integrate tabs/footer into legacy screen | 🔄 (babelback-106, babelback-107) | Needed only if legacy screen persists during migration.
 | Automate mobile seed regression | 🔄 (babelback-3) | Expand Playwright smoke into full regression.
+| Archive mobile prototype | ✅ | `components/song-explorer-mobile/MobileSongExplorerPrototype.tsx` removed from build; keep local copy if needed for reference.
 
 ## Debugging Cheat Sheet
 
