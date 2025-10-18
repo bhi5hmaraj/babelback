@@ -171,8 +171,8 @@ export function useSongExplorerController() {
       let playbackUrl = audioUrl
       if (bufferedBlob) {
         playbackUrl = URL.createObjectURL(bufferedBlob)
-      } else if (seed.gcsObject?.bucket && seed.gcsObject?.path) {
-        playbackUrl = `/api/media?bucket=${encodeURIComponent(seed.gcsObject.bucket)}&path=${encodeURIComponent(seed.gcsObject.path)}&mode=download`
+      } else {
+        setSeedBufferingPercent(null)
       }
 
       dbg('seed', 'analyze:url', playbackUrl)
