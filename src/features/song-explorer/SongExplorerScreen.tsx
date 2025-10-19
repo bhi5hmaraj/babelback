@@ -206,7 +206,7 @@ export default function SongExplorerScreen() {
                   />
                 </div>
                 {activeVerse && (
-                  <section className="mt-2 mb-3 rounded-2xl border border-[#dbd0ba] bg-white/80 p-3 overflow-y-auto h-[clamp(180px,36vh,300px)] scroll-parchment">
+                  <section className="mt-2 mb-3 rounded-2xl border border-[#dbd0ba] bg-white/80 p-3 overflow-y-auto min-h-[120px] max-h-[clamp(180px,32vh,260px)] scroll-parchment">
                     <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[#a67c52] mb-2">
                       Meaning & Context
                     </h3>

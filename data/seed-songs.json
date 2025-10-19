@@ -350,5 +350,223 @@
     ],
     "qualityTier": "seed",
     "addedAt": 1760391740735
+  },
+  {
+    "id": "en-829e423f-a713-4647-8474-3f098f77d62b-mgxe8n6v",
+    "gcsObject": {
+      "bucket": "babelback-dev",
+      "path": "downloads/829e423f-a713-4647-8474-3f098f77d62b.m4a",
+      "contentType": "audio/mp4",
+      "size": 3431260
+    },
+    "targetLanguage": "English",
+    "modelId": "gemini-2.5-pro",
+    "karaokeMode": false,
+    "songData": {
+      "title": "Waka Waka (Esto es África)",
+      "originalLanguage": "Spanish",
+      "summary": "This song is a super upbeat and motivational anthem, famously for the 2010 FIFA World Cup in South Africa. It's all about unity, overcoming challenges, and celebrating with infectious energy. It brilliantly blends Spanish lyrics with a traditional Cameroonian chant, creating a global hit that just makes you want to dance and feel invincible.",
+      "detailedAnalysis": "So, \"Waka Waka (Esto es África)\" is way more than just a catchy soccer song; it's a masterclass in cultural fusion. Shakira took a famous Cameroonian marching song, \"Zangaléwa\" by the group Golden Sounds, and built a global pop anthem around it. The Spanish lyrics she wrote are incredibly uplifting, all about breaking down barriers (\"the walls are falling\"), facing pressure with the support of your people, and giving it your all. It’s like the ultimate pep talk before a big game.\n\nThe magic is in how it combines this message with the original African chant. \"Waka Waka\" means \"Do It\" in a Cameroonian language, and the full chant \"Tsamina mina zangalewa\" roughly translates to a call-and-response from military drills. By placing this in the context of the World Cup, the song transforms a military cadence into a universal cheer for effort, celebration, and coming together. It perfectly captured the excitement of the first World Cup ever hosted on African soil, becoming a symbol of joy, resilience, and the vibrant spirit of the continent.",
+      "verses": [
+        {
+          "verseNumber": 1,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh",
+          "meaning": "This part kicks off the song with a super energetic chant. It's basically a rallying cry. \"Tsamina mina\" means \"Come on\" and \"Waka waka\" means \"Do it.\" It’s simple, direct, and immediately gets you pumped up.",
+          "startTime": 19,
+          "endTime": 22
+        },
+        {
+          "verseNumber": 2,
+          "original": "Tsamina mina zangalewa\nPorque esto es África",
+          "translation": "Come on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Sah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "This continues the chant. \"Zangalewa\" is a phrase from a Cameroonian soldiers' song that means \"Who sent you?\". Paired with \"Because this is Africa,\" it transforms from a military question into a powerful declaration of identity and celebration, setting the stage for the whole song.",
+          "startTime": 23,
+          "endTime": 26
+        },
+        {
+          "verseNumber": 3,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh",
+          "meaning": "The chant repeats here, really driving home that feeling of energy and encouragement. It's designed to be memorable and get everyone singing along, building up the hype.",
+          "startTime": 26,
+          "endTime": 29
+        },
+        {
+          "verseNumber": 4,
+          "original": "Tsamina mina zangalewa\nPorque esto es África",
+          "translation": "Come on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Sah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "One more time with the core chant before the verse starts. It solidifies the song's theme and roots the energy firmly in the spirit of Africa, making it clear what this celebration is all about.",
+          "startTime": 30,
+          "endTime": 33
+        },
+        {
+          "verseNumber": 5,
+          "original": "Llegó el momento, caen las murallas\nVa a comenzar la única justa de las batallas\nNo duele el golpe, no existe el miedo\nQuítate el polvo, ponte de pie y vuelves al ruedo",
+          "translation": "The moment has arrived, the walls are falling down\nThe only fair one of the battles is about to begin\nThe hit doesn't hurt, fear doesn't exist\nBrush off the dust, get on your feet and get back in the ring",
+          "transliteration": "Yeh-GOH el moh-MEN-toh, KAH-en lahs moo-RAH-yahs\nVah ah koh-men-SAR lah OO-nee-kah HOOS-tah deh lahs bah-TAH-yahs\nNoh DWEH-leh el GOL-peh, noh ex-EES-teh el mee-EH-doh\nKEE-tah-teh el POL-voh, PON-teh deh pee-EH ee vwel-ves ahl RWEH-doh",
+          "meaning": "This verse sets the scene for a big competition, like the World Cup. It's saying that barriers are breaking down and the ultimate, fair contest is starting. It's all about resilience and courage—telling you to not let setbacks or fear stop you. If you get knocked down, just shake it off and get right back into the fight.",
+          "startTime": 34,
+          "endTime": 48
+        },
+        {
+          "verseNumber": 6,
+          "original": "Y la presión se siente, espera en ti tu gente",
+          "translation": "And the pressure is felt, your people are waiting for you",
+          "transliteration": "Ee lah preh-see-OHN seh see-EN-teh, es-PEH-rah en tee too HEN-teh",
+          "meaning": "This line really captures the high-stakes atmosphere. It acknowledges the pressure of the moment but frames it in a positive way. It’s not just you out there; your entire community, country, and fans are behind you, counting on you. It's a powerful motivator.",
+          "startTime": 49,
+          "endTime": 56
+        },
+        {
+          "verseNumber": 7,
+          "original": "Ahora vamos por todo y te acompaña la fe\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "translation": "Now let's go for it all and faith accompanies you\nCome on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Ah-OH-rah VAH-mos por TOH-doh ee teh ah-kom-PAH-nyah lah feh\nSah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "This is the big push. It's a call to action to give everything you've got, backed by faith and belief. Then it explodes back into the main chorus chant, connecting that personal determination with the collective, celebratory energy of the entire continent.",
+          "startTime": 56,
+          "endTime": 63
+        },
+        {
+          "verseNumber": 8,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "The chorus repeats, solidifying itself as the heart of the song. It's an undeniable, infectious burst of energy that represents the spirit of the event and the continent.",
+          "startTime": 64,
+          "endTime": 71
+        },
+        {
+          "verseNumber": 9,
+          "original": "(Instrumental)",
+          "translation": "(Instrumental)",
+          "transliteration": "(Instrumental)",
+          "meaning": "This is a musical break that lets the vibrant, rhythmic energy of the song shine. It's a moment to dance and just soak in the celebratory atmosphere.",
+          "startTime": 71,
+          "endTime": 86
+        },
+        {
+          "verseNumber": 10,
+          "original": "Oye a tu dios y no estarás solo\nLlegas aquí para brillar, lo tienes todo\nLa hora se acerca, es el momento\nVas a ganar cada batalla, ya lo presiento",
+          "translation": "Listen to your god and you won't be alone\nYou've come here to shine, you have it all\nThe time is near, this is the moment\nYou're going to win every battle, I can already feel it",
+          "transliteration": "OH-yeh ah too dee-OHS ee noh es-tah-RAHS SOH-loh\nYEH-gahs ah-KEE PAH-rah bree-YAR, loh tee-EH-nes TOH-doh\nLah OH-rah seh ah-SER-kah, es el moh-MEN-toh\nVas ah gah-NAR KAH-dah bah-TAH-yah, yah loh preh-see-EN-toh",
+          "meaning": "This verse is pure inspiration. It’s about finding inner strength and feeling a sense of higher purpose, knowing you're not on this journey by yourself. It’s telling you that this is your time to shine, you have all the tools you need, and victory is within reach. It's an incredibly confident and empowering message.",
+          "startTime": 87,
+          "endTime": 101
+        },
+        {
+          "verseNumber": 11,
+          "original": "Hay que empezar de cero para tocar el cielo",
+          "translation": "You have to start from zero to touch the sky",
+          "transliteration": "Eye keh em-peh-SAR deh SEH-roh PAH-rah toh-KAR el see-EH-loh",
+          "meaning": "This is a beautiful line about the journey to success. It means you have to put in the hard work from the very beginning if you want to achieve the greatest heights. It acknowledges the grind and dedication required to reach your ultimate dream.",
+          "startTime": 102,
+          "endTime": 109
+        },
+        {
+          "verseNumber": 12,
+          "original": "Ahora vamos por todo y todos vamos por ellos\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "translation": "Now let's go for it all, and we're all going for them\nCome on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Ah-OH-rah VAH-mos por TOH-doh ee TOH-dohs VAH-mos por EH-yohs\nSah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "Here, the message shifts from individual effort to collective power. \"We're all going for them\" creates a sense of unity and shared purpose. Everyone is in it together, striving for the same goal, before launching back into the powerful chorus.",
+          "startTime": 109,
+          "endTime": 116
+        },
+        {
+          "verseNumber": 13,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nAnawa ah ah",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nIt's ours, ah ah",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nAh-NAH-wah ah ah",
+          "meaning": "This variation of the chorus adds \"Anawa,\" which means \"It's ours.\" This injects a feeling of ownership and impending victory into the chant. It's not just about trying; it's about claiming the prize.",
+          "startTime": 117,
+          "endTime": 124
+        },
+        {
+          "verseNumber": 14,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "The song returns to its core chorus, grounding the celebration once again in the powerful identity of Africa, reinforcing the theme of unity and continental pride.",
+          "startTime": 124,
+          "endTime": 131
+        },
+        {
+          "verseNumber": 15,
+          "original": "Awu wela majoni, bigi bigi mama, one eh to zed\nBathi susa la majoni, bigi bigi mama from east to west\nBathi waka waka ma eh eh, waka waka ma eh eh\nSendl' enam amasi wuyeh\nThis is Africa",
+          "translation": "The local soldiers are coming, big big mama, from A to Z\nPush the local soldiers, big big mama from east to west\nThey say do it do it, eh eh, do it do it, eh eh\nThe soldiers are here, where are you going?\nThis is Africa",
+          "transliteration": "Ah-woo WEH-lah mah-JOH-nee, BEE-gee BEE-gee MAH-mah, one eh to zed\nBah-thee SOO-sah lah mah-JOH-nee, BEE-gee BEE-gee MAH-mah from east to west\nBah-thee WAH-kah WAH-kah mah eh eh, WAH-kah WAH-kah mah eh eh\nSend-l' en-ahm ah-MAH-see woo-yeh\nThis is Africa",
+          "meaning": "This bridge is a direct nod to the original 'Zangaléwa' song, using its phrases and military march theme. It talks about soldiers (\"majoni\") on the move, covering ground and being urged forward. It's a tribute to the song's roots and reinforces the energetic, marching rhythm that drives the whole track, tying it all together with the definitive statement: \"This is Africa.\"",
+          "startTime": 132,
+          "endTime": 147
+        },
+        {
+          "verseNumber": 16,
+          "original": "(Vocal chants and ad-libs)",
+          "translation": "(Vocal chants and ad-libs)",
+          "transliteration": "(Vocal chants and ad-libs)",
+          "meaning": "This section is a freestyle-like celebration over the beat, with vocal runs and repetitions of the core chants. It builds excitement and feels like a spontaneous burst of joy and energy.",
+          "startTime": 147,
+          "endTime": 162
+        },
+        {
+          "verseNumber": 17,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nAnawa ah ah",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nIt's ours, ah ah",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nAh-NAH-wah ah ah",
+          "meaning": "The chorus returns with that confident \"Anawa\" (\"It's ours\"). As the song nears its end, this chant feels less like a hope and more like a statement of fact—a celebration of victory.",
+          "startTime": 162,
+          "endTime": 169
+        },
+        {
+          "verseNumber": 18,
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
+          "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "The final full run-through of the main chorus. It's the last big, collective shout, bringing everyone together one more time to celebrate the song's central message.",
+          "startTime": 170,
+          "endTime": 177
+        },
+        {
+          "verseNumber": 19,
+          "original": "Django, eh eh, Django, eh eh\nTsamina mina zangalewa, anawa ah ah",
+          "translation": "The sun shines, eh eh, the sun shines, eh eh\nCome on, come on, who asked you to come? It's ours, ah ah",
+          "transliteration": "JAHN-goh, eh eh, JAHN-goh, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah, ah-NAH-wah ah ah",
+          "meaning": "\"Django\" can mean \"the sun shines,\" so this part of the outro feels like a bright, triumphant finish. It's like the sun is rising on a new day of victory. Paired with the final declaration of \"It's ours,\" it’s a perfect, joyful conclusion.",
+          "startTime": 177,
+          "endTime": 184
+        },
+        {
+          "verseNumber": 20,
+          "original": "Django, eh eh, Django, eh eh\nTsamina mina zangalewa, anawa ah ah",
+          "translation": "The sun shines, eh eh, the sun shines, eh eh\nCome on, come on, who asked you to come? It's ours, ah ah",
+          "transliteration": "JAHN-goh, eh eh, JAHN-goh, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah, ah-NAH-wah ah ah",
+          "meaning": "The triumphant chant repeats as the song begins to fade, leaving the listener on a high note of pure celebration and success.",
+          "startTime": 185,
+          "endTime": 192
+        },
+        {
+          "verseNumber": 21,
+          "original": "Porque esto es África\nPorque esto es África",
+          "translation": "Because this is Africa\nBecause this is Africa",
+          "transliteration": "Por-keh ES-toh es AH-free-kah\nPor-keh ES-toh es AH-free-kah",
+          "meaning": "The song fades out with its most important line. It's the final word, reminding everyone of the pride, power, and spirit of the continent that the entire song is celebrating.",
+          "startTime": 192,
+          "endTime": 212
+        }
+      ]
+    },
+    "youtubeUrl": "https://storage.googleapis.com/babelback-dev/downloads/829e423f-a713-4647-8474-3f098f77d62b.m4a?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=babelback-storage%40talkito-dev.iam.gserviceaccount.com%2F20251019%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251019T073201Z&X-Goog-Expires=7200&X-Goog-SignedHeaders=host&X-Goog-Signature=3613306df052f56bd1864b9beaa7cc34807445af1665aa6f9a98a380e35fb325e9ee57af1f52ab079668db193f7c9e31ce2c2bf658d491e3f60bbb7ed4920c6b93c6e490a174937ba1a6557a3541f9c1e690050be254a2ee9f5d36d5bf113d32b310f589ea815233f5c5280dbc77bbc2d00ed22b004972e66e3bf4774ad4bf486d685e178fbd7d5b81b867820060ca6d81caa7c6430a47afd6b99c3ba34ea5cbee1bc896044ee3fc755281788bfafafbc2748e7f29f35f305e6f3eedbbe11951763daf3b2ed948b00ab87d4982ea79b3fac1aabf3c2da9523c78a6302687adc91dae41781ab860d9dfcaaeb00afafb5ab69d895d777a345efdcd604509d69f81",
+    "notes": "pepy, Shakira, Anthem",
+    "tags": [
+      "pepy",
+      "Shakira",
+      "Anthem"
+    ],
+    "qualityTier": "seed",
+    "addedAt": 1760859429224
   }
 ]
