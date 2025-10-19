@@ -1,7 +1,6 @@
 import '../_lib/loadEnv'
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
-import { getRedis } from '../_lib/redis'
 import type { Language, SongData } from '@/types'
 import fallbackSeedsData from '@/data/seed-songs.json'
 
@@ -28,50 +27,15 @@ interface SeedSong {
   cacheKey: string
 }
 
-/**
- * GET /api/seeds
- * Returns list of available seed songs from Redis
- */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const redis = await getRedis()
-    if (!redis) {
-      const fallback = fallbackSeedsData.map(toSeedSongFromRecord)
-      fallback.sort((a, b) => a.title.localeCompare(b.title))
-      console.log('[seeds] Redis unavailable, serving', fallback.length, 'seed songs from static cache')
-      return NextResponse.json({ seeds: fallback, count: fallback.length, source: 'static' })
-    }
-
-    // Get all analysis cache keys that are seeds
-    const allKeys = await redis.keys('analysis:gcs:*')
-    const seeds: SeedSong[] = []
-
-    for (const key of allKeys) {
-      try {
-        const raw = await redis.get(key)
-        if (!raw) continue
-
-        const record = JSON.parse(raw)
-
-        // Only include seeds
-        if (!record.isSeed) continue
-
-        seeds.push(toSeedSongFromRecord(record, key))
-      } catch (err) {
-        console.error('[seeds] Failed to parse seed:', key, err)
-      }
-    }
-
-    // Sort by title
+    const seeds = fallbackSeedsData.map((record) => toSeedSongFromRecord(record))
     seeds.sort((a, b) => a.title.localeCompare(b.title))
-
-    console.log('[seeds] Returning', seeds.length, 'seed songs')
-
-    return NextResponse.json({ seeds, count: seeds.length, source: 'redis' })
+    return NextResponse.json({ seeds, count: seeds.length, source: 'manifest' })
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
-    console.error('[seeds] Error fetching seeds:', msg)
-    return NextResponse.json({ error: 'Failed to fetch seed songs', details: msg }, { status: 500 })
+    console.error('[seeds] Error loading manifest:', msg)
+    return NextResponse.json({ error: 'Failed to load seeds', details: msg }, { status: 500 })
   }
 }
 

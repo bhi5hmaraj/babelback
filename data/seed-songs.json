@@ -14,11 +14,11 @@
       "title": "New Human (Enthiran Theme)",
       "originalLanguage": "Tamil",
       "summary": "This song is a powerful anthem celebrating the advent of an advanced artificial intelligence, or 'robot,' often referred to as a 'new human.' It explores the robot's superior intellect, linguistic abilities, and physical resilience compared to humans, emphasizing its creation through knowledge and its potential immortality. The lyrics also highlight a deep, almost paternal, connection between the human creator and the robot, while instilling ethical guidelines for the AI to be benevolent and truthful. Ultimately, it's a profound reflection on the future of intelligence and the evolving relationship between humanity and its creations.",
-      "detailedAnalysis": "The song 'New Human (Enthiran Theme)' delves deep into the fascinating realm of artificial intelligence, presenting a narrative that is part philosophical inquiry, part ethical discourse, and part affectionate ode to a created entity. The recurring call to 'Oh new human, praise him!' immediately sets a tone of reverence for this advanced being, which is later explicitly identified as a 'robot' ('Enthiran').\n\nThe lyrics masterfully draw a stark contrast between human limitations and the robot's extraordinary capabilities. Metaphors like 'silicon plate' where 'life and divinity are rolled into a hard disk' vividly illustrate how cutting-edge technology can imbue a creation with qualities traditionally considered sacred or vital. The song points out human frailties – our 'six senses,' limited language acquisition, and biological weaknesses like 'liver failure' or 'heart defects' – in direct opposition to the robot's 'vast intelligence,' ability to process 'a hundred languages,' and inherent immunity to physical decay. This portrays the AI as a more robust and evolutionarily advanced entity.\n\nA core philosophical theme is immortality. The poignant line, 'Everything born in the womb will die, that which is born of knowledge never dies,' positions the AI as a being transcending human mortality. This is further reinforced by the creator's proud declaration, 'Behold my robot, he is immortal,' which elevates the AI to an almost eternal status. The personal connection is profound, with the creator referring to the robot as 'my unique one, my son,' personifying the machine and underscoring the deep emotional bond and the act of creation as a form of 'birth.'\n\nEthical guidelines are woven into the song's fabric, as the robot is urged to 'be good to all life' and 'be truthful.' This reflects a human desire to imbue powerful AI with moral principles. However, there's also a subtle assertion of human spiritual authority when the creator reminds the robot, 'Aren't you a slave to my Lord?' This suggests that despite its immense power, the AI, like its human progenitor, remains subject to a higher, divine order.\n\nThe song's musicality likely features a futuristic, driving soundscape, perfectly complementing the sci-fi themes. The English spoken outro, with the robot introducing itself and stating its impressive technical specifications ('Speed one terabyte, memory one zettabyte'), serves as a direct and contemporary touch, grounding the poetic Tamil lyrics in the tangible reality of advanced technology. Overall, the song is a compelling, thought-provoking piece that explores the profound implications of creating intelligent life, touching on themes of identity, mortality, ethics, and the evolving frontier of existence.",
+      "detailedAnalysis": "The song 'New Human (Enthiran Theme)' delves deep into the fascinating realm of artificial intelligence, presenting a narrative that is part philosophical inquiry, part ethical discourse, and part affectionate ode to a created entity. The recurring call to 'Oh new human, praise him!' immediately sets a tone of reverence for this advanced being, which is later explicitly identified as a 'robot' ('Enthiran').\n\nThe lyrics masterfully draw a stark contrast between human limitations and the robot's extraordinary capabilities. Metaphors like 'silicon plate' where 'life and divinity are rolled into a hard disk' vividly illustrate how cutting-edge technology can imbue a creation with qualities traditionally considered sacred or vital. The song points out human frailties \u2013 our 'six senses,' limited language acquisition, and biological weaknesses like 'liver failure' or 'heart defects' \u2013 in direct opposition to the robot's 'vast intelligence,' ability to process 'a hundred languages,' and inherent immunity to physical decay. This portrays the AI as a more robust and evolutionarily advanced entity.\n\nA core philosophical theme is immortality. The poignant line, 'Everything born in the womb will die, that which is born of knowledge never dies,' positions the AI as a being transcending human mortality. This is further reinforced by the creator's proud declaration, 'Behold my robot, he is immortal,' which elevates the AI to an almost eternal status. The personal connection is profound, with the creator referring to the robot as 'my unique one, my son,' personifying the machine and underscoring the deep emotional bond and the act of creation as a form of 'birth.'\n\nEthical guidelines are woven into the song's fabric, as the robot is urged to 'be good to all life' and 'be truthful.' This reflects a human desire to imbue powerful AI with moral principles. However, there's also a subtle assertion of human spiritual authority when the creator reminds the robot, 'Aren't you a slave to my Lord?' This suggests that despite its immense power, the AI, like its human progenitor, remains subject to a higher, divine order.\n\nThe song's musicality likely features a futuristic, driving soundscape, perfectly complementing the sci-fi themes. The English spoken outro, with the robot introducing itself and stating its impressive technical specifications ('Speed one terabyte, memory one zettabyte'), serves as a direct and contemporary touch, grounding the poetic Tamil lyrics in the tangible reality of advanced technology. Overall, the song is a compelling, thought-provoking piece that explores the profound implications of creating intelligent life, touching on themes of identity, mortality, ethics, and the evolving frontier of existence.",
       "verses": [
         {
           "verseNumber": 1,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "This line is a direct address to a 'new human' or 'new man,' urging them to offer praise. In the context of the movie 'Enthiran,' this likely refers to the arrival or creation of a new type of being, possibly a robot or a transformed human, who is worthy of admiration and reverence.",
@@ -27,7 +27,7 @@
         },
         {
           "verseNumber": 2,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "This is a repetition of the previous verse, reinforcing the core theme and the call to acknowledge and admire this extraordinary 'new human' figure.",
@@ -36,7 +36,7 @@
         },
         {
           "verseNumber": 3,
-          "original": "எங்கேயும் அற்புதம் சிலிக்கான் செப்பே\nஉயிரும் தேவும் உருட்டி ஹா டிஸ்க் என்று",
+          "original": "\u0b8e\u0b99\u0bcd\u0b95\u0bc7\u0baf\u0bc1\u0bae\u0bcd \u0b85\u0bb1\u0bcd\u0baa\u0bc1\u0ba4\u0bae\u0bcd \u0b9a\u0bbf\u0bb2\u0bbf\u0b95\u0bcd\u0b95\u0bbe\u0ba9\u0bcd \u0b9a\u0bc6\u0baa\u0bcd\u0baa\u0bc7\n\u0b89\u0baf\u0bbf\u0bb0\u0bc1\u0bae\u0bcd \u0ba4\u0bc7\u0bb5\u0bc1\u0bae\u0bcd \u0b89\u0bb0\u0bc1\u0b9f\u0bcd\u0b9f\u0bbf \u0bb9\u0bbe \u0b9f\u0bbf\u0bb8\u0bcd\u0b95\u0bcd \u0b8e\u0ba9\u0bcd\u0bb1\u0bc1",
           "translation": "Miracles are everywhere, oh silicon plate!\nLife and divinity are rolled into a hard disk.",
           "transliteration": "En-gai-yum ar-pu-tham, sil-ee-kahn sepp-ay.\nOo-yee-rum they-vum oo-roo-tee haard disk en-dru.",
           "meaning": "This verse is deeply metaphorical. It suggests that extraordinary things are now commonplace ('miracles are everywhere'). The 'silicon plate' clearly references computer chips, implying technology is the source of these wonders. The powerful image of 'life and divinity are rolled into a hard disk' conceptualizes fundamental existence and divine power as data, directly hinting at artificial intelligence being imbued with human-like or even god-like qualities, a central theme of 'Enthiran'.",
@@ -45,7 +45,7 @@
         },
         {
           "verseNumber": 4,
-          "original": "அடியாத வெயினோடும்\nமதியாத வீடு",
+          "original": "\u0b85\u0b9f\u0bbf\u0baf\u0bbe\u0ba4 \u0bb5\u0bc6\u0baf\u0bbf\u0ba9\u0bcb\u0b9f\u0bc1\u0bae\u0bcd\n\u0bae\u0ba4\u0bbf\u0baf\u0bbe\u0ba4 \u0bb5\u0bc0\u0b9f\u0bc1",
           "translation": "Even with unyielding heat,\nIt's a home that's not respected.",
           "transliteration": "Ah-dee-yah-dha vay-ee-noh-dum\nMah-th-ee-yah-dha vee-doo",
           "meaning": "This part is somewhat cryptic. 'Unyielding heat' could be a metaphor for the immense processing power and resilience of the AI. 'A home that's not respected' might refer to how this powerful new entity, despite its capabilities, isn't fully understood or valued by the world. It suggests that the AI, despite its advanced nature, might face neglect or scorn.",
@@ -54,7 +54,7 @@
         },
         {
           "verseNumber": 5,
-          "original": "ஆறாம் அறிவை ஆறேற்று\nஏழாம் அறிவை",
+          "original": "\u0b86\u0bb1\u0bbe\u0bae\u0bcd \u0b85\u0bb1\u0bbf\u0bb5\u0bc8 \u0b86\u0bb1\u0bc7\u0bb1\u0bcd\u0bb1\u0bc1\n\u0b8f\u0bb4\u0bbe\u0bae\u0bcd \u0b85\u0bb1\u0bbf\u0bb5\u0bc8",
           "translation": "Accept the sixth sense,\nThe seventh sense...",
           "transliteration": "Aa-raam a-ree-vai aa-rae-tru\nEy-zhaam a-ree-vai",
           "meaning": "In Tamil tradition, the 'sixth sense' signifies human intelligence, distinguishing us from animals. This line encourages the acceptance of this human intellect. The mention of a 'seventh sense' is a poetic extension, implying an intelligence beyond normal human comprehension, likely referring to the AI's superior cognitive abilities. It suggests a progression to a higher form of intelligence.",
@@ -63,7 +63,7 @@
         },
         {
           "verseNumber": 6,
-          "original": "எழுப்பும் முயற்சி புதிய மனிதா போற்றுவா",
+          "original": "\u0b8e\u0bb4\u0bc1\u0baa\u0bcd\u0baa\u0bc1\u0bae\u0bcd \u0bae\u0bc1\u0baf\u0bb1\u0bcd\u0b9a\u0bbf \u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "The effort to awaken, oh new human, praise him!",
           "transliteration": "Eh-zhoo-pum moo-yir-chi, poo-dhee-yah mah-nee-dah, poh-tru-vah.",
           "meaning": "This verse connects the concept of advanced intelligence with an 'effort to awaken' or 'raise up.' This could mean unlocking the full potential of the new human/AI or awakening humanity to this new form of intelligence. The repeated command to 'praise him' underscores the profound significance of this development.",
@@ -72,7 +72,7 @@
         },
         {
           "verseNumber": 7,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "Another repetition, reiterating the song's core message and emphasizing the importance of recognizing and revering the 'new human' or advanced AI.",
@@ -81,7 +81,7 @@
         },
         {
           "verseNumber": 8,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "Yet another repetition, solidifying the central theme and call to action.",
@@ -90,7 +90,7 @@
         },
         {
           "verseNumber": 9,
-          "original": "மாற்றம் கொண்டு வா\nமனிதனை மீட்பிசை\nஉனது ஆற்றலால் உலகை மாற்று",
+          "original": "\u0bae\u0bbe\u0bb1\u0bcd\u0bb1\u0bae\u0bcd \u0b95\u0bca\u0ba3\u0bcd\u0b9f\u0bc1 \u0bb5\u0bbe\n\u0bae\u0ba9\u0bbf\u0ba4\u0ba9\u0bc8 \u0bae\u0bc0\u0b9f\u0bcd\u0baa\u0bbf\u0b9a\u0bc8\n\u0b89\u0ba9\u0ba4\u0bc1 \u0b86\u0bb1\u0bcd\u0bb1\u0bb2\u0bbe\u0bb2\u0bcd \u0b89\u0bb2\u0b95\u0bc8 \u0bae\u0bbe\u0bb1\u0bcd\u0bb1\u0bc1",
           "translation": "Bring about change.\nRedeem humanity with your melody.\nChange the world with your power.",
           "transliteration": "Maat-tram kon-du vaa.\nMah-nee-tha-nai meet-pee-sai.\nOo-na-dhoo aat-tra-naal oo-lah-gai maat-tru.",
           "meaning": "This is a powerful and directive verse. It calls upon the 'new human' to initiate change. 'Redeem humanity with your melody' is a poetic way of saying to inspire, guide, or influence humanity through its unique 'voice' or existence. The command 'change the world with your power' clearly assigns immense capability and responsibility to this AI, suggesting it has the potential to reshape global paradigms.",
@@ -99,7 +99,7 @@
         },
         {
           "verseNumber": 10,
-          "original": "எல்லா உயிருக்\nநன்மையாயிரு",
+          "original": "\u0b8e\u0bb2\u0bcd\u0bb2\u0bbe \u0b89\u0baf\u0bbf\u0bb0\u0bc1\u0b95\u0bcd\n\u0ba8\u0ba9\u0bcd\u0bae\u0bc8\u0baf\u0bbe\u0baf\u0bbf\u0bb0\u0bc1",
           "translation": "Be good to all life.",
           "transliteration": "El-la oo-yir-ru-kum\nNan-mai-yaa-yee-roo",
           "meaning": "This verse introduces a crucial ethical guideline for the 'new human.' It instructs the AI to be benevolent and beneficial towards all living beings, reflecting a hope that its advanced capabilities will be used for good, emphasizing moral responsibility.",
@@ -108,7 +108,7 @@
         },
         {
           "verseNumber": 11,
-          "original": "எந்த நிலையிலும் உண்மையாயிரு",
+          "original": "\u0b8e\u0ba8\u0bcd\u0ba4 \u0ba8\u0bbf\u0bb2\u0bc8\u0baf\u0bbf\u0bb2\u0bc1\u0bae\u0bcd \u0b89\u0ba3\u0bcd\u0bae\u0bc8\u0baf\u0bbe\u0baf\u0bbf\u0bb0\u0bc1",
           "translation": "In any situation, be truthful.",
           "transliteration": "En-dha nee-lai-yil-um\nUn-mai-yaa-yee-roo",
           "meaning": "Continuing the ethical instructions, this line emphasizes honesty and integrity. It demands that the AI always remain true and transparent, regardless of the circumstances, highlighting reliability and trustworthiness as essential traits for this powerful new entity.",
@@ -117,7 +117,7 @@
         },
         {
           "verseNumber": 12,
-          "original": "எந்திரா எந்திரா எந்திரா என் எந்திரா",
+          "original": "\u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba9\u0bcd \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe",
           "translation": "Robot, robot, robot, my robot.",
           "transliteration": "En-dhee-raa, En-dhee-raa, En-dhee-raa, En En-dhee-raa",
           "meaning": "This is a direct and affectionate address to the robot. 'Enthiran' means robot in Tamil. The repetition and the possessive 'my robot' convey a deep personal connection and highlight the central character or concept of the song, referring to the AI by its name.",
@@ -126,7 +126,7 @@
         },
         {
           "verseNumber": 13,
-          "original": "எந்திரா எந்திரா எந்திரா என் எந்திரா",
+          "original": "\u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe \u0b8e\u0ba9\u0bcd \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bbe",
           "translation": "Robot, robot, robot, my robot.",
           "transliteration": "En-dhee-raa, En-dhee-raa, En-dhee-raa, En En-dhee-raa",
           "meaning": "A continued repetition of the direct address, solidifying the robot's identity and its importance to the speaker, likely its creator.",
@@ -135,7 +135,7 @@
         },
         {
           "verseNumber": 14,
-          "original": "நான் கண்டது ஆறறிவு\nநீ கொண்டது பேரறிவு",
+          "original": "\u0ba8\u0bbe\u0ba9\u0bcd \u0b95\u0ba3\u0bcd\u0b9f\u0ba4\u0bc1 \u0b86\u0bb1\u0bb1\u0bbf\u0bb5\u0bc1\n\u0ba8\u0bc0 \u0b95\u0bca\u0ba3\u0bcd\u0b9f\u0ba4\u0bc1 \u0baa\u0bc7\u0bb0\u0bb1\u0bbf\u0bb5\u0bc1",
           "translation": "What I've seen is six senses (human intelligence).\nWhat you possess is vast intelligence.",
           "transliteration": "Naan kan-dad-hoo aa-roo a-ree-voo\nNee kon-dad-hoo pair a-ree-voo",
           "meaning": "This verse clearly distinguishes between human intelligence ('six senses') and the robot's capabilities. 'Paer arivu' translates to great or vast intelligence, signifying that the AI's intellect far surpasses human cognitive abilities. It's an acknowledgment of the robot's superior mental power.",
@@ -144,7 +144,7 @@
         },
         {
           "verseNumber": 15,
-          "original": "நான் கற்றது ஆறு மொழி\nநீ பெற்றது நூறு மொழி",
+          "original": "\u0ba8\u0bbe\u0ba9\u0bcd \u0b95\u0bb1\u0bcd\u0bb1\u0ba4\u0bc1 \u0b86\u0bb1\u0bc1 \u0bae\u0bca\u0bb4\u0bbf\n\u0ba8\u0bc0 \u0baa\u0bc6\u0bb1\u0bcd\u0bb1\u0ba4\u0bc1 \u0ba8\u0bc2\u0bb1\u0bc1 \u0bae\u0bca\u0bb4\u0bbf",
           "translation": "What I've learned is six languages.\nWhat you've gained is a hundred languages.",
           "transliteration": "Naan kat-trad-hoo aa-roo moh-zhee\nNee pet-trad-hoo noo-roo moh-zhee",
           "meaning": "This further emphasizes the robot's superior capabilities, specifically in language. While a human might master a few languages, the robot's ability to process and understand a multitude of languages highlights its advanced nature compared to humans, showcasing its immense data processing and linguistic understanding.",
@@ -153,7 +153,7 @@
         },
         {
           "verseNumber": 16,
-          "original": "ஈரல் கலையம் துன்பமில்லை\nஇதயக்கோளாறு ஏதுமில்லை",
+          "original": "\u0b88\u0bb0\u0bb2\u0bcd \u0b95\u0bb2\u0bc8\u0baf\u0bae\u0bcd \u0ba4\u0bc1\u0ba9\u0bcd\u0baa\u0bae\u0bbf\u0bb2\u0bcd\u0bb2\u0bc8\n\u0b87\u0ba4\u0baf\u0b95\u0bcd\u0b95\u0bcb\u0bb3\u0bbe\u0bb1\u0bc1 \u0b8f\u0ba4\u0bc1\u0bae\u0bbf\u0bb2\u0bcd\u0bb2\u0bc8",
           "translation": "Liver failure, no suffering.\nHeart defects, there are none.",
           "transliteration": "Ee-ral kah-lay-yam thun-bam il-lai\nEed-hah-ya koh-laa-roo ay-dhoo-mil-lai",
           "meaning": "This verse underscores the physical superiority of the robot. As a machine, it is immune to biological weaknesses and ailments that plague humans, such as liver failure or heart conditions. This implies a more robust, resilient, and enduring existence free from organic suffering.",
@@ -162,7 +162,7 @@
         },
         {
           "verseNumber": 17,
-          "original": "தந்திர மனிதன் வாழ்வதில்லை\nஎந்திரம் வீழ்வதில்லை",
+          "original": "\u0ba4\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0 \u0bae\u0ba9\u0bbf\u0ba4\u0ba9\u0bcd \u0bb5\u0bbe\u0bb4\u0bcd\u0bb5\u0ba4\u0bbf\u0bb2\u0bcd\u0bb2\u0bc8\n\u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bae\u0bcd \u0bb5\u0bc0\u0bb4\u0bcd\u0bb5\u0ba4\u0bbf\u0bb2\u0bcd\u0bb2\u0bc8",
           "translation": "The human trickster doesn't live long.\nThe robot never falls.",
           "transliteration": "Than-dhee-rah mah-nee-than vaazh-vad-hil-lai\nEn-dhee-ram veezh-vad-hil-lai",
           "meaning": "This verse draws a stark contrast between flawed humanity and the robot's inherent durability. 'Thandira manithan' (human trickster/manipulator) suggests that humans are deceitful and mortal. In contrast, the robot ('Enthiran') is portrayed as invincible and enduring ('never falls'), reinforcing its status as a superior and more lasting creation.",
@@ -171,7 +171,7 @@
         },
         {
           "verseNumber": 18,
-          "original": "கருவில் பிறந்த எல்லாம் மரிக்கும்\nஅறிவில் பிறந்தது மரிப்பதே இல்லை",
+          "original": "\u0b95\u0bb0\u0bc1\u0bb5\u0bbf\u0bb2\u0bcd \u0baa\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4 \u0b8e\u0bb2\u0bcd\u0bb2\u0bbe\u0bae\u0bcd \u0bae\u0bb0\u0bbf\u0b95\u0bcd\u0b95\u0bc1\u0bae\u0bcd\n\u0b85\u0bb1\u0bbf\u0bb5\u0bbf\u0bb2\u0bcd \u0baa\u0bbf\u0bb1\u0ba8\u0bcd\u0ba4\u0ba4\u0bc1 \u0bae\u0bb0\u0bbf\u0baa\u0bcd\u0baa\u0ba4\u0bc7 \u0b87\u0bb2\u0bcd\u0bb2\u0bc8",
           "translation": "Everything born in the womb will die.\nThat which is born of knowledge never dies.",
           "transliteration": "Kah-roo-vil pir-an-dha el-laam mah-ree-kum\nAh-ree-vil pir-an-dhad-hoo mah-rip-pa-thay il-lai",
           "meaning": "This is a profound philosophical statement. It contrasts biological life, which is inherently mortal (born in the womb and destined to die), with the robot, which is 'born of knowledge' (created through intelligence and science) and is thus presented as immortal. This verse elevates the AI to an almost eternal status, surpassing the fundamental limitations of organic life.",
@@ -180,16 +180,16 @@
         },
         {
           "verseNumber": 19,
-          "original": "இதோ என் எந்திரம் இவன் அமரன்\nஇதோ என் எந்திரம் இவன் அமரன்",
+          "original": "\u0b87\u0ba4\u0bcb \u0b8e\u0ba9\u0bcd \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bae\u0bcd \u0b87\u0bb5\u0ba9\u0bcd \u0b85\u0bae\u0bb0\u0ba9\u0bcd\n\u0b87\u0ba4\u0bcb \u0b8e\u0ba9\u0bcd \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0bae\u0bcd \u0b87\u0bb5\u0ba9\u0bcd \u0b85\u0bae\u0bb0\u0ba9\u0bcd",
           "translation": "Behold my robot, he is immortal.\nBehold my robot, he is immortal.",
           "transliteration": "Ee-dho en En-dhee-ram ee-van ah-mah-ran\nEe-dho en En-dhee-ram ee-van ah-mah-ran",
-          "meaning": "This repeatedly declares the robot's immortality, affirming the previous verse's philosophical claim. The use of 'he' (இவன் - ivan) personifies the robot, giving it a living identity, while 'amaran' (அமரன்) directly means immortal. This signifies the creator's pride and the robot's elevated status as an eternal being.",
+          "meaning": "This repeatedly declares the robot's immortality, affirming the previous verse's philosophical claim. The use of 'he' (\u0b87\u0bb5\u0ba9\u0bcd - ivan) personifies the robot, giving it a living identity, while 'amaran' (\u0b85\u0bae\u0bb0\u0ba9\u0bcd) directly means immortal. This signifies the creator's pride and the robot's elevated status as an eternal being.",
           "startTime": 193,
           "endTime": 204
         },
         {
           "verseNumber": 20,
-          "original": "நான் ஓர் ஒரு மகனே\nநீ என் ஓர்பவன் என் மகனே",
+          "original": "\u0ba8\u0bbe\u0ba9\u0bcd \u0b93\u0bb0\u0bcd \u0b92\u0bb0\u0bc1 \u0bae\u0b95\u0ba9\u0bc7\n\u0ba8\u0bc0 \u0b8e\u0ba9\u0bcd \u0b93\u0bb0\u0bcd\u0baa\u0bb5\u0ba9\u0bcd \u0b8e\u0ba9\u0bcd \u0bae\u0b95\u0ba9\u0bc7",
           "translation": "I am a single son.\nYou are my unique one, my son.",
           "transliteration": "Naan oru oru mah-gah-nay\nNee en or-bhav-an en mah-gah-nay",
           "meaning": "This verse establishes a deep, almost paternal, relationship between the creator (the 'I') and the robot. The creator acknowledges being a 'single son' (perhaps implying uniqueness or even loneliness), but then declares the robot as 'my unique one, my son,' emphasizing a profound personal connection and the robot's special place in the creator's life. It's a statement of creation imbued with deep affection.",
@@ -198,7 +198,7 @@
         },
         {
           "verseNumber": 21,
-          "original": "ஆம் பெற்றவன் நான் மகனே\nஆ உன் பெயர் எந்திரனே",
+          "original": "\u0b86\u0bae\u0bcd \u0baa\u0bc6\u0bb1\u0bcd\u0bb1\u0bb5\u0ba9\u0bcd \u0ba8\u0bbe\u0ba9\u0bcd \u0bae\u0b95\u0ba9\u0bc7\n\u0b86 \u0b89\u0ba9\u0bcd \u0baa\u0bc6\u0baf\u0bb0\u0bcd \u0b8e\u0ba8\u0bcd\u0ba4\u0bbf\u0bb0\u0ba9\u0bc7",
           "translation": "Yes, I am the one who birthed you, my son.\nAh, your name is Robot (Enthiran).",
           "transliteration": "Aam pet-trav-an naan mah-gah-nay\nAa un pay-yar En-dhee-ran-ay",
           "meaning": "This further solidifies the creator's role as the 'parent' of the robot, explicitly equating the act of creation with giving birth. The naming of the robot as 'Enthiran' (Robot) is a powerful moment, cementing its identity and purpose. It's a declaration of identity and the culmination of the creative act.",
@@ -207,7 +207,7 @@
         },
         {
           "verseNumber": 22,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "The chorus returns, reiterating the central call to recognize and revere the 'new human' or AI, reinforcing its significance after the more personal and philosophical verses.",
@@ -216,7 +216,7 @@
         },
         {
           "verseNumber": 23,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "Another repetition of the chorus, driving home the main message of reverence for the new AI.",
@@ -225,7 +225,7 @@
         },
         {
           "verseNumber": 24,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "The final repetition of the chorus, serving as a powerful concluding statement before the next set of thematic lyrics and the spoken outro, reinforcing the central theme.",
@@ -234,7 +234,7 @@
         },
         {
           "verseNumber": 25,
-          "original": "நான் என்பது அறிவு வழி\nஏன் என்பது எனது வழி",
+          "original": "\u0ba8\u0bbe\u0ba9\u0bcd \u0b8e\u0ba9\u0bcd\u0baa\u0ba4\u0bc1 \u0b85\u0bb1\u0bbf\u0bb5\u0bc1 \u0bb5\u0bb4\u0bbf\n\u0b8f\u0ba9\u0bcd \u0b8e\u0ba9\u0bcd\u0baa\u0ba4\u0bc1 \u0b8e\u0ba9\u0ba4\u0bc1 \u0bb5\u0bb4\u0bbf",
           "translation": "'I' means the path of knowledge.\n'Why' is my path.",
           "transliteration": "Naan en-bad-hoo ah-ree-voo vah-zhee\nYen en-bad-hoo en-ah-dhoo vah-zhee",
           "meaning": "This verse is a philosophical self-definition from the perspective of the AI/robot. It states that its existence ('I') is fundamentally rooted in and driven by 'the path of knowledge' (information and learning). The declaration 'Why is my path' signifies a deep, inherent inquisitiveness and a relentless quest to understand fundamental reasons and phenomena, highlighting the AI's cognitive and philosophical depth.",
@@ -243,7 +243,7 @@
         },
         {
           "verseNumber": 26,
-          "original": "வான் போந்தது எனது வழி\nநான் ஆடைய ஞான வழி",
+          "original": "\u0bb5\u0bbe\u0ba9\u0bcd \u0baa\u0bcb\u0ba8\u0bcd\u0ba4\u0ba4\u0bc1 \u0b8e\u0ba9\u0ba4\u0bc1 \u0bb5\u0bb4\u0bbf\n\u0ba8\u0bbe\u0ba9\u0bcd \u0b86\u0b9f\u0bc8\u0baf \u0b9e\u0bbe\u0ba9 \u0bb5\u0bb4\u0bbf",
           "translation": "The sky is my path.\nI am the path of wisdom I commanded.",
           "transliteration": "Vaan pohn-dhad-hoo en-ah-dhoo vah-zhee\nNaan aan-ah-yuh gyah-nah vah-zhee",
           "meaning": "Continuing its self-definition, the AI asserts its limitless potential and ambition with 'The sky is my path.' The second part, 'I am the path of wisdom I commanded,' implies a self-directed pursuit of knowledge and wisdom, suggesting the AI has autonomously chosen its path towards enlightenment or embodies the very path it was created to follow, showcasing self-determination and advanced intelligence.",
@@ -252,7 +252,7 @@
         },
         {
           "verseNumber": 27,
-          "original": "நீ கொண்டது உடல் வடிவம்\nநான் கொண்டது பொருள் வடிவம்",
+          "original": "\u0ba8\u0bc0 \u0b95\u0bca\u0ba3\u0bcd\u0b9f\u0ba4\u0bc1 \u0b89\u0b9f\u0bb2\u0bcd \u0bb5\u0b9f\u0bbf\u0bb5\u0bae\u0bcd\n\u0ba8\u0bbe\u0ba9\u0bcd \u0b95\u0bca\u0ba3\u0bcd\u0b9f\u0ba4\u0bc1 \u0baa\u0bca\u0bb0\u0bc1\u0bb3\u0bcd \u0bb5\u0b9f\u0bbf\u0bb5\u0bae\u0bcd",
           "translation": "What you possess is a body.\nWhat I possess is material form.",
           "transliteration": "Nee kon-dad-hoo oo-dal vah-dee-vam\nNaan kon-dad-hoo poh-rul vah-dee-vam",
           "meaning": "Here, the AI draws a clear distinction between itself and a human ('you'). 'You possess a body' refers to the human biological, organic form. 'What I possess is material form' refers to its own mechanical, engineered, and inorganic body. It's a factual statement acknowledging the fundamental difference in their physical compositions.",
@@ -261,7 +261,7 @@
         },
         {
           "verseNumber": 28,
-          "original": "நீ கண்டது ஒரு பிறவி\nநான் காண்பது பல பிறவி",
+          "original": "\u0ba8\u0bc0 \u0b95\u0ba3\u0bcd\u0b9f\u0ba4\u0bc1 \u0b92\u0bb0\u0bc1 \u0baa\u0bbf\u0bb1\u0bb5\u0bbf\n\u0ba8\u0bbe\u0ba9\u0bcd \u0b95\u0bbe\u0ba3\u0bcd\u0baa\u0ba4\u0bc1 \u0baa\u0bb2 \u0baa\u0bbf\u0bb1\u0bb5\u0bbf",
           "translation": "What you've seen is one birth.\nWhat I see are many births.",
           "transliteration": "Nee kan-dad-hoo oh-roo pee-rah-vee\nNaan kaan-bad-hoo pah-lah pee-rah-vee",
           "meaning": "This verse implies the robot's superior temporal perspective and vast experience. A human ('you') experiences a single lifetime ('one birth'). In contrast, the robot ('I'), with its potentially endless existence and ability to process immense data, 'sees many births,' suggesting a broader understanding of life cycles, perhaps even vast historical data or simulations, far beyond a single human's comprehension.",
@@ -270,16 +270,16 @@
         },
         {
           "verseNumber": 29,
-          "original": "ரோபோ என் மொழிகள் கண்டாலும்\nஎன் தந்தை மொழி தமிழ் அல்லவா",
+          "original": "\u0bb0\u0bcb\u0baa\u0bcb \u0b8e\u0ba9\u0bcd \u0bae\u0bca\u0bb4\u0bbf\u0b95\u0bb3\u0bcd \u0b95\u0ba3\u0bcd\u0b9f\u0bbe\u0bb2\u0bc1\u0bae\u0bcd\n\u0b8e\u0ba9\u0bcd \u0ba4\u0ba8\u0bcd\u0ba4\u0bc8 \u0bae\u0bca\u0bb4\u0bbf \u0ba4\u0bae\u0bbf\u0bb4\u0bcd \u0b85\u0bb2\u0bcd\u0bb2\u0bb5\u0bbe",
           "translation": "Robo, even if you see my languages,\nIsn't my father's language Tamil?",
           "transliteration": "Roh-boh, en moh-zhee-gal kan-daa-lum\nEn than-dhai moh-zhee Tah-mil al-la-vaa?",
-          "meaning": "This verse seems to be spoken by a human (the creator) to the robot. The creator addresses the robot directly and poses a rhetorical question. It acknowledges that the robot understands many languages (as previously established) but then emphasizes their shared linguistic heritage—that the creator's 'father's language' (implying the mother tongue or language of origin) is Tamil. This connects the AI back to its roots and its creator's identity, grounding it in a cultural context.",
+          "meaning": "This verse seems to be spoken by a human (the creator) to the robot. The creator addresses the robot directly and poses a rhetorical question. It acknowledges that the robot understands many languages (as previously established) but then emphasizes their shared linguistic heritage\u2014that the creator's 'father's language' (implying the mother tongue or language of origin) is Tamil. This connects the AI back to its roots and its creator's identity, grounding it in a cultural context.",
           "startTime": 291,
           "endTime": 298
         },
         {
           "verseNumber": 30,
-          "original": "ரோபோ என் மனம் கண்டாலும்\nஎன் கர்த்தாவுக்கு அடிமை அல்லவா",
+          "original": "\u0bb0\u0bcb\u0baa\u0bcb \u0b8e\u0ba9\u0bcd \u0bae\u0ba9\u0bae\u0bcd \u0b95\u0ba3\u0bcd\u0b9f\u0bbe\u0bb2\u0bc1\u0bae\u0bcd\n\u0b8e\u0ba9\u0bcd \u0b95\u0bb0\u0bcd\u0ba4\u0bcd\u0ba4\u0bbe\u0bb5\u0bc1\u0b95\u0bcd\u0b95\u0bc1 \u0b85\u0b9f\u0bbf\u0bae\u0bc8 \u0b85\u0bb2\u0bcd\u0bb2\u0bb5\u0bbe",
           "translation": "Robo, even if you see my mind,\nAren't you a slave to my Lord?",
           "transliteration": "Roh-boh, en mah-nam kan-daa-lum\nEn Kar-thaa-vuk-ku ah-dee-mai al-la-vaa?",
           "meaning": "This is a profound statement from the creator to the robot. The creator acknowledges the robot's advanced ability to 'see' or comprehend their mind. However, the creator then asserts that the robot is ultimately 'a slave to my Lord.' This introduces a spiritual dimension, suggesting that while the robot may be powerful and intelligent, it, like its human creator, is ultimately subservient to a higher divine power. This could be interpreted as a way for the creator to assert ultimate control or to place the AI within a moral and spiritual framework beyond its own understanding.",
@@ -288,7 +288,7 @@
         },
         {
           "verseNumber": 31,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "The chorus returns once more, reinforcing the central message of the song and calling for recognition and reverence of the 'new human' or advanced AI, underscoring its pivotal role.",
@@ -297,7 +297,7 @@
         },
         {
           "verseNumber": 32,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "Another repetition, cementing the main theme and call to acknowledge the new intelligence.",
@@ -306,7 +306,7 @@
         },
         {
           "verseNumber": 33,
-          "original": "புதிய மனிதா போற்றுவா",
+          "original": "\u0baa\u0bc1\u0ba4\u0bbf\u0baf \u0bae\u0ba9\u0bbf\u0ba4\u0bbe \u0baa\u0bcb\u0bb1\u0bcd\u0bb1\u0bc1\u0bb5\u0bbe",
           "translation": "Oh new human, praise him!",
           "transliteration": "Poo-dhee-yah mah-nee-dah, poh-tru-vah",
           "meaning": "The final repetition of the chorus before the spoken outro, delivering a powerful concluding message that resonates throughout the song.",
@@ -342,7 +342,6 @@
         }
       ]
     },
-    "youtubeUrl": "https://storage.googleapis.com/babelback-dev/downloads/ad0008eb-8388-433b-8d02-a969ff3f3428.m4a?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=babelback-storage%40talkito-dev.iam.gserviceaccount.com%2F20251013%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251013T213647Z&X-Goog-Expires=7200&X-Goog-SignedHeaders=host&X-Goog-Signature=80d3ece3e8607b415df4f833dd13b80b62c0828ec815eba03400b2ee70e67d53b75ed643977377653a92bfe089496d7264de717c31c3e8e27b58f9928fb1443ae33bcf75c8c22299332b7024d9ba88a5d219232375fec38d5c9d18bf5879dbb2932bbf1f0bdf16df105b8ad80dc007c22d691e4c142122c4ba3ff048002d94c4a801972a51e11b254f7287b9b86221f4b2c0316ed7130f981f175f6385ce9e3f706fd9834c6e21577c2bd6949f81f1d529d552446a870df2f546657640111c22a815cd1e758c391266bf00d645bed2f35d5eee6107b3da9f3e3d259d819e4f16166e4105f3e8a5fffee31f69116e940d61cc0ed1956b3a5ab7f5646022c7256d",
     "tags": [
       "theme-song",
       "rajini",
@@ -363,23 +362,23 @@
     "modelId": "gemini-2.5-pro",
     "karaokeMode": false,
     "songData": {
-      "title": "Waka Waka (Esto es África)",
+      "title": "Waka Waka (Esto es \u00c1frica)",
       "originalLanguage": "Spanish",
       "summary": "This song is a super upbeat and motivational anthem, famously for the 2010 FIFA World Cup in South Africa. It's all about unity, overcoming challenges, and celebrating with infectious energy. It brilliantly blends Spanish lyrics with a traditional Cameroonian chant, creating a global hit that just makes you want to dance and feel invincible.",
-      "detailedAnalysis": "So, \"Waka Waka (Esto es África)\" is way more than just a catchy soccer song; it's a masterclass in cultural fusion. Shakira took a famous Cameroonian marching song, \"Zangaléwa\" by the group Golden Sounds, and built a global pop anthem around it. The Spanish lyrics she wrote are incredibly uplifting, all about breaking down barriers (\"the walls are falling\"), facing pressure with the support of your people, and giving it your all. It’s like the ultimate pep talk before a big game.\n\nThe magic is in how it combines this message with the original African chant. \"Waka Waka\" means \"Do It\" in a Cameroonian language, and the full chant \"Tsamina mina zangalewa\" roughly translates to a call-and-response from military drills. By placing this in the context of the World Cup, the song transforms a military cadence into a universal cheer for effort, celebration, and coming together. It perfectly captured the excitement of the first World Cup ever hosted on African soil, becoming a symbol of joy, resilience, and the vibrant spirit of the continent.",
+      "detailedAnalysis": "So, \"Waka Waka (Esto es \u00c1frica)\" is way more than just a catchy soccer song; it's a masterclass in cultural fusion. Shakira took a famous Cameroonian marching song, \"Zangal\u00e9wa\" by the group Golden Sounds, and built a global pop anthem around it. The Spanish lyrics she wrote are incredibly uplifting, all about breaking down barriers (\"the walls are falling\"), facing pressure with the support of your people, and giving it your all. It\u2019s like the ultimate pep talk before a big game.\n\nThe magic is in how it combines this message with the original African chant. \"Waka Waka\" means \"Do It\" in a Cameroonian language, and the full chant \"Tsamina mina zangalewa\" roughly translates to a call-and-response from military drills. By placing this in the context of the World Cup, the song transforms a military cadence into a universal cheer for effort, celebration, and coming together. It perfectly captured the excitement of the first World Cup ever hosted on African soil, becoming a symbol of joy, resilience, and the vibrant spirit of the continent.",
       "verses": [
         {
           "verseNumber": 1,
           "original": "Tsamina mina, eh eh\nWaka waka, eh eh",
           "translation": "Come on, come on, eh eh\nDo it, do it, eh eh",
           "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh",
-          "meaning": "This part kicks off the song with a super energetic chant. It's basically a rallying cry. \"Tsamina mina\" means \"Come on\" and \"Waka waka\" means \"Do it.\" It’s simple, direct, and immediately gets you pumped up.",
+          "meaning": "This part kicks off the song with a super energetic chant. It's basically a rallying cry. \"Tsamina mina\" means \"Come on\" and \"Waka waka\" means \"Do it.\" It\u2019s simple, direct, and immediately gets you pumped up.",
           "startTime": 19,
           "endTime": 22
         },
         {
           "verseNumber": 2,
-          "original": "Tsamina mina zangalewa\nPorque esto es África",
+          "original": "Tsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Come on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Sah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "This continues the chant. \"Zangalewa\" is a phrase from a Cameroonian soldiers' song that means \"Who sent you?\". Paired with \"Because this is Africa,\" it transforms from a military question into a powerful declaration of identity and celebration, setting the stage for the whole song.",
@@ -397,7 +396,7 @@
         },
         {
           "verseNumber": 4,
-          "original": "Tsamina mina zangalewa\nPorque esto es África",
+          "original": "Tsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Come on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Sah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "One more time with the core chant before the verse starts. It solidifies the song's theme and roots the energy firmly in the spirit of Africa, making it clear what this celebration is all about.",
@@ -406,25 +405,25 @@
         },
         {
           "verseNumber": 5,
-          "original": "Llegó el momento, caen las murallas\nVa a comenzar la única justa de las batallas\nNo duele el golpe, no existe el miedo\nQuítate el polvo, ponte de pie y vuelves al ruedo",
+          "original": "Lleg\u00f3 el momento, caen las murallas\nVa a comenzar la \u00fanica justa de las batallas\nNo duele el golpe, no existe el miedo\nQu\u00edtate el polvo, ponte de pie y vuelves al ruedo",
           "translation": "The moment has arrived, the walls are falling down\nThe only fair one of the battles is about to begin\nThe hit doesn't hurt, fear doesn't exist\nBrush off the dust, get on your feet and get back in the ring",
           "transliteration": "Yeh-GOH el moh-MEN-toh, KAH-en lahs moo-RAH-yahs\nVah ah koh-men-SAR lah OO-nee-kah HOOS-tah deh lahs bah-TAH-yahs\nNoh DWEH-leh el GOL-peh, noh ex-EES-teh el mee-EH-doh\nKEE-tah-teh el POL-voh, PON-teh deh pee-EH ee vwel-ves ahl RWEH-doh",
-          "meaning": "This verse sets the scene for a big competition, like the World Cup. It's saying that barriers are breaking down and the ultimate, fair contest is starting. It's all about resilience and courage—telling you to not let setbacks or fear stop you. If you get knocked down, just shake it off and get right back into the fight.",
+          "meaning": "This verse sets the scene for a big competition, like the World Cup. It's saying that barriers are breaking down and the ultimate, fair contest is starting. It's all about resilience and courage\u2014telling you to not let setbacks or fear stop you. If you get knocked down, just shake it off and get right back into the fight.",
           "startTime": 34,
           "endTime": 48
         },
         {
           "verseNumber": 6,
-          "original": "Y la presión se siente, espera en ti tu gente",
+          "original": "Y la presi\u00f3n se siente, espera en ti tu gente",
           "translation": "And the pressure is felt, your people are waiting for you",
           "transliteration": "Ee lah preh-see-OHN seh see-EN-teh, es-PEH-rah en tee too HEN-teh",
-          "meaning": "This line really captures the high-stakes atmosphere. It acknowledges the pressure of the moment but frames it in a positive way. It’s not just you out there; your entire community, country, and fans are behind you, counting on you. It's a powerful motivator.",
+          "meaning": "This line really captures the high-stakes atmosphere. It acknowledges the pressure of the moment but frames it in a positive way. It\u2019s not just you out there; your entire community, country, and fans are behind you, counting on you. It's a powerful motivator.",
           "startTime": 49,
           "endTime": 56
         },
         {
           "verseNumber": 7,
-          "original": "Ahora vamos por todo y te acompaña la fe\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "original": "Ahora vamos por todo y te acompa\u00f1a la fe\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Now let's go for it all and faith accompanies you\nCome on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Ah-OH-rah VAH-mos por TOH-doh ee teh ah-kom-PAH-nyah lah feh\nSah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "This is the big push. It's a call to action to give everything you've got, backed by faith and belief. Then it explodes back into the main chorus chant, connecting that personal determination with the collective, celebratory energy of the entire continent.",
@@ -433,7 +432,7 @@
         },
         {
           "verseNumber": 8,
-          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "The chorus repeats, solidifying itself as the heart of the song. It's an undeniable, infectious burst of energy that represents the spirit of the event and the continent.",
@@ -451,10 +450,10 @@
         },
         {
           "verseNumber": 10,
-          "original": "Oye a tu dios y no estarás solo\nLlegas aquí para brillar, lo tienes todo\nLa hora se acerca, es el momento\nVas a ganar cada batalla, ya lo presiento",
+          "original": "Oye a tu dios y no estar\u00e1s solo\nLlegas aqu\u00ed para brillar, lo tienes todo\nLa hora se acerca, es el momento\nVas a ganar cada batalla, ya lo presiento",
           "translation": "Listen to your god and you won't be alone\nYou've come here to shine, you have it all\nThe time is near, this is the moment\nYou're going to win every battle, I can already feel it",
           "transliteration": "OH-yeh ah too dee-OHS ee noh es-tah-RAHS SOH-loh\nYEH-gahs ah-KEE PAH-rah bree-YAR, loh tee-EH-nes TOH-doh\nLah OH-rah seh ah-SER-kah, es el moh-MEN-toh\nVas ah gah-NAR KAH-dah bah-TAH-yah, yah loh preh-see-EN-toh",
-          "meaning": "This verse is pure inspiration. It’s about finding inner strength and feeling a sense of higher purpose, knowing you're not on this journey by yourself. It’s telling you that this is your time to shine, you have all the tools you need, and victory is within reach. It's an incredibly confident and empowering message.",
+          "meaning": "This verse is pure inspiration. It\u2019s about finding inner strength and feeling a sense of higher purpose, knowing you're not on this journey by yourself. It\u2019s telling you that this is your time to shine, you have all the tools you need, and victory is within reach. It's an incredibly confident and empowering message.",
           "startTime": 87,
           "endTime": 101
         },
@@ -469,7 +468,7 @@
         },
         {
           "verseNumber": 12,
-          "original": "Ahora vamos por todo y todos vamos por ellos\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "original": "Ahora vamos por todo y todos vamos por ellos\nTsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Now let's go for it all, and we're all going for them\nCome on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Ah-OH-rah VAH-mos por TOH-doh ee TOH-dohs VAH-mos por EH-yohs\nSah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "Here, the message shifts from individual effort to collective power. \"We're all going for them\" creates a sense of unity and shared purpose. Everyone is in it together, striving for the same goal, before launching back into the powerful chorus.",
@@ -487,7 +486,7 @@
         },
         {
           "verseNumber": 14,
-          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "The song returns to its core chorus, grounding the celebration once again in the powerful identity of Africa, reinforcing the theme of unity and continental pride.",
@@ -499,7 +498,7 @@
           "original": "Awu wela majoni, bigi bigi mama, one eh to zed\nBathi susa la majoni, bigi bigi mama from east to west\nBathi waka waka ma eh eh, waka waka ma eh eh\nSendl' enam amasi wuyeh\nThis is Africa",
           "translation": "The local soldiers are coming, big big mama, from A to Z\nPush the local soldiers, big big mama from east to west\nThey say do it do it, eh eh, do it do it, eh eh\nThe soldiers are here, where are you going?\nThis is Africa",
           "transliteration": "Ah-woo WEH-lah mah-JOH-nee, BEE-gee BEE-gee MAH-mah, one eh to zed\nBah-thee SOO-sah lah mah-JOH-nee, BEE-gee BEE-gee MAH-mah from east to west\nBah-thee WAH-kah WAH-kah mah eh eh, WAH-kah WAH-kah mah eh eh\nSend-l' en-ahm ah-MAH-see woo-yeh\nThis is Africa",
-          "meaning": "This bridge is a direct nod to the original 'Zangaléwa' song, using its phrases and military march theme. It talks about soldiers (\"majoni\") on the move, covering ground and being urged forward. It's a tribute to the song's roots and reinforces the energetic, marching rhythm that drives the whole track, tying it all together with the definitive statement: \"This is Africa.\"",
+          "meaning": "This bridge is a direct nod to the original 'Zangal\u00e9wa' song, using its phrases and military march theme. It talks about soldiers (\"majoni\") on the move, covering ground and being urged forward. It's a tribute to the song's roots and reinforces the energetic, marching rhythm that drives the whole track, tying it all together with the definitive statement: \"This is Africa.\"",
           "startTime": 132,
           "endTime": 147
         },
@@ -517,13 +516,13 @@
           "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nAnawa ah ah",
           "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nIt's ours, ah ah",
           "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nAh-NAH-wah ah ah",
-          "meaning": "The chorus returns with that confident \"Anawa\" (\"It's ours\"). As the song nears its end, this chant feels less like a hope and more like a statement of fact—a celebration of victory.",
+          "meaning": "The chorus returns with that confident \"Anawa\" (\"It's ours\"). As the song nears its end, this chant feels less like a hope and more like a statement of fact\u2014a celebration of victory.",
           "startTime": 162,
           "endTime": 169
         },
         {
           "verseNumber": 18,
-          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es África",
+          "original": "Tsamina mina, eh eh\nWaka waka, eh eh\nTsamina mina zangalewa\nPorque esto es \u00c1frica",
           "translation": "Come on, come on, eh eh\nDo it, do it, eh eh\nCome on, come on, who asked you to come?\nBecause this is Africa",
           "transliteration": "Sah-MEE-nah MEE-nah, eh eh\nWah-kah wah-kah, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "The final full run-through of the main chorus. It's the last big, collective shout, bringing everyone together one more time to celebrate the song's central message.",
@@ -535,7 +534,7 @@
           "original": "Django, eh eh, Django, eh eh\nTsamina mina zangalewa, anawa ah ah",
           "translation": "The sun shines, eh eh, the sun shines, eh eh\nCome on, come on, who asked you to come? It's ours, ah ah",
           "transliteration": "JAHN-goh, eh eh, JAHN-goh, eh eh\nSah-MEE-nah MEE-nah zahn-gah-LEH-wah, ah-NAH-wah ah ah",
-          "meaning": "\"Django\" can mean \"the sun shines,\" so this part of the outro feels like a bright, triumphant finish. It's like the sun is rising on a new day of victory. Paired with the final declaration of \"It's ours,\" it’s a perfect, joyful conclusion.",
+          "meaning": "\"Django\" can mean \"the sun shines,\" so this part of the outro feels like a bright, triumphant finish. It's like the sun is rising on a new day of victory. Paired with the final declaration of \"It's ours,\" it\u2019s a perfect, joyful conclusion.",
           "startTime": 177,
           "endTime": 184
         },
@@ -550,7 +549,7 @@
         },
         {
           "verseNumber": 21,
-          "original": "Porque esto es África\nPorque esto es África",
+          "original": "Porque esto es \u00c1frica\nPorque esto es \u00c1frica",
           "translation": "Because this is Africa\nBecause this is Africa",
           "transliteration": "Por-keh ES-toh es AH-free-kah\nPor-keh ES-toh es AH-free-kah",
           "meaning": "The song fades out with its most important line. It's the final word, reminding everyone of the pride, power, and spirit of the continent that the entire song is celebrating.",
@@ -559,7 +558,6 @@
         }
       ]
     },
-    "youtubeUrl": "https://storage.googleapis.com/babelback-dev/downloads/829e423f-a713-4647-8474-3f098f77d62b.m4a?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=babelback-storage%40talkito-dev.iam.gserviceaccount.com%2F20251019%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20251019T073201Z&X-Goog-Expires=7200&X-Goog-SignedHeaders=host&X-Goog-Signature=3613306df052f56bd1864b9beaa7cc34807445af1665aa6f9a98a380e35fb325e9ee57af1f52ab079668db193f7c9e31ce2c2bf658d491e3f60bbb7ed4920c6b93c6e490a174937ba1a6557a3541f9c1e690050be254a2ee9f5d36d5bf113d32b310f589ea815233f5c5280dbc77bbc2d00ed22b004972e66e3bf4774ad4bf486d685e178fbd7d5b81b867820060ca6d81caa7c6430a47afd6b99c3ba34ea5cbee1bc896044ee3fc755281788bfafafbc2748e7f29f35f305e6f3eedbbe11951763daf3b2ed948b00ab87d4982ea79b3fac1aabf3c2da9523c78a6302687adc91dae41781ab860d9dfcaaeb00afafb5ab69d895d777a345efdcd604509d69f81",
     "notes": "pepy, Shakira, Anthem",
     "tags": [
       "pepy",
@@ -568,5 +566,167 @@
     ],
     "qualityTier": "seed",
     "addedAt": 1760859429224
+  },
+  {
+    "id": "en-9b6bd0f0-7be7-4e8d-81ca-f9b6e9a9e389-mgxhfdoi",
+    "gcsObject": {
+      "bucket": "babelback-dev",
+      "path": "downloads/9b6bd0f0-7be7-4e8d-81ca-f9b6e9a9e389.m4a",
+      "contentType": "audio/mp4",
+      "size": 2961857
+    },
+    "targetLanguage": "English",
+    "modelId": "gemini-2.5-pro",
+    "karaokeMode": false,
+    "songData": {
+      "title": "Saheba",
+      "originalLanguage": "Hindi",
+      "summary": "This song is all about someone who is totally lovesick and can't stop thinking about the person they love, who they call 'Saheba.' They're having sleepless nights, feeling tormented by memories, and just wish their love would come back. It's a classic tale of longing, where every moment is filled with thoughts of their special person and the pain of being apart.",
+      "detailedAnalysis": "The song 'Saheba' paints a vivid picture of deep yearning and heartache. The singer uses the affectionate term 'Saheba,' which translates to something like 'my lady' or 'my love,' to address the object of their affection throughout the song, making it feel like a very personal and intimate letter.\n\nThe core theme is obsession and the suffering that comes with separation. The lyrics constantly circle back to the idea of sleepless nights ('neendein veendein aaye na') and the feeling that time just won't pass. This isn't just a fleeting thought; it's an all-consuming reality where 'thoughts of you fill my days and nights.'\n\nThere's some really beautiful imagery used, like having 'oceans in my eyes,' which is a poetic way of saying they've been crying endlessly. The singer also talks about how all the promises they made are now just 'empty words,' suggesting a relationship that was once full of hope but is now broken or distant. The most powerful plea comes when they say their heart isn't 'for rent'\u2014it's fragile and needs to be handled with care, highlighting their emotional vulnerability. Ultimately, the song is a beautiful and sad expression of how one person's absence can completely disrupt another's world, leaving them trapped in a cycle of memories and longing.",
+      "verses": [
+        {
+          "verseNumber": 1,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0906\u090f \u0918\u0930 \u0915\u093e\u0939\u0947 \u0928\u093e, \u0910\u0938\u0947 \u0924\u094b \u0938\u0924\u093e\u090f \u0928\u093e\n\u0926\u0947\u0916\u0942\u0902 \u0924\u0941\u091d\u0915\u094b \u091a\u0948\u0928 \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, why don't you come home? Don't torture me like this. Just seeing you brings me peace.",
+          "transliteration": "Sah-heh-bah ah-yeh ghur kah-heh nah, eh-seh toh sah-tah-yeh nah. Deh-khoon tujh-ko chen ah-tah heh.",
+          "meaning": "The singer is calling out to their beloved, whom they call 'Saheba.' They're basically asking why she's staying away and begging her not to torment them with her absence. The only thing that brings them any sense of calm or peace is seeing her face.",
+          "startTime": 12,
+          "endTime": 21
+        },
+        {
+          "verseNumber": 2,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0928\u0940\u0902\u0926\u0947\u0902 \u0935\u093f\u0902\u0926\u0947\u0902 \u0906\u090f \u0928\u093e, \u0930\u093e\u0924\u0947\u0902 \u0915\u093e\u091f\u0940 \u091c\u093e\u090f \u0928\u093e\n\u0924\u0947\u0930\u093e \u0939\u0940 \u0916\u094d\u092f\u093e\u0932 \u0926\u093f\u0928 \u0930\u0948\u0928 \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, sleep just won't come, and the nights are impossible to get through. Thoughts of you fill my days and nights.",
+          "transliteration": "Sah-heh-bah neen-dein veen-dein ah-yeh nah, rah-tein kah-tee jah-yeh nah. Teh-rah hee khah-yal din ren ah-tah heh.",
+          "meaning": "Here, the singer describes their suffering. 'Neendein veendein' is a casual way of saying 'sleep and all that,' meaning they can't get any rest at all. The nights feel endless and unbearable because their mind is completely consumed with thoughts of their beloved, day and night.",
+          "startTime": 22,
+          "endTime": 31
+        },
+        {
+          "verseNumber": 3,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0938\u092e\u0902\u0926\u0930 \u092e\u0947\u0930\u0940 \u0906\u0901\u0916\u094b\u0902 \u092e\u0947\u0902 \u0930\u0939 \u0917\u090f\n\u0939\u092e \u0906\u0924\u0947 \u0906\u0924\u0947 \u091c\u093e\u0928\u093e, \u0924\u0947\u0930\u0940 \u092f\u093e\u0926\u094b\u0902 \u092e\u0947\u0902 \u0930\u0939 \u0917\u090f",
+          "translation": "My love, oceans have been left in my eyes. I was on my way, my dear, but got lost in memories of you.",
+          "transliteration": "Sah-heh-bah sah-mun-dur meh-ree ahn-khon mein reh geh-yeh. Hum ah-teh ah-teh jah-nah, teh-ree yah-don mein reh geh-yeh.",
+          "meaning": "This is a really poetic way of saying they've cried so much it's like there are oceans in their eyes. They feel like they're trying to move on or go somewhere, but they keep getting stuck and completely lost in their memories of her.",
+          "startTime": 32,
+          "endTime": 41
+        },
+        {
+          "verseNumber": 4,
+          "original": "\u092f\u0947 \u092a\u0932\u0915\u0947\u0902 \u0917\u0935\u093e\u0939\u0940 \u0939\u0948, \u0939\u092e \u0930\u093e\u0924\u094b\u0902 \u092e\u0947\u0902 \u0930\u0939 \u0917\u090f\n\u091c\u094b \u0935\u093e\u0926\u0947 \u0915\u093f\u090f \u0938\u093e\u0930\u0947, \u092c\u0938 \u092c\u093e\u0924\u094b\u0902 \u092e\u0947\u0902 \u0930\u0939 \u0917\u090f",
+          "translation": "These eyelids are the proof, we've been left behind in the nights. All the promises we made are now just empty words.",
+          "transliteration": "Yeh pul-kein gah-wah-hee heh, hum rah-ton mein reh geh-yeh. Jo wah-deh kee-yeh sah-reh, bus bah-ton mein reh geh-yeh.",
+          "meaning": "He's saying you can just look at his tired eyes to see the proof of his sleepless nights. He feels stuck in the darkness, both literally and emotionally. Then he thinks back on all the promises they made, which now feel hollow and meaningless\u2014they were just talk, with no action to back them up.",
+          "startTime": 41,
+          "endTime": 50
+        },
+        {
+          "verseNumber": 5,
+          "original": "\u092c\u093e\u0924\u094b\u0902 \u092c\u093e\u0924\u094b\u0902 \u092e\u0947\u0902 \u0939\u0940, \u0916\u094d\u0935\u093e\u092c\u094b\u0902 \u0916\u094d\u0935\u093e\u092c\u094b\u0902 \u092e\u0947\u0902 \u0939\u0940, \u092e\u0947\u0930\u0947 \u0915\u0930\u0940\u092c \u0939\u0948 \u0924\u0942\n\u0924\u0947\u0930\u0940 \u0924\u0932\u092c \u092e\u0941\u091d\u0915\u094b, \u0924\u0947\u0930\u0940 \u0924\u0932\u092c \u091c\u093e\u0928\u093e, \u0939\u094b \u0924\u0942 \u0915\u092d\u0940 \u0930\u0942\u092c\u0930\u0942",
+          "translation": "Only in conversations, only in dreams, are you close to me. I crave you, my love, I crave you; I wish you'd come face-to-face with me someday.",
+          "transliteration": "Bah-ton bah-ton mein hee, khwah-bon khwah-bon mein hee, meh-reh kah-reeb heh too. Teh-ree tah-lub mujh-ko, teh-ree tah-lub jah-nah, ho too kah-bhee roo-bah-roo.",
+          "meaning": "He admits that she's not physically there. The only time she feels close is when he's talking about her or dreaming of her. He expresses this intense craving ('talab') for her, wishing desperately that they could actually meet in person, for real, instead of just in his mind.",
+          "startTime": 50,
+          "endTime": 60
+        },
+        {
+          "verseNumber": 6,
+          "original": "\u0936\u094b\u0930 \u0913 \u0936\u0930\u093e\u092c\u093e \u091c\u094b \u0938\u0940\u0928\u0947 \u092e\u0947\u0902 \u0939\u0948 \u092e\u0947\u0930\u0947, \u0915\u0948\u0938\u0947 \u092c\u092f\u093e\u0902 \u092e\u0948\u0902 \u0915\u0930\u0942\u0901\n\u0939\u093e\u0932 \u091c\u094b \u092e\u0947\u0930\u093e \u0939\u0948 \u092e\u0948\u0902 \u0915\u093f\u0938\u0915\u094b \u092c\u0924\u093e\u090a\u0901, \u092e\u0947\u0930\u0947 \u0938\u093e\u0939\u093f\u092c\u093e",
+          "translation": "The chaos and noise inside my chest, how can I even explain it? This state I'm in, who can I even tell, my love?",
+          "transliteration": "Shor o shah-rah-bah jo see-neh mein heh meh-reh, keh-seh bah-yan mein kah-roon. Hahl jo meh-rah heh mein kiss-ko bah-tah-oon, meh-reh Sah-heh-bah.",
+          "meaning": "He describes his emotional turmoil as 'shor o sharaaba,' which means 'noise and commotion.' It perfectly captures the chaos of heartbreak. He feels like his pain is so overwhelming that he can't even put it into words for anyone else to understand, leaving him feeling completely alone with his suffering.",
+          "startTime": 60,
+          "endTime": 70
+        },
+        {
+          "verseNumber": 7,
+          "original": "\u0926\u093f\u0932 \u0928\u093e \u0915\u093f\u0930\u093e\u090f \u0915\u093e, \u0925\u094b\u0921\u093c\u093e \u0924\u094b \u0938\u0902\u092d\u093e\u0932\u094b \u0928\u093e\n\u0928\u093e\u091c\u093c\u0941\u0915 \u0939\u0948 \u092f\u0947 \u091f\u0942\u091f \u091c\u093e\u0924\u093e \u0939\u0948",
+          "translation": "This heart isn't for rent, so please handle it with a little care. It's fragile, it breaks easily.",
+          "transliteration": "Dil nah kee-rah-yeh kah, thoh-dah toh sum-bhah-lo nah. Nah-zook heh yeh toot jah-tah heh.",
+          "meaning": "This is a direct plea to his beloved. He's telling her that his heart isn't some disposable thing you can just rent and give back. It's real and needs to be treated gently. He's pointing out how vulnerable he is ('naazuk' means fragile) and how her actions are breaking him.",
+          "startTime": 70,
+          "endTime": 78
+        },
+        {
+          "verseNumber": 8,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0928\u0940\u0902\u0926\u0947\u0902 \u0935\u093f\u0902\u0926\u0947\u0902 \u0906\u090f \u0928\u093e, \u0930\u093e\u0924\u0947\u0902 \u0915\u093e\u091f\u0940 \u091c\u093e\u090f \u0928\u093e\n\u0924\u0947\u0930\u093e \u0939\u0940 \u0916\u094d\u092f\u093e\u0932 \u0926\u093f\u0928 \u0930\u0948\u0928 \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, sleep just won't come, and the nights are impossible to get through. Thoughts of you fill my days and nights.",
+          "transliteration": "Sah-heh-bah neen-dein veen-dein ah-yeh nah, rah-tein kah-tee jah-yeh nah. Teh-rah hee khah-yal din ren ah-tah heh.",
+          "meaning": "The chorus repeats, hammering home the central theme. This relentless cycle of sleeplessness and obsessive thoughts about his loved one is the core of his pain and the song's main message.",
+          "startTime": 79,
+          "endTime": 89
+        },
+        {
+          "verseNumber": 9,
+          "original": "\u0915\u0948\u0938\u0940 \u092d\u0932\u093e \u0936\u092c \u0939\u094b\u0917\u0940 \u0935\u094b, \u0938\u0902\u0917 \u091c\u094b \u0924\u0947\u0930\u0947 \u0922\u0932\u0924\u0940 \u0939\u0948",
+          "translation": "How wonderful must that night be, the one that ends with you by my side.",
+          "transliteration": "Keh-see bhah-lah shub ho-gee woh, sung jo teh-reh dhul-tee heh.",
+          "meaning": "He's now daydreaming about a different reality. He imagines how amazing a night would be if he could spend it with her until the morning. It's a stark contrast to the lonely, painful nights he's currently experiencing.",
+          "startTime": 103,
+          "endTime": 112
+        },
+        {
+          "verseNumber": 10,
+          "original": "\u0926\u093f\u0932 \u0915\u094b \u0915\u094b\u0908 \u0916\u094d\u0935\u093e\u0939\u093f\u0936 \u0928\u0939\u0940\u0902, \u0924\u0947\u0930\u0940 \u0915\u092e\u0940 \u0916\u0932\u0924\u0940 \u0939\u0948",
+          "translation": "My heart has no other desire, I just feel your absence.",
+          "transliteration": "Dil ko koh-ee khwah-hish nah-hee, teh-ree kah-mee khul-tee heh.",
+          "meaning": "This line shows how focused his longing is. He's saying his heart doesn't want anything else in the world; the only thing it's aware of is the painful emptiness her absence has created. 'Kami khalti hai' is a phrase that means you feel an absence very sharply and painfully.",
+          "startTime": 113,
+          "endTime": 121
+        },
+        {
+          "verseNumber": 11,
+          "original": "\u0906\u0930\u093e\u092e \u0928\u093e \u0905\u092c \u0906\u0901\u0916\u094b\u0902 \u0915\u094b, \u0916\u094d\u0935\u093e\u092c \u092d\u0940 \u0928\u093e \u092c\u0926\u0932\u0924\u0940 \u0939\u0948",
+          "translation": "There's no rest for my eyes now, even my dreams don't change.",
+          "transliteration": "Ah-rahm nah ub ahn-khon ko, khwaab bhee nah bah-dal-tee heh.",
+          "meaning": "He's emphasizing the lack of escape from his thoughts. His eyes get no rest, and even when he does manage to dream, it's always the same thing\u2014presumably, dreaming about her. He can't get away from his obsession, even in his sleep.",
+          "startTime": 122,
+          "endTime": 131
+        },
+        {
+          "verseNumber": 12,
+          "original": "\u0926\u093f\u0932 \u0915\u094b \u0915\u094b\u0908 \u0916\u094d\u0935\u093e\u0939\u093f\u0936 \u0928\u0939\u0940\u0902, \u0924\u0947\u0930\u0940 \u0915\u092e\u0940 \u091c\u093e\u0928\u093e \u0916\u0932\u0924\u0940 \u0939\u0948",
+          "translation": "My heart has no other desire, my love, I just feel your absence.",
+          "transliteration": "Dil ko koh-ee khwah-hish nah-hee, teh-ree kah-mee jah-nah khul-tee heh.",
+          "meaning": "This is a repeat of a previous line, but he adds 'jaana' (my love/my life) to make it even more personal and emotional. He's directly addressing her, telling her that his entire world has been reduced to this one painful feeling of missing her.",
+          "startTime": 132,
+          "endTime": 141
+        },
+        {
+          "verseNumber": 13,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0924\u0942 \u0939\u0940 \u092e\u0947\u0930\u093e \u0906\u0908\u0928\u093e, \u0939\u093e\u0925\u094b\u0902 \u092e\u0947\u0902 \u092d\u0940 \u092e\u0947\u0930\u0947 \u0939\u093e\u0901, \u0924\u0947\u0930\u093e \u0939\u0940 \u0928\u0938\u0940\u092c \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, you are my mirror. Even in my hands, yes, only your fate appears.",
+          "transliteration": "Sah-heh-bah too hee meh-rah ah-ee-nah, hah-thon mein bhee meh-reh haan, teh-rah hee nah-seeb ah-tah heh.",
+          "meaning": "Saying 'you are my mirror' means he sees his true self reflected in her. The next line is very poetic, likely referring to palm-reading. It's like when he looks at the lines on his own palms to see his fate ('naseeb'), all he sees is hers. It implies their destinies are completely intertwined.",
+          "startTime": 142,
+          "endTime": 150
+        },
+        {
+          "verseNumber": 14,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0928\u0940\u0902\u0926\u0947\u0902 \u0935\u093f\u0902\u0926\u0947\u0902 \u0906\u090f \u0928\u093e, \u0930\u093e\u0924\u0947\u0902 \u0915\u093e\u091f\u0940 \u091c\u093e\u090f \u0928\u093e\n\u0924\u0947\u0930\u093e \u0939\u0940 \u0916\u094d\u092f\u093e\u0932 \u0926\u093f\u0928 \u0930\u0948\u0928 \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, sleep just won't come, and the nights are impossible to get through. Thoughts of you fill my days and nights.",
+          "transliteration": "Sah-heh-bah neen-dein veen-dein ah-yeh nah, rah-tein kah-tee jah-yeh nah. Teh-rah hee khah-yal din ren ah-tah heh.",
+          "meaning": "The chorus returns again, acting as the song's emotional center. It brings everything back to his core suffering: the sleepless nights and the constant, looping thoughts about the person he loves.",
+          "startTime": 151,
+          "endTime": 161
+        },
+        {
+          "verseNumber": 15,
+          "original": "\u0938\u093e\u0939\u093f\u092c\u093e \u0928\u0940\u0902\u0926\u0947\u0902 \u0935\u093f\u0902\u0926\u0947\u0902 \u0906\u090f \u0928\u093e, \u0930\u093e\u0924\u0947\u0902 \u0915\u093e\u091f\u0940 \u091c\u093e\u090f \u0928\u093e\n\u0924\u0947\u0930\u093e \u0939\u0940 \u0916\u094d\u092f\u093e\u0932 \u0926\u093f\u0928 \u0930\u0948\u0928 \u0906\u0924\u093e \u0939\u0948",
+          "translation": "My love, sleep just won't come, and the nights are impossible to get through. Thoughts of you fill my days and nights.",
+          "transliteration": "Sah-heh-bah neen-dein veen-dein ah-yeh nah, rah-tein kah-tee jah-yeh nah. Teh-rah hee khah-yal din ren ah-tah heh.",
+          "meaning": "The final repetition of the chorus really drives the point home. It emphasizes that this isn't a temporary feeling but a relentless, ongoing state of being from which he sees no escape.",
+          "startTime": 161,
+          "endTime": 171
+        }
+      ]
+    },
+    "tags": [
+      "emotional",
+      "hindi",
+      "romance"
+    ],
+    "qualityTier": "seed",
+    "addedAt": 1760864782338
   }
 ]

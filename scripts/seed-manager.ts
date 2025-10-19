@@ -6,10 +6,7 @@
  * Usage:
  *   npm run seed -- list                           # List all seeds
  *   npm run seed -- add <jobId>                    # Add seed from analyzed job
- *   npm run seed -- add-redis <cacheKey>           # Add seed from Redis cache
  *   npm run seed -- remove <seedId>                # Remove seed from manifest
- *   npm run seed -- sync                           # Sync all seeds to Redis
- *   npm run seed -- clear                          # Clear all seeds from Redis
  *   npm run seed -- export <jobId> [output.json]   # Export job to seed JSON
  */
 
@@ -17,7 +14,7 @@ import '../app/api/_lib/loadEnv' // Load environment variables first!
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getJob } from '../app/api/_lib/jobStore'
-import { getCachedAnalysis, setCachedAnalysis, makeAnalysisCacheKey, extractYouTubeId, type AnalysisCacheRecord, type GCSObject } from '../app/api/_lib/analysisCache'
+import { getCachedAnalysis } from '../app/api/_lib/analysisCache'
 import type { Language } from '../types'
 
 const SEED_FILE = path.join(process.cwd(), 'data/seed-songs.json')
@@ -85,7 +82,7 @@ async function listSeeds() {
     if (seed.notes) console.log(`   Notes: ${seed.notes}`)
     if (seed.tags?.length) console.log(`   Tags: ${seed.tags.join(', ')}`)
     console.log(`   Added: ${new Date(seed.addedAt).toISOString()}`)
-    console.log('   ⚙︎ Sync command: npm run seed -- sync')
+    console.log('   📦 Deploy: commit data/seed-songs.json')
     console.log()
   })
 }
@@ -191,7 +188,8 @@ async function addSeedFromJob(jobId: string) {
   console.log(`   Path: data/seed-songs.json`)
 
   console.log(`\n💡 Next steps:`)
-  console.log(`   npm run seed -- sync    # Push to Redis`)
+  console.log(`   git add data/seed-songs.json && git commit`) 
+  console.log(`   Redeploy preview once the commit lands`)
 }
 
 async function removeSeed(seedId: string) {
@@ -216,67 +214,7 @@ async function removeSeed(seedId: string) {
   await saveSeeds(seeds)
 
   console.log(`✅ Removed seed: ${seedId}`)
-  console.log(`   Run "npm run seed -- sync" to update Redis`)
-}
-
-async function syncSeeds() {
-  const seeds = await loadSeeds()
-
-  if (seeds.length === 0) {
-    console.log('📭 No seeds to sync')
-    return
-  }
-
-  console.log(`\n🔄 Syncing ${seeds.length} seed(s) to Redis...\n`)
-
-  let successCount = 0
-  let failCount = 0
-
-  for (const seed of seeds) {
-    try {
-      await setCachedAnalysis({
-        gcsObject: seed.gcsObject,
-        targetLanguage: seed.targetLanguage,
-        modelId: seed.modelId,
-        karaokeMode: seed.karaokeMode,
-        sourceType: seed.youtubeUrl ? 'youtube' : 'upload',
-        youtubeUrl: seed.youtubeUrl,
-        youtubeId: seed.youtubeId,
-        songData: seed.songData,
-        ttl: 0, // No expiry
-        isSeed: true,
-        seedPath: seed.gcsObject.path,
-        qualityTier: seed.qualityTier || 'seed',
-        notes: seed.notes,
-        tags: seed.tags,
-      })
-
-      console.log(`✓ ${seed.songData.title || seed.id}`)
-      successCount++
-    } catch (error) {
-      console.error(`✗ ${seed.id}: ${error instanceof Error ? error.message : String(error)}`)
-      failCount++
-    }
-  }
-
-  console.log(`\n✅ Sync complete: ${successCount} succeeded, ${failCount} failed`)
-}
-
-async function clearSeeds() {
-  console.log(`\n⚠️  This will clear all seed cache entries from Redis`)
-  console.log(`   (The seed manifest file will NOT be deleted)`)
-
-  const confirm = await promptYesNo('\nContinue? (y/n): ', false)
-  if (!confirm) {
-    console.log('Cancelled')
-    return
-  }
-
-  console.log(`\n🧹 Clearing Redis cache...`)
-  console.log(`⚠️  Note: Redis delete is not implemented in redis.ts yet`)
-  console.log(`   You can manually clear with: redis-cli KEYS "analysis:gcs:*" | xargs redis-cli DEL`)
-
-  // TODO: Implement delete in redis.ts and call here
+  console.log('   Remember to commit data/seed-songs.json if you want to deploy the change.')
 }
 
 async function exportJobToSeed(jobId: string, outputFile?: string) {
@@ -403,14 +341,6 @@ async function main() {
         await removeSeed(args[0])
         break
 
-      case 'sync':
-        await syncSeeds()
-        break
-
-      case 'clear':
-        await clearSeeds()
-        break
-
       case 'export':
         if (!args[0]) {
           console.error('Usage: npm run seed -- export <jobId> [output.json]')
@@ -424,9 +354,7 @@ async function main() {
         console.log('  npm run seed -- list              List all seeds')
         console.log('  npm run seed -- add <jobId>       Add seed from job')
         console.log('  npm run seed -- remove <seedId>   Remove seed')
-        console.log('  npm run seed -- sync              Sync to Redis')
-        console.log('  npm run seed -- clear             Clear Redis cache')
-        console.log('  npm run seed -- export <jobId>    Export to JSON')
+        console.log('  npm run seed -- export <jobId>    Export seed JSON')
         console.log()
         process.exit(1)
     }

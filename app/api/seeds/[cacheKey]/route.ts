@@ -1,6 +1,5 @@
 import '../../_lib/loadEnv'
 import { NextRequest, NextResponse } from 'next/server'
-import { getRedis } from '../../_lib/redis'
 import { getStorageProvider } from '../../_lib/storage'
 import fallbackSeedsData from '@/data/seed-songs.json'
 import type { SongData } from '@/types'
@@ -18,32 +17,11 @@ export async function GET(
   try {
     const resolvedParams = await context.params
     const cacheKey = decodeURIComponent(resolvedParams.cacheKey)
-
-    const redis = await getRedis()
-    if (!redis) {
-      const fallback = fallbackSeedsData.find((seed) => seed.id === cacheKey || seed.gcsObject?.path === cacheKey)
-      if (!fallback) {
-        return NextResponse.json({ error: 'Seed not found' }, { status: 404 })
-      }
-      return NextResponse.json(await buildSeedResponse(fallback))
+    const fallback = fallbackSeedsData.find((seed) => seed.id === cacheKey || seed.gcsObject?.path === cacheKey)
+    if (!fallback) {
+      return NextResponse.json({ error: 'Seed not found' }, { status: 404 })
     }
-
-    const raw = await redis.get(cacheKey)
-    if (!raw) {
-      const fallback = fallbackSeedsData.find((seed) => seed.id === cacheKey || seed.gcsObject?.path === cacheKey)
-      if (!fallback) {
-        return NextResponse.json({ error: 'Seed not found' }, { status: 404 })
-      }
-      return NextResponse.json(await buildSeedResponse(fallback))
-    }
-
-    const record = JSON.parse(raw)
-
-    if (!record.isSeed) {
-      return NextResponse.json({ error: 'Not a seed song' }, { status: 400 })
-    }
-
-    return NextResponse.json(await buildSeedResponse(record))
+    return NextResponse.json(await buildSeedResponse(fallback))
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error)
     console.error('[seeds:load] Error loading seed:', msg)

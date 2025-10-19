@@ -7,6 +7,7 @@ _Updated: 2025-10-18_
 - **Try These → Explorer:** Seeds now load through `useSongExplorerController.ingestSeedPayload`, which buffers the full audio via `/api/media?mode=download` before hydrating lyrics. Seeking is instant and playback uses an object URL.
 - **Explorer Loading Screen:** The parchment loading card shows buffering progress (`seedBufferingPercent`). If buffering stalls, watch for `[seed] buffer:` logs.
 - **Library Entries:** Seed loads write real audio blobs into IndexedDB (`BabelbackLibraryDB.songs`). Delete and re-load seeds saved prior to 2025-10-18 for working playback.
+- **Seed manifest:** `/api/seeds` now reads exclusively from `data/seed-songs.json`. Update seeds with `npm run seed -- add <jobId>` and commit the file when deploying.
 - **Media Endpoint:** `/api/media` supports `mode=json` (signed URL) and `mode=download` (same-origin stream). Client code now uses download mode to avoid CORS.
 
 ## Outstanding Migrations / Follow-ups
