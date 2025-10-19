@@ -72,19 +72,20 @@ async function listSeeds() {
     return
   }
 
-  console.log(`\n📚 Found ${seeds.length} seed(s):\n`)
+  console.log(`\n📚 Found ${seeds.length} seed(s)\n   Source manifest: data/seed-songs.json\n`)
 
   seeds.forEach((seed, idx) => {
     console.log(`${idx + 1}. [${seed.id}]`)
     console.log(`   Title: ${seed.songData.title || 'Untitled'}`)
-    console.log(`   Language: ${seed.targetLanguage} (${seed.songData.originalLanguage})`)
-    console.log(`   GCS: ${seed.gcsObject.bucket}/${seed.gcsObject.path}`)
+    console.log(`   Languages: ${seed.songData.originalLanguage} → ${seed.targetLanguage}`)
+    console.log(`   Storage: ${seed.gcsObject.bucket}/${seed.gcsObject.path}`)
     console.log(`   Model: ${seed.modelId} | Karaoke: ${seed.karaokeMode ? 'Yes' : 'No'}`)
     console.log(`   Verses: ${seed.songData.verses?.length || 0}`)
     if (seed.youtubeUrl) console.log(`   YouTube: ${seed.youtubeUrl}`)
     if (seed.notes) console.log(`   Notes: ${seed.notes}`)
     if (seed.tags?.length) console.log(`   Tags: ${seed.tags.join(', ')}`)
     console.log(`   Added: ${new Date(seed.addedAt).toISOString()}`)
+    console.log('   ⚙︎ Sync command: npm run seed -- sync')
     console.log()
   })
 }

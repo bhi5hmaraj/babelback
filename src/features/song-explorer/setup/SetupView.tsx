@@ -3,6 +3,7 @@ import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import LoadingSpinner from '@/components/LoadingSpinner'
+import LanguageSelector from '@/components/LanguageSelector'
 import type { SeedSongPayload, Language } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -21,7 +22,7 @@ export interface SetupViewProps {
   funLoadingMessage?: string
 }
 
-export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProcessYoutube, onLoadSeed: _onLoadSeed, selectedModelId, onModelSelect, loadingMessage, funLoadingMessage }: SetupViewProps) {
+export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProcessYoutube, onLoadSeed: _onLoadSeed, targetLanguage, onLanguageSelect, selectedModelId, onModelSelect, loadingMessage, funLoadingMessage }: SetupViewProps) {
   const [sourceMode, setSourceMode] = React.useState<'file' | 'youtube'>('file')
   const [file, setFile] = React.useState<File | null>(null)
   const [ytUrl, setYtUrl] = React.useState('')
@@ -102,6 +103,13 @@ export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProce
               disabled={isBusy}
             />
           </div>
+          <LanguageSelector
+            className="pt-2"
+            selectedLanguage={targetLanguage}
+            onLanguageChange={onLanguageSelect}
+            disabled={isBusy}
+            label="Translate to"
+          />
         </div>
 
         <Button

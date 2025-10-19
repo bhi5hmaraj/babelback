@@ -286,6 +286,7 @@ export function useSongExplorerController() {
     // analysis entry points
     handleAudioSubmit: songMgr.handleAudioSubmit,
     handleUrlAnalyze: songMgr.handleUrlAnalyze,
+    handleLanguageChange: songMgr.handleLanguageChange,
     handleSongDurationAvailable: songMgr.handleSongDurationAvailable,
     clearCurrentSong: songMgr.clearCurrentSong,
     loadSeed,

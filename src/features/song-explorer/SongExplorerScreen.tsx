@@ -16,6 +16,8 @@ import { getSongFromLibrary } from '@/db'
 import fallbackSeedsData from '@/data/seed-songs.json'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { dbg } from '@/lib/debug'
+import LanguageSelector from '@/components/LanguageSelector'
+import type { Language } from '@/types'
 
 import '@/styles/mobile-brown-theme.css'
 
@@ -40,6 +42,14 @@ export default function SongExplorerScreen() {
   const [showDetails, setShowDetails] = React.useState(false)
   const loadedSeedRef = React.useRef<string | null>(null)
   const [pendingSeedId, setPendingSeedId] = React.useState<string | null>(null)
+
+  const handleLanguageSelect = React.useCallback(async (lang: Language) => {
+    if (ctrl.songData && ctrl.handleLanguageChange) {
+      await ctrl.handleLanguageChange(lang)
+    } else {
+      ctrl.setTargetLanguage(lang)
+    }
+  }, [ctrl])
 
   const verses = ctrl.songData?.verses ?? []
   const activeVerse: Verse | null = verses[ctrl.currentVerseIndex] ?? null
@@ -131,6 +141,18 @@ export default function SongExplorerScreen() {
       {ctrl.songData && (
         <div className="flex items-center justify-center gap-2 px-3 py-1">
           <ViewTabs active={view} onChange={setView} />
+        </div>
+      )}
+
+      {ctrl.songData && (
+        <div className="px-4 pb-2">
+          <LanguageSelector
+            selectedLanguage={ctrl.targetLanguage}
+            onLanguageChange={handleLanguageSelect}
+            disabled={!!ctrl.isBusy}
+            className="max-w-xs"
+            label="Translate to"
+          />
         </div>
       )}
 
