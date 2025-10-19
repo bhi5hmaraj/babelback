@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import type { SeedSongPayload, Language } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +37,9 @@ export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProce
       await onProcessYoutube(ytUrl)
     }
   }
+
+  const primaryMessage = loadingMessage || (isBusy ? (sourceMode === 'file' ? 'Uploading your song…' : 'Preparing your link…') : null)
+  const playfulMessage = isBusy ? funLoadingMessage : undefined
 
   return (
     <div className={cn('parchment-shell min-h-screen pb-24 text-[#4a3f35]')}>
@@ -109,10 +113,12 @@ export function SetupView({ isBusy, apiKeyMissing, error, onProcessFile, onProce
           {isBusy ? 'Processing…' : 'BabelBack!'}
         </Button>
 
-        {(loadingMessage || funLoadingMessage) && (
-          <div className="mt-3 text-xs text-[#7d6b56]">
-            <p>{loadingMessage}</p>
-            {funLoadingMessage ? <p className="italic opacity-80">{funLoadingMessage}</p> : null}
+        {(primaryMessage || playfulMessage) && (
+          <div className="mt-4">
+            <LoadingSpinner
+              message={primaryMessage ?? undefined}
+              funMessage={playfulMessage}
+            />
           </div>
         )}
 
