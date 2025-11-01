@@ -4,6 +4,7 @@ export type StartDownloadResponse = {
   statusUrl: string
   getUrl?: string
   apifyRunId?: string
+  apifyAccountLabel?: string
 }
 
 /** Status payload returned by GET /api/downloads/:id. */
@@ -15,14 +16,22 @@ export type DownloadStatus = {
   error?: { message: string }
   apifyRunId?: string
   apifyStatus?: string
+  apifyAccountLabel?: string
+  apifyDatasetId?: string
+  apifyKeyValueStoreId?: string
 }
 
 /** Start a YouTube download-and-upload job via the server. */
-export async function startDownload(youtubeUrl: string, audioFormat: 'm4a' | 'mp3' = 'm4a', country = 'IN'): Promise<StartDownloadResponse> {
+export async function startDownload(
+  youtubeUrl: string,
+  audioFormat: 'm4a' | 'mp3' = 'm4a',
+  country = 'IN',
+  limits?: { maxDurationSeconds?: number; maxFileSizeBytes?: number }
+): Promise<StartDownloadResponse> {
   const resp = await fetch('/api/downloads', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ youtubeUrl, audioFormat, country })
+    body: JSON.stringify({ youtubeUrl, audioFormat, country, ...(limits || {}) })
   })
   if (!resp.ok) {
     const text = await resp.text().catch(() => '')

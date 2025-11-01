@@ -12,7 +12,8 @@
     "seed": "tsx scripts/seed-manager.ts",
     "recover-job": "tsx scripts/recover-job.ts",
     "list-jobs": "tsx scripts/list-redis-jobs.ts",
-    "seed-cache": "tsx scripts/seed-analysis-cache.ts"
+    "seed-cache": "tsx scripts/seed-analysis-cache.ts",
+    "manage-apify-accs": "tsx scripts/manage-apify-accs.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.17.1",
