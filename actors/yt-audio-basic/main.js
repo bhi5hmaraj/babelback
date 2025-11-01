@@ -19,57 +19,24 @@
  *   less efficient than direct GCS upload.
  */
 
-import { Actor, log } from 'apify';
-import { promises as fs } from 'node:fs';
-import { createReadStream } from 'node:fs';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import crypto from 'node:crypto';
-const execFileAsync = promisify(execFile);
-
-function parseJsonLines(stdout) {
-  const lines = stdout.trim().split(/\r?\n/).filter(Boolean);
-  for (let i = lines.length - 1; i >= 0; i -= 1) {
-    try { return JSON.parse(lines[i]); } catch {}
-  }
-  throw new Error('yt-dlp metadata JSON not found in output');
-}
-
-function extractApproximateBytes(metadata) {
-  if (!metadata || typeof metadata !== 'object') return undefined;
-  const requested = Array.isArray(metadata.requested_downloads) ? metadata.requested_downloads[0] : undefined;
-  const formats = Array.isArray(metadata.formats) ? metadata.formats : [];
-  const requestedFormat = requested?.format_id ? formats.find((fmt) => fmt.format_id === requested.format_id) : undefined;
-  const candidates = [
-    requested?.filesize,
-    requested?.filesize_approx,
-    requestedFormat?.filesize,
-    requestedFormat?.filesize_approx,
-    metadata.filesize,
-    metadata.filesize_approx,
-  ];
-  return candidates.find((val) => typeof val === 'number' && Number.isFinite(val));
-}
+import { Actor, log } from 'apify'
+import { promises as fs } from 'node:fs'
+import { createReadStream } from 'node:fs'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import crypto from 'node:crypto'
+const execFileAsync = promisify(execFile)
 
 function detectContentType(filePath) {
-  if (filePath.endsWith('.mp3')) return 'audio/mpeg';
-  if (filePath.endsWith('.m4a') || filePath.endsWith('.mp4')) return 'audio/mp4';
-  if (filePath.endsWith('.ogg')) return 'audio/ogg';
-  if (filePath.endsWith('.webm')) return 'audio/webm';
-  return 'application/octet-stream';
-}
-
-function defaultUA() {
-  // Modern desktop UA helps avoid some server-side filtering
-  return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
-}
-function looks403(err) {
-  const s = String(err?.stderr || err?.stdout || err?.message || err);
-  return /HTTP\s*Error\s*403|403:\s*Forbidden/i.test(s);
+  if (filePath.endsWith('.mp3')) return 'audio/mpeg'
+  if (filePath.endsWith('.m4a') || filePath.endsWith('.mp4')) return 'audio/mp4'
+  if (filePath.endsWith('.ogg')) return 'audio/ogg'
+  if (filePath.endsWith('.webm')) return 'audio/webm'
+  return 'application/octet-stream'
 }
 
 await Actor.main(async () => {
-  const input = (await Actor.getInput()) ?? {};
+  const input = (await Actor.getInput()) ?? {}
   const {
     youtubeUrl,
     audioFormat = 'm4a',
@@ -77,156 +44,148 @@ await Actor.main(async () => {
     cookiesTxt,
     proxyConfiguration,
     formatExpr = 'bestaudio[ext=m4a]/140/234/bestaudio',
-    uploadUrl,
-    callbackUrl,
-    callbackSecret,
-    jobId,
-    maxDurationSeconds: rawMaxDurationSeconds,
-    maxFileSizeBytes: rawMaxFileSizeBytes,
-  } = input;
+    // Direct-to-GCS parameters, provided by Hono (Edge) at job start
+    uploadUrl,            // V4 signed PUT URL (optional)
+    callbackUrl,          // Hono webhook to report completion (optional)
+    callbackSecret,       // HMAC secret for webhook signing (optional)
+    jobId                 // Correlation id for logging and callback payload (optional)
+  } = input
 
-  const maxDurationSeconds = typeof rawMaxDurationSeconds === 'number' && rawMaxDurationSeconds > 0 ? rawMaxDurationSeconds : 600;
-  const maxFileSizeBytes = typeof rawMaxFileSizeBytes === 'number' && rawMaxFileSizeBytes > 0 ? rawMaxFileSizeBytes : 100 * 1024 * 1024;
+  if (!youtubeUrl) throw new Error('youtubeUrl is required')
 
-  if (!youtubeUrl) throw new Error('youtubeUrl is required');
-
-  // Proxy
-  let proxyUrl;
+  // Proxy: prefer new "proxyConfiguration" editor if provided
+  let proxyUrl
   if (proxyConfiguration && (proxyConfiguration.useApifyProxy || (proxyConfiguration.proxyUrls && proxyConfiguration.proxyUrls.length))) {
-    const proxyConf = await Actor.createProxyConfiguration(proxyConfiguration);
-    proxyUrl = await proxyConf.newUrl();
+    const proxyConf = await Actor.createProxyConfiguration(proxyConfiguration)
+    // newUrl() returns a Promise in Apify SDK v3
+    proxyUrl = await proxyConf.newUrl()
   }
 
-  // Cookies
-  let cookiesPath = null;
+  // Optional cookies
+  let cookiesPath = null
   if (cookiesTxt) {
-    cookiesPath = '/tmp/cookies.txt';
+    cookiesPath = '/tmp/cookies.txt'
+    // If cookiesTxt looks like a URL, fetch content; otherwise treat as raw Netscape text
     if (/^https?:\/\//i.test(cookiesTxt)) {
-      const resp = await fetch(cookiesTxt);
-      if (!resp.ok) throw new Error(`Failed to fetch cookies URL: ${resp.status}`);
-      await fs.writeFile(cookiesPath, await resp.text(), 'utf8');
+      const resp = await fetch(cookiesTxt)
+      if (!resp.ok) throw new Error(`Failed to fetch cookies URL: ${resp.status}`)
+      const text = await resp.text()
+      await fs.writeFile(cookiesPath, text, 'utf8')
     } else {
-      await fs.writeFile(cookiesPath, cookiesTxt, 'utf8');
+      await fs.writeFile(cookiesPath, cookiesTxt, 'utf8')
     }
   }
 
-  const outBase = '/tmp/out';
+  const outBase = '/tmp/out'
+  const args = [
+    youtubeUrl,
+    '-f', formatExpr,
+    '-x', '--audio-format', audioFormat,
+    '-o', `${outBase}.%(ext)s`,
+    '--no-playlist', '--force-ipv4', '-q'
+  ]
+  if (cookiesPath) args.push('--cookies', cookiesPath)
+  if (userAgent) args.push('--user-agent', userAgent)
+  if (proxyUrl) args.push('--proxy', proxyUrl)
 
-  const sharedArgsBase = [];
-  if (cookiesPath) sharedArgsBase.push('--cookies', cookiesPath);
-  sharedArgsBase.push('--user-agent', userAgent || defaultUA());
-  if (proxyUrl) sharedArgsBase.push('--proxy', proxyUrl);
-
-  const runYtDlp = async (baseArgs, useProxy = true) => {
-    const shared = [...sharedArgsBase];
-    if (!useProxy) {
-      const i = shared.indexOf('--proxy');
-      if (i !== -1) shared.splice(i, 2);
-    }
-    const fullArgs = [youtubeUrl, ...baseArgs, ...shared];
-    return execFileAsync('yt-dlp', fullArgs, { maxBuffer: 1024 * 1024 * 64 });
-  };
-
-  // --- Preflight metadata (same constraints you added) ---
-  try {
-    const metaArgs = ['-f', formatExpr, '--skip-download', '--no-playlist', '--no-progress', '--dump-json', '--force-ipv4'];
-    const { stdout } = await runYtDlp(metaArgs, true);
-    const metadata = parseJsonLines(stdout);
-    const estimatedDuration = typeof metadata?.duration === 'number' ? metadata.duration : undefined;
-    const estimatedBytes = extractApproximateBytes(metadata);
-
-    log.info('yt-dlp metadata', { jobId, duration: estimatedDuration, approxBytes: estimatedBytes, title: metadata?.title });
-
-    if (maxDurationSeconds > 0 && estimatedDuration && estimatedDuration > maxDurationSeconds) {
-      log.warning('Skipping download due to duration limit', { jobId, duration: estimatedDuration, maxDurationSeconds });
-      await Actor.pushData({ status: 'skipped', reason: 'duration_exceeded', jobId, duration: estimatedDuration, maxDurationSeconds });
-      throw new Error(`MEDIA_TOO_LONG: duration ${estimatedDuration}s > ${maxDurationSeconds}s`);
-    }
-    if (maxFileSizeBytes > 0 && estimatedBytes && estimatedBytes > maxFileSizeBytes) {
-      log.warning('Skipping download due to size limit', { jobId, estimatedBytes, maxFileSizeBytes });
-      await Actor.pushData({ status: 'skipped', reason: 'filesize_exceeded', jobId, estimatedBytes, maxFileSizeBytes });
-      throw new Error(`MEDIA_TOO_LARGE: estimated ${estimatedBytes} bytes > ${maxFileSizeBytes} bytes`);
-    }
-  } catch (err) {
-    if (err instanceof Error && (err.message.startsWith('MEDIA_TOO_LONG') || err.message.startsWith('MEDIA_TOO_LARGE'))) throw err;
-    log.warning('Metadata preflight failed; continuing', { jobId, error: err instanceof Error ? err.message : String(err) });
-  }
-
-  // --- Download ---
-  const dlArgs = ['-f', formatExpr, '-x', '--audio-format', audioFormat, '-o', `${outBase}.%(ext)s`, '--no-playlist', '--force-ipv4', '-q'];
-
+  // Avoid logging secrets/long strings. Show minimal command context.
   log.info('Running yt-dlp', {
-    url: youtubeUrl, formatExpr, audioFormat,
-    hasCookies: Boolean(cookiesPath), hasProxy: Boolean(proxyUrl), jobId,
-  });
+    url: youtubeUrl,
+    formatExpr,
+    audioFormat,
+    hasCookies: Boolean(cookiesPath),
+    hasProxy: Boolean(proxyUrl),
+    jobId,
+  })
 
   try {
-    await runYtDlp(dlArgs, true);
+    await execFileAsync('yt-dlp', args, { maxBuffer: 1024 * 1024 * 64 })
   } catch (err) {
-    const is403 = looks403(err);
-    log.exception(err, 'yt-dlp failed');
-    if (is403 && proxyUrl) {
-      log.warning('Retrying once without proxy due to 403', { jobId });
-      await runYtDlp(dlArgs, false);
-    } else {
-      throw err;
-    }
+    log.exception(err, 'yt-dlp failed')
+    throw err
   }
 
-  // --- Output file ---
-  const candidates = ['m4a', 'mp3', 'ogg', 'webm', 'mp4'].map(ext => `${outBase}.${ext}`);
-  let filePath = null;
-  for (const p of candidates) { try { await fs.stat(p); filePath = p; break; } catch {} }
-  if (!filePath) throw new Error('Output file not found');
+  // Find the output file (m4a/mp3)
+  const candidates = ['m4a', 'mp3', 'ogg', 'webm', 'mp4'].map(ext => `${outBase}.${ext}`)
+  let filePath = null
+  for (const p of candidates) {
+    try { await fs.stat(p); filePath = p; break } catch {}
+  }
+  if (!filePath) throw new Error('Output file not found')
 
-  const contentType = detectContentType(filePath);
-  const { size } = await fs.stat(filePath);
+  const contentType = detectContentType(filePath)
+  const { size } = await fs.stat(filePath)
 
-  // --- Upload to GCS (preferred) ---
-  let uploadedToGcs = false;
+  // Preferred: PUT directly to GCS when uploadUrl is provided
+  let uploadedToGcs = false
   if (uploadUrl) {
     try {
-      log.info('Uploading to GCS via signed PUT', { jobId });
-      const body = createReadStream(filePath);
-      const resp = await fetch(uploadUrl, { method: 'PUT', duplex: 'half', headers: { 'Content-Type': contentType, 'Content-Length': String(size) }, body });
+      log.info('Uploading to GCS via signed PUT', { jobId })
+      const body = createReadStream(filePath)
+      const resp = await fetch(uploadUrl, {
+        method: 'PUT',
+        // Node.js fetch requires duplex: 'half' when streaming a body
+        // See: https://github.com/nodejs/undici/issues/2588
+        duplex: 'half',
+        headers: {
+          'Content-Type': contentType,
+          'Content-Length': String(size),
+        },
+        body,
+      })
       if (!resp.ok) {
-        const text = await resp.text().catch(() => '');
-        throw new Error(`GCS PUT failed: ${resp.status} ${text?.slice(0, 300)}`);
+        const text = await resp.text().catch(() => '')
+        throw new Error(`GCS PUT failed: ${resp.status} ${text?.slice(0, 300)}`)
       }
-      uploadedToGcs = true;
+      uploadedToGcs = true
     } catch (e) {
-      log.warning('GCS PUT failed, will fall back to KVS storage', { err: String(e) });
+      log.warning('GCS PUT failed, will fall back to KVS storage', { err: String(e) })
     }
   }
 
-  // --- Fallback: KVS ---
-  let kvsDownloadUrl;
+  // Fallback: save to Actor KVS if direct upload wasn’t used
+  let kvsDownloadUrl
   if (!uploadedToGcs) {
-    const buf = await fs.readFile(filePath);
-    await Actor.setValue('audio', buf, { contentType });
-    const env = Actor.getEnv();
-    kvsDownloadUrl = `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/audio?token=${env.token}`;
+    const buf = await fs.readFile(filePath)
+    await Actor.setValue('audio', buf, { contentType })
+    const env = Actor.getEnv()
+    kvsDownloadUrl = `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/audio?token=${env.token}`
   }
 
-  // --- Optional callback ---
+  // Optional webhook back to Hono (Node): include jobId, status, and metadata
   if (callbackUrl) {
-    const payload = { jobId, status: 'completed', bytes: size, contentType, fallbackKvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl };
-    const raw = JSON.stringify(payload);
-    const headers = { 'Content-Type': 'application/json' };
+    const payload = {
+      jobId,
+      status: 'completed',
+      bytes: size,
+      contentType,
+      // When uploadedToGcs===true, Hono already knows the object (it minted the PUT URL).
+      // When false, we include the Apify KVS fallback URL for manual retrieval.
+      fallbackKvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl,
+    }
+    const raw = JSON.stringify(payload)
+    const headers = { 'Content-Type': 'application/json' }
     if (callbackSecret) {
-      const sig = crypto.createHmac('sha256', callbackSecret).update(raw).digest('hex');
-      headers['X-Signature'] = sig;
+      const sig = crypto.createHmac('sha256', callbackSecret).update(raw).digest('hex')
+      headers['X-Signature'] = sig
     }
     try {
-      const resp = await fetch(callbackUrl, { method: 'POST', headers, body: raw });
-      if (!resp.ok) log.warning('Callback returned non-2xx', { status: resp.status });
+      const resp = await fetch(callbackUrl, { method: 'POST', headers, body: raw })
+      if (!resp.ok) log.warning('Callback returned non-2xx', { status: resp.status })
     } catch (e) {
-      log.warning('Callback POST failed', { err: String(e) });
+      log.warning('Callback POST failed', { err: String(e) })
     }
   }
 
-  const result = { status: 'completed', jobId, uploadedToGcs, contentType, bytes: size, kvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl };
-  await Actor.pushData(result);
-  log.info('Done', result);
-});
-
+  // Emit a small result for the Actor run (useful when testing via Apify console)
+  const result = {
+    status: 'completed',
+    jobId,
+    uploadedToGcs,
+    contentType,
+    bytes: size,
+    kvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl,
+  }
+  await Actor.pushData(result)
+  log.info('Done', result)
+})

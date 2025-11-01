@@ -1,58 +1,37 @@
-"use client"
 
-import type React from "react"
+import React from 'react';
+
+// Using Phosphor Icons class names
+// Ensure you have included the Phosphor Icons CSS in your index.html
+// <link href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/css/phosphor.css" rel="stylesheet">
+
 
 interface IconProps {
-  name: string
-  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone"
-  size?: "sm" | "md" | "lg" | "xl" | "2xl" | number
-  className?: string
+  name: string; // Phosphor icon name, e.g., "play", "gear", "translate"
+  weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
+  className?: string;
 }
 
-/**
- * Simple icon wrapper component.
- * In a real app, this would integrate with an icon library like Phosphor Icons.
- * For now, it renders a placeholder or you can integrate your preferred icon system.
- */
-const Icon: React.FC<IconProps> = ({ name, weight = "regular", size = "md", className = "" }) => {
-  // Map size to actual pixel values
+const Icon: React.FC<IconProps> = ({ name, weight = 'regular', size = 'base', className = '' }) => {
   const sizeMap = {
-    sm: 16,
-    md: 20,
-    lg: 24,
-    xl: 32,
-    "2xl": 40,
-  }
+    xs: 'text-xs',
+    sm: 'text-sm',
+    base: 'text-base',
+    lg: 'text-lg',
+    xl: 'text-xl',
+    '2xl': 'text-2xl',
+    '3xl': 'text-3xl',
+    '4xl': 'text-4xl',
+    '5xl': 'text-5xl',
+    '6xl': 'text-6xl',
+  };
 
-  const pixelSize = typeof size === "number" ? size : sizeMap[size]
-
-  // This is a placeholder implementation
-  // In production, you'd use an actual icon library like:
-  // import { Icon as PhosphorIcon } from "@phosphor-icons/react"
-  // return <PhosphorIcon name={name} weight={weight} size={pixelSize} className={className} />
+  const weightClass = weight === 'regular' ? '' : `ph-${weight}`;
 
   return (
-    <span
-      className={`inline-block ${className}`}
-      style={{ width: pixelSize, height: pixelSize }}
-      role="img"
-      aria-label={name}
-    >
-      {/* Placeholder - replace with actual icon library */}
-      <svg
-        width={pixelSize}
-        height={pixelSize}
-        viewBox="0 0 256 256"
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect width="256" height="256" fill="none" />
-        {/* Simple placeholder icon */}
-        <circle cx="128" cy="128" r="96" opacity="0.2" />
-        <circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" strokeWidth="16" />
-      </svg>
-    </span>
-  )
-}
+    <i className={`ph ${weightClass} ph-${name} ${sizeMap[size]} ${className}`} />
+  );
+};
 
-export default Icon
+export default Icon;

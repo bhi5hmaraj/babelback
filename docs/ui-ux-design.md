@@ -151,36 +151,6 @@ This variant locks the app to a single viewport with tabbed navigation and a bot
 - Desktop: resizing preserves layout; no page scroll; player sticky.
 
 **Risks & Mitigations**
-- iOS Safari dynamic bars: prefer 100dvh with 100svh fallback; add safe-area padding to player.
-- On-screen keyboard: open inputs in sheets; keep player visible.
-- Reduced motion: disable karaoke sweep when prefers-reduced-motion.
-
-## Future Architecture & Routing Roadmap
-
-To support richer async flows (upload → download → analysis → practice) and upcoming features such as user accounts, social sharing, and cloud libraries, the UI will move from a single-page shell to a routed Next.js application backed by a modular “core” layer.
-
-### Shared Model Layer
-- Extract hooks, services, types, and constants into `core/` (or a workspace package) so multiple front-ends can share the same business logic.
-- API routes (`/api/*`) become thin controllers that call into the shared services (controllers → services → vendor SDKs).
-- Add unit tests for hooks/services before migrating the UI.
-
-### Next.js Migration Phases
-1. **Phase 0 – Prep**: audit hooks/services; ensure browser-only APIs are isolated; set up a Next.js workspace alongside the current Vite app.
-2. **Phase 1 – Core Extraction**: move `useSongDataManager`, `useSingingPractice`, `geminiService`, etc. into `core`; update Vite imports to validate the abstraction.
-3. **Phase 2 – Bootstrap Next**: configure Next (App Router), TypeScript, Tailwind/theme; add path aliases so Next can import from `core`.
-4. **Phase 3 – Routes**: implement `/setup`, `/lyrics`, `/meaning`, `/practice`, `/library` (plus `/about`, `/tech`, `/changelog`); reuse the sticky header/tabs/player in an `app/(main)/layout.tsx`.
-5. **Phase 4 – Context Provider**: wrap routes in `<SongProvider>` (client component) that instantiates the shared hooks once and exposes state/actions to every route.
-6. **Phase 5 – Async Flow Integration**: after each task, push to the next route (`router.push('/lyrics')`, etc.); show per-route loaders while uploads/downloads/analysis run.
-7. **Phase 6 – API Alignment**: either keep existing Vercel serverless functions (via rewrites) or move their logic into Next’s `/app/api/*`, still consuming the same services.
-8. **Phase 7 – Decommission Vite**: once parity is achieved, retire or archive the old SPA; optionally keep both apps if desktop/mobile shells diverge.
-
-### Backend Evolution (Auth, Social, Library)
-- Introduce a dedicated backend service (Fastify/Express or Next API routes backed by a database) that handles:
-  - User authentication (OAuth/passwordless) and session management.
-  - Persistent libraries (songs, practice history, progress) stored in Postgres or Firestore.
-  - Social features (leaderboards, shared playlists) via REST/GraphQL endpoints.
-- Keep the existing client-side IndexedDB as an offline cache that syncs with the server when logged in.
-- Add analytics/telemetry emitters in the core services so both front-ends report consistent metrics regardless of hosting stack.
-- Plan deployment: separate infra for the backend (e.g., Fly.io/Render/Serverless DB) or leverage Next’s server functions with edge caching where appropriate.
-
-This roadmap lets us adopt true routing (better async hand-offs) while laying the foundation for user accounts and collaborative features without rewriting the business logic a second time.
+- iOS Safari dynamic bars: prefer 100dvh with 100svh fallback; add safe‑area padding to player.
+- On‑screen keyboard: open inputs in sheets; keep player visible.
+- Reduced motion: disable karaoke sweep when prefers‑reduced‑motion.
