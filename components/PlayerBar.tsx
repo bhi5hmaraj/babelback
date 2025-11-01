@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import AudioPlayer from './AudioPlayer';
-import PlayerControls from './PlayerControls';
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import AudioPlayer from "./AudioPlayer"
+import PlayerControls from "./PlayerControls"
 
 interface PlayerBarProps {
-  audioSrc: string | null;
-  onTimeUpdate: (currentTime: number) => void;
-  setAudioElement: (el: HTMLAudioElement | null) => void;
-  onLoadedData?: () => void;
-  onDurationAvailable?: (duration: number) => void;
-  outputDeviceId?: string | null;
+  audioSrc: string | null
+  onTimeUpdate: (currentTime: number) => void
+  setAudioElement: (el: HTMLAudioElement | null) => void
+  onLoadedData?: () => void
+  onDurationAvailable?: (duration: number) => void
+  outputDeviceId?: string | null
 
-  totalVerses: number;
-  currentVerseIndex: number;
-  onSeekToVerse: (idx: number) => void;
-  onPrevVerseClick: () => void;
-  onNextVerseClick: () => void;
-  disabled?: boolean;
-  compact?: boolean; // reduce padding/margins for mobile
+  totalVerses: number
+  currentVerseIndex: number
+  onSeekToVerse: (idx: number) => void
+  onPrevVerseClick: () => void
+  onNextVerseClick: () => void
+  disabled?: boolean
+  compact?: boolean
 }
 
 /**
@@ -38,24 +41,24 @@ const PlayerBar: React.FC<PlayerBarProps> = ({
   disabled,
   compact,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const preferCompact = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-        if (preferCompact) setCollapsed(true);
-      }
-    } catch {}
-  }, []);
+  const [collapsed, setCollapsed] = useState(false)
   return (
-    <div className={`w-full bg-slate-900/80 backdrop-blur-md border-t border-slate-700/60 ${compact ? 'p-2' : 'p-3 pt-2'}
-                    sticky bottom-0 left-0 z-30 safe-area-inset-b`}>
+    <div
+      className={`w-full bg-foreground/98 backdrop-blur-lg border-t border-border-accent shadow-2xl
+                    ${compact ? "p-2" : "p-3 pt-2"}
+                    fixed bottom-0 left-0 right-0 z-50`}
+      style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+    >
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-end mb-1">
           <button
-            className="text-xs px-2 py-1 rounded bg-slate-800 text-sky-200 hover:bg-slate-700"
-            onClick={() => setCollapsed(v => !v)}
-          >{collapsed ? 'Expand Player' : 'Minimize Player'}</button>
+            className="text-xs px-3 py-1.5 rounded-md bg-secondary text-foreground hover:bg-secondary-dark transition-colors font-medium"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expand player controls" : "Minimize player controls"}
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            {collapsed ? "▲ Show Controls" : "▼ Hide Controls"}
+          </button>
         </div>
         <AudioPlayer
           src={audioSrc}
@@ -75,11 +78,11 @@ const PlayerBar: React.FC<PlayerBarProps> = ({
             onNextVerseClick={onNextVerseClick}
             disabled={!!disabled || !audioSrc}
             compact={compact}
-          />)
-        }
+          />
+        )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PlayerBar;
+export default PlayerBar
