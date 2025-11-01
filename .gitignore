@@ -48,3 +48,4 @@ babelback-mobile-optimized (1)/
 mobile-zen-makeover-main/
 .beads/
 .vscode/
+.env*.local

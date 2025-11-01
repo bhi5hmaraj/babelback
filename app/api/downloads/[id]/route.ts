@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getJob, updateJob } from '../../_lib/jobStore'
 import { gaEvent } from '../../_lib/ga'
 import { getStorageProvider } from '../../_lib/storage'
+import { getApifyAccount } from '../../_lib/apifyAccounts'
 
 export const runtime = 'nodejs'
 
@@ -73,16 +74,30 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
   }
 
   let latestApifyStatus: string | undefined
-  if (job.apifyRunId && process.env.APIFY_TOKEN) {
+  let pollToken: string | undefined
+  if (job.apifyAccountLabel) {
+    const cfg = await getApifyAccount(job.apifyAccountLabel).catch(() => undefined)
+    pollToken = cfg?.token
+  }
+  if (!pollToken) pollToken = process.env.APIFY_TOKEN || undefined
+
+  if (job.apifyRunId && pollToken) {
     try {
-      const runUrl = `https://api.apify.com/v2/actor-runs/${encodeURIComponent(job.apifyRunId)}?token=${encodeURIComponent(process.env.APIFY_TOKEN)}`
+      const runUrl = `https://api.apify.com/v2/actor-runs/${encodeURIComponent(job.apifyRunId)}?token=${encodeURIComponent(pollToken)}`
       const resp = await fetch(runUrl)
       if (resp.ok) {
         const data = await resp.json().catch(() => ({} as any))
-        const status = (data?.data?.status as string | undefined) || ''
+        const runData = data?.data
+        const status = (runData?.status as string | undefined) || ''
         if (status) {
           latestApifyStatus = status.toUpperCase()
           job = (await updateJob(jobId, { apifyStatus: status })) ?? job
+        }
+        if (!job.apifyDatasetId && runData?.defaultDatasetId) {
+          job = (await updateJob(jobId, {
+            apifyDatasetId: runData.defaultDatasetId,
+            apifyKeyValueStoreId: runData.defaultKeyValueStoreId,
+          })) ?? job
         }
       }
     } catch (err) {

@@ -18,6 +18,10 @@ export interface JobRecord {
   error?: { message: string }
   workerUrl: string
   apifyRunId?: string
+  apifyAccountLabel?: string
+  apifyDatasetId?: string
+  apifyKeyValueStoreId?: string
+  apifyStatus?: string
   sourceUrl?: string
   startedAtMs?: number
   metricsSent?: boolean

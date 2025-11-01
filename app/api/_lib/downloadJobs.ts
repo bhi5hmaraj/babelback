@@ -10,6 +10,10 @@ export interface JobRecord {
   error?: { message: string }
   workerUrl: string
   apifyRunId?: string
+  apifyAccountLabel?: string
+  apifyDatasetId?: string
+  apifyKeyValueStoreId?: string
+  apifyStatus?: string
 }
 
 // In-memory job store for download tasks. Dev/local only.
