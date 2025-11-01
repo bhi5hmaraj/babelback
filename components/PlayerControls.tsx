@@ -1,23 +1,17 @@
-"use client"
 
-import type React from "react"
-import Icon from "./Icon"
-import { Button } from "./ui/button"
+import React from 'react';
+import Icon from './Icon';
 
 interface PlayerControlsProps {
-  currentVerseIndex: number
-  totalVerses: number
-  onSeekToVerse: (idx: number) => void
-  onPrevVerseClick: () => void
-  onNextVerseClick: () => void
-  disabled?: boolean
-  compact?: boolean
+  currentVerseIndex: number; // 0-indexed
+  totalVerses: number;
+  onSeekToVerse: (verseIndex: number) => void;
+  onPrevVerseClick: () => void; // New prop
+  onNextVerseClick: () => void; // New prop
+  disabled: boolean;
+  compact?: boolean;
 }
 
-/**
- * Verse navigation controls for the player bar.
- * Shows prev/next buttons and verse indicator.
- */
 const PlayerControls: React.FC<PlayerControlsProps> = ({
   currentVerseIndex,
   totalVerses,
@@ -27,41 +21,56 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   disabled,
   compact,
 }) => {
-  if (totalVerses === 0) return null
+  const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSeekToVerse(parseInt(event.target.value, 10));
+  };
+
+  if (totalVerses <= 0) {
+    return null;
+  }
 
   return (
-    <div className={`flex items-center justify-between ${compact ? "mt-2" : "mt-3"}`}>
-      <Button
-        variant="ghost"
-        size="sm"
+    <div className={`${compact ? 'mt-2 p-2' : 'mt-6 p-4'} bg-slate-800/80 rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-between backdrop-blur-sm space-y-3 sm:space-y-0 sm:space-x-3`}>
+      <button
         onClick={onPrevVerseClick}
-        disabled={disabled || currentVerseIndex === 0}
-        className="text-secondary hover:text-primary hover:bg-surface disabled:opacity-30"
-        aria-label="Previous verse"
+        disabled={disabled || currentVerseIndex === 0 || totalVerses <= 1}
+        className="p-2 rounded-full text-slate-300 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        aria-label="Previous Verse"
       >
-        <Icon name="caret-left" weight="bold" className="mr-1" />
-        Prev
-      </Button>
+        <Icon name="skip-back" weight="bold" size="lg" />
+      </button>
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-foreground-subtle">
-          Verse {currentVerseIndex + 1} of {totalVerses}
-        </span>
+      <div className="flex-grow w-full sm:w-auto">
+        <label htmlFor="verse-slider" className="sr-only">
+          Verse Navigation
+        </label>
+        <input
+          type="range"
+          id="verse-slider"
+          min="0"
+          max={totalVerses > 0 ? totalVerses - 1 : 0}
+          value={currentVerseIndex}
+          onChange={handleSliderChange}
+          disabled={disabled || totalVerses <= 1}
+          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-valuetext={`Verse ${currentVerseIndex + 1} of ${totalVerses}`}
+        />
       </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
+      
+      <button
         onClick={onNextVerseClick}
-        disabled={disabled || currentVerseIndex >= totalVerses - 1}
-        className="text-secondary hover:text-primary hover:bg-surface disabled:opacity-30"
-        aria-label="Next verse"
+        disabled={disabled || currentVerseIndex >= totalVerses - 1 || totalVerses <= 1}
+        className="p-2 rounded-full text-slate-300 hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        aria-label="Next Verse"
       >
-        Next
-        <Icon name="caret-right" weight="bold" className="ml-1" />
-      </Button>
-    </div>
-  )
-}
+        <Icon name="skip-forward" weight="bold" size="lg" />
+      </button>
 
-export default PlayerControls
+      <div className={`text-slate-300 font-medium ${compact ? 'text-xs' : 'text-sm'} whitespace-nowrap sm:ml-2`}>
+        Verse {currentVerseIndex + 1} of {totalVerses}
+      </div>
+    </div>
+  );
+};
+
+export default PlayerControls;

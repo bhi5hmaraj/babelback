@@ -48,17 +48,7 @@ export interface UseSongDataManagerReturn {
   setIsKaraokeMode: React.Dispatch<React.SetStateAction<boolean>>;
 
   handleAudioSubmit: (file: File) => Promise<SongProcessingResult | null>;
-  handleUrlAnalyze: (
-    url: string,
-    opts?: {
-      fileName?: string;
-      mimeType?: string;
-      jobId?: string;
-      preParsedSongData?: SongData;
-      seedTargetLanguage?: Language;
-      seedModelId?: string;
-    }
-  ) => Promise<SongProcessingResult | null>;
+  handleUrlAnalyze: (url: string, opts?: { fileName?: string; mimeType?: string; jobId?: string }) => Promise<SongProcessingResult | null>;
   handleLanguageChange: (newLanguage: Language) => Promise<SongProcessingResult | null>;
   handleKaraokeModeToggle: () => void;
   handleSongDurationAvailable: (duration: number) => void;
@@ -216,51 +206,16 @@ export const useSongDataManager = ({
     return null;
   }, [audioFile, apiKeyMissing, isKaraokeMode, selectedModelId, practiceExitCallback, handleFetchSongDataInternal]);
 
-  const handleUrlAnalyze = useCallback(async (
-    url: string,
-    opts?: {
-      fileName?: string;
-      mimeType?: string;
-      jobId?: string;
-      preParsedSongData?: SongData;
-      seedTargetLanguage?: Language;
-      seedModelId?: string;
-    },
-  ): Promise<SongProcessingResult | null> => {
+  const handleUrlAnalyze = useCallback(async (url: string, opts?: { fileName?: string; mimeType?: string; jobId?: string }): Promise<SongProcessingResult | null> => {
     if (apiKeyMissing) return null;
     if (!url) return null;
     setAudioFile(null);
     setAudioSrc(url);
-    const seedSong = opts?.preParsedSongData ?? null;
-    setSongData(seedSong);
+    setSongData(null);
     currentSongDurationRef.current = null;
     setError(null);
     practiceExitCallback(false);
 
-    if (seedSong) {
-      const modelUsed = opts?.seedModelId || selectedModelId;
-      if (opts?.seedTargetLanguage) {
-        setTargetLanguage(opts.seedTargetLanguage);
-      }
-      setIsLoading(false);
-      setLoadingMessage(null);
-      processingStartTimeRef.current = null;
-      setAnalysisProgressPercent(null);
-      trackEvent('analysis_seed_loaded', {
-        source: 'seed',
-        job_id: opts?.jobId,
-        model_id: modelUsed,
-        lang: opts?.seedTargetLanguage || targetLanguage,
-      });
-      return {
-        songData: seedSong,
-        processingTimeSeconds: 0,
-        songDuration: currentSongDurationRef.current,
-        modelIdUsed: modelUsed,
-      };
-    }
-
-    setSongData(null);
     setIsLoading(true);
     trackEvent('analysis_start', { source: 'url', job_id: opts?.jobId, karaoke: isKaraokeMode ? 1 : 0, lang: targetLanguage, model_id: selectedModelId })
     setLoadingMessage('Initializing process...');

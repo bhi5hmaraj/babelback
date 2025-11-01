@@ -10,8 +10,6 @@ Inputs
 - `proxyGroups` (array, default ["RESIDENTIAL"]) – requires Apify Proxy
 - `apifyProxyCountry` (string, default "IN") – 2-letter ISO code, e.g., IN, US, GB
 - `formatExpr` (string, default `bestaudio[ext=m4a]/140/234/bestaudio`)
-- `maxDurationSeconds` (number, optional, default 600) – skip download when estimated duration exceeds this value
-- `maxFileSizeBytes` (number, optional, default 104857600) – skip download when estimated size exceeds this value
 
 Output
 - Saves the audio file to the default Key‑Value Store with key `audio`.
@@ -40,7 +38,6 @@ apify run -i '{
 Notes
 - Cookies must be in Netscape format and include both `.google.com` and `.youtube.com` entries when YouTube requires login/anti‑bot verification.
 - `m4a` (AAC) is the recommended default for browser playback. Use `mp3` only if you need legacy compatibility.
-- The actor performs a yt-dlp metadata preflight (`--dump-json --skip-download`) to estimate duration/size. When either limit is exceeded it pushes a `status: "skipped"` record and fails fast to conserve credits. Defaults are 600 seconds (10 minutes) and 104 857 600 bytes (~100 MB).
 - If `yt-dlp` fails due to recent YouTube changes, change the Dockerfile to install from HEAD temporarily:
   - Replace `pip3 install yt-dlp` with
     `pip3 install "yt-dlp @ https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.zip"`

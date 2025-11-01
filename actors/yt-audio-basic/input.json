@@ -1,8 +1,5 @@
-{
-  "youtubeUrl":"https://www.youtube.com/watch?v=IdveDKCYtI8",
-  "audioFormat":"m4a",
-  "formatExpr":"bestaudio[ext=m4a]/140/234/bestaudio",
-  "maxDurationSeconds": 600,
-  "maxFileSizeBytes": 104857600,
+{"youtubeUrl":"https://www.youtube.com/watch?v=IdveDKCYtI8",
+"audioFormat":"m4a",
+"formatExpr":"bestaudio[ext=m4a]/140/234/bestaudio",
   "proxyConfiguration":{"useApifyProxy":true,"apifyProxyGroups":["RESIDENTIAL"],"apifyProxyCountry":"IN"}
 }

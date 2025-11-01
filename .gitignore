@@ -9,7 +9,6 @@ urls.json
 node_modules/
 npm-debug.log*
 yarn-error.log*
-.next/*
 
 # Apify local runs (if any)
 apify_storage/
@@ -41,11 +40,3 @@ apify_storage/
 !public/**/*.webp
 !public/**/*.ico
 !public/**/*.svg
-
-# Local inspiration repos / tooling
-babelback-mobile-optimized/
-babelback-mobile-optimized (1)/
-mobile-zen-makeover-main/
-.beads/
-.vscode/
-.env*.local

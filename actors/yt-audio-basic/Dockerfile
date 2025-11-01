@@ -1,26 +1,26 @@
-FROM apify/actor-node:20
+FROM apify/actor-node:latest
 
+# Switch to root to install system deps on Alpine
 USER root
 RUN set -eux; \
-    apk add --no-cache ffmpeg ca-certificates curl bash python3; \
-    update-ca-certificates; \
-    # Add BOTH edge/main and edge/community, tagged as @edge for pinning
-    echo "@edge https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories; \
-    echo "@edge https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories; \
-    apk update; \
-    # Pull simdutf and deno from edge to satisfy libsimdutf.so.27
-    apk add --no-cache simdutf@edge deno@edge; \
-    deno --version; \
-    # yt-dlp: use official Python zipapp (no pip → no PEP 668 issues)
-    curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-      -o /usr/local/bin/yt-dlp; \
+  apk add --no-cache ffmpeg curl; \
+  if apk add --no-cache yt-dlp 2>/dev/null; then \
+    echo "yt-dlp installed from Alpine repo"; \
+  else \
+    echo "yt-dlp not in repo, fetching static binary"; \
+    curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp; \
     chmod a+rx /usr/local/bin/yt-dlp; \
-    yt-dlp --version; \
-    ffmpeg -version
+  fi; \
+  yt-dlp --version; ffmpeg -version
 
+# Switch back to non-root user
 USER myuser
+
+# Install Node deps (apify SDK already present, keep placeholder for future deps)
 COPY --chown=myuser:myuser package.json package-lock.json* ./
 RUN npm ci --omit=dev || true
-COPY --chown=myuser:myuser main.js ./
-CMD ["node", "main.js"]
 
+# App code
+COPY --chown=myuser:myuser main.js ./
+
+CMD ["node", "main.js"]

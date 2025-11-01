@@ -6,13 +6,16 @@ import { getAllSongsFromLibrary } from '../db';
 
 export interface UseLibraryManagerReturn {
   libraryEntries: LibraryEntry[];
+  showLibraryView: boolean;
   isLoadingLibrary: boolean;
   refreshLibrary: () => Promise<void>;
+  toggleLibraryView: () => void;
   setLibraryEntries: React.Dispatch<React.SetStateAction<LibraryEntry[]>>; // Allow external update
 }
 
 export const useLibraryManager = (): UseLibraryManagerReturn => {
   const [libraryEntries, setLibraryEntries] = useState<LibraryEntry[]>([]);
+  const [showLibraryView, setShowLibraryView] = useState<boolean>(false);
   const [isLoadingLibrary, setIsLoadingLibrary] = useState<boolean>(true);
 
   const refreshLibrary = useCallback(async () => {
@@ -34,5 +37,9 @@ export const useLibraryManager = (): UseLibraryManagerReturn => {
     refreshLibrary();
   }, [refreshLibrary]);
 
-  return { libraryEntries, isLoadingLibrary, refreshLibrary, setLibraryEntries };
+  const toggleLibraryView = useCallback(() => {
+    setShowLibraryView(prev => !prev);
+  }, []);
+
+  return { libraryEntries, showLibraryView, isLoadingLibrary, refreshLibrary, toggleLibraryView, setLibraryEntries };
 };
