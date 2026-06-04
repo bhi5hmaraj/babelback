@@ -5,12 +5,28 @@ import { updateJob } from '../../../_lib/jobStore'
 
 export const runtime = 'nodejs'
 
+const ALLOWED_STATUSES = new Set(['queued', 'working', 'completed', 'failed'])
+// Hosts we trust for a fallback download URL supplied by the callback.
+const ALLOWED_FALLBACK_HOSTS = new Set(['api.apify.com', 'storage.googleapis.com'])
+
+// Fail closed: an unconfigured secret means the endpoint cannot be authenticated,
+// so reject rather than accept every request.
 function verifyHmac(raw: string, signature: string | undefined, secret: string | undefined) {
-  if (!secret) return true
+  if (!secret) return false
   if (!signature) return false
   const expected = crypto.createHmac('sha256', secret).update(raw).digest('hex')
   try {
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  } catch {
+    return false
+  }
+}
+
+function isAllowedFallbackUrl(value: unknown): value is string {
+  if (typeof value !== 'string' || !value) return false
+  try {
+    const u = new URL(value)
+    return u.protocol === 'https:' && ALLOWED_FALLBACK_HOSTS.has(u.hostname)
   } catch {
     return false
   }
@@ -34,9 +50,10 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
     const body = raw ? JSON.parse(raw) : {}
     const { status, bytes, contentType, fallbackKvsUrl } = body || {}
     const patch: Record<string, unknown> = {}
-    if (status) patch.status = status === 'completed' ? 'completed' : status
-    if (fallbackKvsUrl) patch.url = fallbackKvsUrl
+    if (status && ALLOWED_STATUSES.has(status)) patch.status = status
+    if (isAllowedFallbackUrl(fallbackKvsUrl)) patch.url = fallbackKvsUrl
     if (contentType || bytes) {
+      // Note: jobStore.updateJob deep-merges gcsObject, so bucket/path are preserved.
       patch.gcsObject = {
         contentType,
         size: bytes ? Number(bytes) : undefined,

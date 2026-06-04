@@ -40,7 +40,7 @@ export async function GET(_req: NextRequest) {
 }
 
 function toSeedSongFromRecord(record: any, cacheKey?: string): SeedSong {
-  const songData = (record.songData ?? record.songData) as SongData | undefined
+  const songData = record.songData as SongData | undefined
   return {
     id: record.seedPath || record.gcsObject?.path || record.id || cacheKey || randomUUID(),
     title: songData?.title || record.title || 'Untitled',

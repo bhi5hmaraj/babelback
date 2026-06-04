@@ -3,17 +3,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { gaEvent } from '../../_lib/ga'
 import { getStorageProvider } from '../../_lib/storage'
+import { enforceRateLimit } from '../../_lib/rateLimit'
 
 export const runtime = 'nodejs'
+
+const MAX_AUDIO_BYTES = Number(process.env.MAX_AUDIO_BYTES || 25 * 1024 * 1024)
 
 export async function POST(req: NextRequest) {
   if (req.method !== 'POST') {
     return NextResponse.json({ error: 'Method not allowed. Use POST.' }, { status: 405 })
   }
 
+  const limited = await enforceRateLimit(req, 'uploads', 10, 60)
+  if (limited) return limited
+
   const bucketName = process.env.GCS_BUCKET
   if (!bucketName) {
     return NextResponse.json({ error: 'GCS_BUCKET not set' }, { status: 500 })
+  }
+
+  // Reject oversized uploads up front when the size is declared.
+  const declaredLen = Number(req.headers.get('content-length') || 0)
+  if (declaredLen && declaredLen > MAX_AUDIO_BYTES) {
+    return NextResponse.json(
+      { error: `Upload too large (max ${Math.floor(MAX_AUDIO_BYTES / (1024 * 1024))}MB).` },
+      { status: 413 },
+    )
   }
 
   const contentType = req.headers.get('content-type') || 'application/octet-stream'
@@ -23,6 +38,12 @@ export async function POST(req: NextRequest) {
   const objectPath = `uploads/${id}-${fileName}`
 
   const buffer = Buffer.from(await req.arrayBuffer())
+  if (buffer.byteLength > MAX_AUDIO_BYTES) {
+    return NextResponse.json(
+      { error: `Upload too large (max ${Math.floor(MAX_AUDIO_BYTES / (1024 * 1024))}MB).` },
+      { status: 413 },
+    )
+  }
 
   const storage = getStorageProvider()
 

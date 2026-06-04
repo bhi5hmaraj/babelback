@@ -53,8 +53,10 @@ async function kvSet(key: string, value: string, ttlSec?: number) {
     console.warn('[jobStore:kvSet] No KV backend configured (no Redis, no Vercel KV)')
     return
   }
-  const url = `${kvUrl}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}${ttlSec ? `?EX=${ttlSec}` : ''}`
-  const resp = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${kvToken}` } })
+  // Send the value in the request body (Upstash/Vercel KV REST supports this)
+  // rather than the URL path, which would break on large job records.
+  const url = `${kvUrl}/set/${encodeURIComponent(key)}${ttlSec ? `?EX=${ttlSec}` : ''}`
+  const resp = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${kvToken}` }, body: value })
   if (!resp.ok) throw new Error(`KV set failed: ${resp.status}`)
 }
 
@@ -144,6 +146,11 @@ export async function updateJob(id: string, patch: Partial<JobRecord>) {
   const cur = await getJob(id)
   if (!cur) return undefined
   const next = { ...cur, ...patch, id }
+  // Deep-merge gcsObject so a partial patch (e.g. callback sending only
+  // contentType/size) does not clobber bucket/path.
+  if (patch.gcsObject) {
+    next.gcsObject = { ...cur.gcsObject, ...patch.gcsObject } as JobRecord['gcsObject']
+  }
   jobs.set(id, next)
   try { await kvSet(`downloads:${id}`, JSON.stringify(next), JOB_TTL_SECONDS) } catch {}
   return next

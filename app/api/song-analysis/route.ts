@@ -8,8 +8,13 @@ import { getSongAnalysisSystemPrompt, getSongAnalysisUserPromptText, Language } 
 import { parseSongVerses, RawVerse, Verse } from '../_lib/verseParser'
 import { getCachedAnalysis, setCachedAnalysis, type GCSObject, extractYouTubeId } from '../_lib/analysisCache'
 import { getJob } from '../_lib/jobStore'
+import { enforceRateLimit } from '../_lib/rateLimit'
+import { isAllowedGcsUrl } from '../_lib/gcsUrl'
 
 export const runtime = 'nodejs'
+
+// Cap audio we pull into memory / send to Gemini (protects memory + cost).
+const MAX_AUDIO_BYTES = Number(process.env.MAX_AUDIO_BYTES || 25 * 1024 * 1024)
 
 interface SongAnalysisRequestBody {
   audioBase64?: string
@@ -272,6 +277,12 @@ async function handleSongAnalysis(body: unknown) {
   if (audioBase64) {
     try {
       const base64Clean = audioBase64.includes(',') ? audioBase64.split(',').pop() ?? '' : audioBase64
+      if (Math.floor((base64Clean.length * 3) / 4) > MAX_AUDIO_BYTES) {
+        return NextResponse.json(
+          { error: `Audio too large (max ${Math.floor(MAX_AUDIO_BYTES / (1024 * 1024))}MB).` },
+          { status: 413 },
+        )
+      }
       audioData = Buffer.from(base64Clean, 'base64')
       if (audioData.byteLength === 0) throw new Error('Decoded audio buffer is empty')
     } catch (error) {
@@ -279,6 +290,11 @@ async function handleSongAnalysis(body: unknown) {
       return NextResponse.json({ error: `Invalid audioBase64 payload: ${message}` }, { status: 400 })
     }
   } else if (audioUrl) {
+    // SSRF guard: only fetch audio from our own GCS buckets. Every frontend
+    // path passes a GCS signed URL, so this does not restrict legitimate use.
+    if (!isAllowedGcsUrl(audioUrl)) {
+      return NextResponse.json({ error: 'audioUrl host/bucket not allowed' }, { status: 400 })
+    }
     const attempts = 3
     let lastErr: unknown
     let lastErrCode: string | undefined
@@ -289,7 +305,10 @@ async function handleSongAnalysis(body: unknown) {
         const resp = await fetch(audioUrl, { cache: 'no-store', redirect: 'follow', signal: ac.signal })
         clearTimeout(t)
         if (!resp.ok) throw new Error(`fetch(${resp.status})`)
+        const declaredLen = Number(resp.headers.get('content-length') || 0)
+        if (declaredLen && declaredLen > MAX_AUDIO_BYTES) throw new Error('audio exceeds max size')
         const arr = await resp.arrayBuffer()
+        if (arr.byteLength > MAX_AUDIO_BYTES) throw new Error('audio exceeds max size')
         audioData = Buffer.from(arr)
         if (audioData.byteLength === 0) throw new Error('fetched zero bytes')
         if (!mimeType) mimeType = resp.headers.get('content-type') || 'audio/mpeg'
@@ -429,6 +448,9 @@ export async function POST(req: NextRequest) {
   if (req.method !== 'POST') {
     return NextResponse.json({ error: 'Method not allowed. Use POST.' }, { status: 405 })
   }
+
+  const limited = await enforceRateLimit(req, 'song-analysis', 20, 60)
+  if (limited) return limited
 
   let body: unknown = null
   try {

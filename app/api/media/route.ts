@@ -1,6 +1,7 @@
 import '../_lib/loadEnv'
 import { NextRequest, NextResponse } from 'next/server'
 import { getStorageProvider } from '../_lib/storage'
+import { isBucketAllowed, allowedBuckets } from '../_lib/gcsUrl'
 
 export const runtime = 'nodejs'
 
@@ -42,6 +43,10 @@ function parseRequestParams(req: NextRequest): MediaRequestParams {
   if (!path) {
     throw new Error('Missing required query parameter: path')
   }
+  // Reject path traversal / absolute paths.
+  if (path.startsWith('/') || path.includes('..')) {
+    throw new Error('Invalid object path')
+  }
 
   let expiresIn = DEFAULT_EXPIRY_SECONDS
   if (expiresInStr) {
@@ -74,6 +79,16 @@ export async function GET(req: NextRequest) {
   }
 
   const { bucket, path, expiresIn, mode } = params
+
+  // Only mint URLs for buckets we own. Without this, callers could request
+  // signed URLs for any object the service account can read.
+  if (!isBucketAllowed(bucket)) {
+    try { console.warn('[media] rejected bucket', { bucket, allowed: allowedBuckets() }) } catch {}
+    return NextResponse.json(
+      { error: 'bucket not allowed' },
+      { status: allowedBuckets().length === 0 ? 500 : 403 },
+    )
+  }
 
   try {
     const storage = getStorageProvider()
