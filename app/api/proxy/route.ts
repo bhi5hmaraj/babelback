@@ -8,7 +8,7 @@
  */
 import '../_lib/loadEnv'
 import { NextRequest, NextResponse } from 'next/server'
-import { allowedBuckets, parseGcsUrl } from '../_lib/gcsUrl'
+import { isAllowedAudioUrl } from '../_lib/gcsUrl'
 
 export const runtime = 'nodejs'
 
@@ -17,18 +17,14 @@ export async function GET(req: NextRequest) {
   const url = searchParams.get('url') || ''
   if (!url) return NextResponse.json({ error: 'missing url' }, { status: 400 })
 
-  const parsed = parseGcsUrl(url)
-  if (!parsed) return NextResponse.json({ error: 'host not allowed' }, { status: 400 })
-
-  // When buckets are configured, require the object to live under one of them.
-  const buckets = allowedBuckets()
-  if (buckets.length > 0 && !buckets.some((b) => parsed.pathname.startsWith(`/${b}/`))) {
-    return NextResponse.json({ error: 'bucket not allowed' }, { status: 400 })
+  // SSRF guard: only proxy our own GCS objects or the Apify KVS fallback.
+  if (!isAllowedAudioUrl(url)) {
+    return NextResponse.json({ error: 'url not allowed' }, { status: 400 })
   }
 
   let upstream: Response
   try {
-    upstream = await fetch(parsed.toString(), { redirect: 'follow' })
+    upstream = await fetch(url, { redirect: 'follow' })
   } catch {
     return NextResponse.json({ error: 'proxy fetch failed' }, { status: 502 })
   }

@@ -53,3 +53,29 @@ export function isAllowedGcsUrl(raw: string): boolean {
   if (allowed.length === 0) return true
   return allowed.some((b) => u.pathname.startsWith(`/${b}/`))
 }
+
+/**
+ * True for the Apify key-value-store record URL the download actor emits as a
+ * fallback when it can't upload to GCS (https://api.apify.com/v2/key-value-stores/…).
+ * The callback route already trusts this host, so analysis/proxy must too.
+ */
+export function isApifyKvsUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw)
+    return (
+      u.protocol === 'https:' &&
+      u.hostname === 'api.apify.com' &&
+      u.pathname.startsWith('/v2/key-value-stores/')
+    )
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Sources we trust to fetch/proxy audio from: our own GCS buckets plus the
+ * Apify KVS fallback. Used by /api/song-analysis (server fetch) and /api/proxy.
+ */
+export function isAllowedAudioUrl(raw: string): boolean {
+  return isAllowedGcsUrl(raw) || isApifyKvsUrl(raw)
+}

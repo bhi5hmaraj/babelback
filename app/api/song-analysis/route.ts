@@ -9,7 +9,7 @@ import { parseSongVerses, RawVerse, Verse } from '../_lib/verseParser'
 import { getCachedAnalysis, setCachedAnalysis, type GCSObject, extractYouTubeId } from '../_lib/analysisCache'
 import { getJob } from '../_lib/jobStore'
 import { enforceRateLimit } from '../_lib/rateLimit'
-import { isAllowedGcsUrl } from '../_lib/gcsUrl'
+import { isAllowedAudioUrl } from '../_lib/gcsUrl'
 
 export const runtime = 'nodejs'
 
@@ -290,11 +290,16 @@ async function handleSongAnalysis(body: unknown) {
       return NextResponse.json({ error: `Invalid audioBase64 payload: ${message}` }, { status: 400 })
     }
   } else if (audioUrl) {
-    // SSRF guard: only fetch audio from our own GCS buckets. Every frontend
-    // path passes a GCS signed URL, so this does not restrict legitimate use.
-    if (!isAllowedGcsUrl(audioUrl)) {
+    // SSRF guard: only fetch audio from our own GCS buckets or the Apify KVS
+    // fallback the download actor emits. Every legitimate path passes one of these.
+    if (!isAllowedAudioUrl(audioUrl)) {
       return NextResponse.json({ error: 'audioUrl host/bucket not allowed' }, { status: 400 })
     }
+    const tooLarge = () =>
+      NextResponse.json(
+        { error: `Audio too large (max ${Math.floor(MAX_AUDIO_BYTES / (1024 * 1024))}MB).` },
+        { status: 413 },
+      )
     const attempts = 3
     let lastErr: unknown
     let lastErrCode: string | undefined
@@ -305,10 +310,12 @@ async function handleSongAnalysis(body: unknown) {
         const resp = await fetch(audioUrl, { cache: 'no-store', redirect: 'follow', signal: ac.signal })
         clearTimeout(t)
         if (!resp.ok) throw new Error(`fetch(${resp.status})`)
+        // Oversized: return a terminal 413 (no retry, no proxy fallback) so the
+        // client doesn't re-download the whole file through /api/proxy.
         const declaredLen = Number(resp.headers.get('content-length') || 0)
-        if (declaredLen && declaredLen > MAX_AUDIO_BYTES) throw new Error('audio exceeds max size')
+        if (declaredLen && declaredLen > MAX_AUDIO_BYTES) return tooLarge()
         const arr = await resp.arrayBuffer()
-        if (arr.byteLength > MAX_AUDIO_BYTES) throw new Error('audio exceeds max size')
+        if (arr.byteLength > MAX_AUDIO_BYTES) return tooLarge()
         audioData = Buffer.from(arr)
         if (audioData.byteLength === 0) throw new Error('fetched zero bytes')
         if (!mimeType) mimeType = resp.headers.get('content-type') || 'audio/mpeg'
