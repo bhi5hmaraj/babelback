@@ -6,7 +6,6 @@
  * - fetchSingingFeedback: Scores a recorded attempt against reference verses.
  */
 import { SongData, Language, Verse, SingingScore } from '../types';
-import { upload } from '@vercel/blob/client';
 import { trackEvent } from './analytics';
 
 // Keep the last analysis job id from the most recent upload/URL analysis

@@ -68,6 +68,21 @@ export async function redisSet(key: string, value: string, ttlSeconds?: number) 
   console.log('[redis:redisSet] ✓ Set successful')
 }
 
+/**
+ * Atomically increment a counter and set its TTL on first write.
+ * Returns the new count, or null when Redis is unavailable (callers should
+ * fall back to a local strategy). Used by the rate limiter.
+ */
+export async function redisIncr(key: string, ttlSeconds: number): Promise<number | null> {
+  const redis = await getRedis()
+  if (!redis) return null
+  const count = await redis.incr(key)
+  if (count === 1 && ttlSeconds > 0) {
+    try { await redis.expire(key, ttlSeconds) } catch {}
+  }
+  return count
+}
+
 /** Get a string value or null. No-op when Redis unavailable. */
 export async function redisGet(key: string): Promise<string | null> {
   const redis = await getRedis()

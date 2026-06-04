@@ -4,8 +4,22 @@ import { newId, putJob, updateJob, getJob, getJobIdBySource, setJobIdForSource }
 import { gaEvent } from '../_lib/ga'
 import { getStorageProvider } from '../_lib/storage'
 import { loadApifyAccounts, ApifyAccountConfig } from '../_lib/apifyAccounts'
+import { enforceRateLimit } from '../_lib/rateLimit'
 
 export const runtime = 'nodejs'
+
+const YOUTUBE_HOSTS = new Set([
+  'youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be',
+])
+
+function isYouTubeUrl(value: string): boolean {
+  try {
+    const u = new URL(value)
+    return (u.protocol === 'https:' || u.protocol === 'http:') && YOUTUBE_HOSTS.has(u.hostname)
+  } catch {
+    return false
+  }
+}
 
 const DEFAULT_MAX_DURATION_SECONDS = 600
 const DEFAULT_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024
@@ -47,6 +61,7 @@ const parseRequestBody = (body: unknown): DownloadsRequestBody => {
   const maxFileSizeBytes = Number(maxFileSizeBytesRaw)
   const hasMaxFileSize = Number.isFinite(maxFileSizeBytes) && maxFileSizeBytes > 0
   if (!youtubeUrl) throw new Error('youtubeUrl required')
+  if (!isYouTubeUrl(youtubeUrl)) throw new Error('youtubeUrl must be a valid YouTube URL')
   return {
     youtubeUrl,
     audioFormat,
@@ -57,6 +72,9 @@ const parseRequestBody = (body: unknown): DownloadsRequestBody => {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, 'downloads', 10, 60)
+  if (limited) return limited
+
   let rawBody: unknown = null
   try {
     const contentType = req.headers.get('content-type') || ''
