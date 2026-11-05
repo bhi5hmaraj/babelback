@@ -1,0 +1,150 @@
+.page {
+  position: relative;
+  min-height: 100dvh;
+  padding-top: min(154px, 18dvh);
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 56px 30px 0;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: max(690px, 82dvh);
+  padding: 10px 20px max(26px, env(safe-area-inset-bottom));
+  border-radius: var(--sheetRadius);
+  background: var(--surface);
+  box-shadow: var(--raise);
+}
+
+.handle {
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--edge);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-family: var(--lcd);
+  font-size: var(--numSize);
+  font-variant-numeric: tabular-nums;
+}
+
+.close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -8px;
+  color: var(--text);
+  border-radius: var(--pill);
+}
+
+.lyrics {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--panel);
+  box-shadow: var(--sink);
+}
+
+.lyrics h1 {
+  margin: 0;
+  color: var(--lyricNow);
+  font-size: 26px;
+  line-height: 1.45;
+  font-weight: 600;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.sheet h2 {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-family: var(--chipFont);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sheet p {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.sound {
+  color: var(--ink);
+  font-family: var(--lcd);
+  font-size: 17px;
+  line-height: 1.4;
+  font-style: var(--soundStyle);
+}
+
+.translation {
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.meaning {
+  color: var(--soft);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.loop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  margin-top: auto;
+  border: 1px solid var(--edge);
+  border-radius: var(--pill);
+  box-shadow: var(--raise);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+:global([data-theme='retro']) .lyrics {
+  padding: 12px;
+}
+
+:global([data-theme='retro']) .sheet h2 {
+  font-size: 18px;
+}
+
+:global([data-theme='retro']) .sound {
+  font-size: 21px;
+}
+
+:global([data-theme='retro']) .loop {
+  background: var(--raised);
+  font-family: var(--display);
+  font-size: 20px;
+}
