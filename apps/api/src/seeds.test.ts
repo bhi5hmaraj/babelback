@@ -11,7 +11,9 @@ import { freshDatabase } from './test-db.ts';
 
 const storage: Storage = {
   signedUrl: async (key) => `https://bucket.test/${key}?signed`,
+  signedPutUrl: async () => { throw new Error('Seed tests do not upload'); },
   head: async () => ({ bytes: 1234, contentType: 'audio/mp4' }),
+  read: async () => { throw new Error('Seed tests do not download'); },
 };
 
 let database: Awaited<ReturnType<typeof freshDatabase>>;
