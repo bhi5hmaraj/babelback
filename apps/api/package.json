@@ -1,0 +1,35 @@
+{
+  "name": "@babelback/api",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "26"
+  },
+  "exports": {
+    "./app": "./src/app.ts"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/index.ts",
+    "start": "node src/index.ts",
+    "migrate": "node --env-file-if-exists=.env src/migrate.ts",
+    "db:generate": "drizzle-kit generate",
+    "test": "node --env-file-if-exists=.env --test 'src/**/*.test.ts'",
+    "typecheck": "tsc --noEmit",
+    "import-seeds": "node --env-file-if-exists=.env src/import-seeds.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
+    "@aws-sdk/s3-request-presigner": "^3.1161.0",
+    "@hono/node-server": "^2.1.6",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.16",
+    "postgres": "^3.4.9",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "drizzle-kit": "^0.31.11",
+    "railway": "^3.16.0",
+    "typescript": "^7.0.2"
+  }
+}

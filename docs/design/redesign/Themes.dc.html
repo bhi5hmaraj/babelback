@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Themes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Noto+Sans+Devanagari:wght@400;600&amp;family=Noto+Sans+Tamil:wght@400;600&amp;family=VT323&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1450px; height: 1260px; box-sizing: border-box; padding: 56px 60px; background: #E9EBEF; color: #15171C; font-family: Figtree, sans-serif; display: flex; flex-direction: column; gap: 36px">
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <h1 style="margin: 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-size: 48px; font-weight: 700; letter-spacing: -0.02em">Themes</h1>
+    <p style="margin: 0; font-size: 18px; color: #4A505A">One set of tokens drives every screen. Switch a screen with its Theme tweak. In the app, one data-theme attribute swaps the CSS variables.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 80px">
+    <sc-for list="{{themes}}" as="th" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between">
+          <h2 style="margin: 0; font-size: 24px; font-weight: 700">{{th.name}}</h2>
+          <span style="font-size: 15px; color: #4A505A">{{th.fonts}}</span>
+        </div>
+        <div style="width: 390px; height: 844px; border-radius: 32px; overflow: hidden; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12)">
+          <dc-import name="Player" theme="{{th.id}}" hint-size="390px,844px"></dc-import>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{th.swatches}}" as="sw" hint-placeholder-count="6">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 44px; border-radius: 10px; background: {{sw.hex}}; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14)"></span>
+              <span style="font-size: 12px; color: #4A505A">{{sw.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1450,"height":1260}}'>
+const SWATCHES = {
+  night: ['#0E1014', '#171A20', '#F3F1EC', '#A3A9B4', '#F5B83D', '#C3C7CF'],
+  day: ['#F4F5F7', '#FFFFFF', '#15171C', '#5A606A', '#F5B83D', '#2E3239'],
+  retro: ['#1B1D2A', '#2A2D3E', '#E6E8F0', '#9EA3B8', '#F2D13A', '#3CFF5A'],
+};
+const LABELS = ['Ground', 'Surface', 'Text', 'Muted', 'Accent', 'Lyrics'];
+
+class Component extends DCLogic {
+  renderVals() {
+    const column = (id, name, fonts) => ({
+      id,
+      name,
+      fonts,
+      swatches: SWATCHES[id].map((hex, index) => ({ hex, label: LABELS[index] })),
+    });
+    return {
+      themes: [
+        column('night', 'Night', 'Bricolage Grotesque, Figtree'),
+        column('day', 'Day', 'Bricolage Grotesque, Figtree'),
+        column('retro', 'Retro deck', 'VT323, Figtree'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

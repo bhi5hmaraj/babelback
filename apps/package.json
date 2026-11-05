@@ -1,0 +1,12 @@
+{
+  "name": "@babelback/apps",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "26"
+  },
+  "workspaces": [
+    "api",
+    "web"
+  ]
+}
