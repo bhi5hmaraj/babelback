@@ -1,0 +1,67 @@
+.player { display: flex; flex-direction: column; height: 100dvh; max-width: 42rem; margin: 0 auto; overflow: hidden; background: var(--bg); color: var(--text); }
+.header { display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px; }
+.back { display: flex; align-items: center; justify-content: center; flex: 0 0 44px; height: 44px; border-radius: var(--pill); color: var(--text); }
+.heading { flex: 1; min-width: 0; }
+.heading h1 { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.heading p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
+.language { padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--pill); background: var(--surface); font-size: 14px; font-weight: 600; }
+.brand, .lcd { display: none; }
+.chips { display: flex; gap: 8px; padding: 10px 20px 12px; }
+.chips button { min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--pill); background: transparent; color: var(--muted); box-shadow: var(--raise); font-family: var(--chipFont); font-size: var(--chipSize); font-weight: 600; cursor: pointer; }
+.chips button[aria-pressed='true'] { border-color: var(--tintLine); background: var(--tint); color: var(--ink); box-shadow: var(--sink); }
+.verses { flex: 1; min-height: 0; position: relative; list-style: none; margin: 0 12px; padding: 0; overflow-y: auto; overscroll-behavior: contain; background: var(--panel); border-radius: var(--small); box-shadow: var(--sink); scrollbar-width: thin; }
+.verses li { margin: 0 0 4px; }
+.verses button { display: flex; flex-direction: column; gap: 2px; min-height: 44px; width: 100%; padding: 8px 18px; text-align: left; border: 0; border-radius: var(--radius); background: transparent; color: var(--lyric); font: inherit; cursor: pointer; }
+.verses span { white-space: pre-line; overflow-wrap: anywhere; }
+.script { font-size: 18px; line-height: 1.45; }
+.sound, .meaning { font-family: var(--lcd); font-size: 14px; line-height: 1.35; color: var(--muted); }
+.sound { font-style: var(--soundStyle); }
+.active button { gap: 6px; padding: 16px 18px; background: var(--tint); }
+.active .script { font-size: 25px; color: var(--lyricNow); }
+.active .sound { font-size: 16px; color: var(--ink); }
+.active .meaning { font-size: 16px; color: var(--soft); }
+.detail { display: flex; align-items: center; gap: 6px; width: fit-content; min-height: 44px; padding: 0 18px; color: var(--ink); font-family: var(--chipFont); font-size: var(--chipSize); font-weight: 600; text-decoration: none; }
+.playback { flex-shrink: 0; margin-top: 12px; padding: 0 20px max(26px, env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--raise); }
+.seek { position: relative; height: 44px; }
+.track { position: absolute; top: 21px; width: 100%; height: 2px; background: var(--line); }
+.track span { position: absolute; top: -2px; height: 6px; border-radius: 3px; border-right: 2px solid var(--surface); }
+.track .segmentActive { top: -5px; height: 12px; }
+.seek input { position: absolute; inset: 0; width: 100%; height: 44px; margin: 0; opacity: 0; cursor: pointer; }
+.seek:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--small); }
+.times { display: flex; justify-content: space-between; color: var(--muted); font-family: var(--lcd); font-size: var(--numSize); font-variant-numeric: tabular-nums; }
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.controls button { display: flex; align-items: center; justify-content: center; flex: 0 0 48px; height: 52px; padding: 0; border: 0; border-radius: var(--pill); background: transparent; color: var(--text); box-shadow: var(--raise); cursor: pointer; }
+.controls button[aria-pressed='true'] { color: var(--ink); background: var(--tint); box-shadow: var(--sink); }
+.controls .play { flex-basis: 72px; height: 72px; background: var(--accent); color: var(--onAccent); }
+.controls button:disabled { cursor: default; opacity: 0.45; }
+.controlSpace { width: 48px; }
+.error { margin: 10px 0 0; color: var(--err); font-size: 14px; }
+.empty { padding: 18px; color: var(--muted); }
+:global([data-theme='retro']) .header { padding-top: 10px; }
+:global([data-theme='retro']) .heading { display: none; }
+:global([data-theme='retro']) .back, :global([data-theme='retro']) .language { background: var(--raised); box-shadow: var(--raise); }
+:global([data-theme='retro']) .brand { display: block; flex: 1; text-align: center; font-family: var(--display); font-size: 20px; letter-spacing: 0.18em; color: var(--soft); }
+:global([data-theme='retro']) .language { font-family: var(--display); font-size: 20px; }
+:global([data-theme='retro']) .lcd { display: flex; align-items: center; gap: 14px; margin: 10px 12px 0; padding: 10px 12px; background: var(--panel); box-shadow: var(--sink); font-family: var(--display); color: var(--lyric); }
+.lcdTime { font-size: 48px; line-height: 0.9; }
+.spectrum { display: flex; align-items: flex-end; gap: 2px; height: 20px; margin-top: 4px; }
+.spectrum span { width: 4px; background: var(--lyric); }
+.lcdTitle { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; text-transform: uppercase; }
+.lcdTitle > span { overflow: hidden; white-space: nowrap; font-size: 23px; }
+.lcdTitle small { font-size: 19px; }
+:global([data-theme='retro']) .chips button { text-transform: uppercase; }
+:global([data-theme='retro']) .verses { padding: 8px 0; }
+:global([data-theme='retro']) .sound, :global([data-theme='retro']) .meaning { color: var(--lyric); font-size: 18px; }
+:global([data-theme='retro']) .active .sound { color: var(--ink); font-size: 20px; }
+:global([data-theme='retro']) .active .meaning { color: var(--lyricNow); font-size: 20px; }
+:global([data-theme='retro']) .controls button { background: var(--raised); }
+:global([data-theme='retro']) .controls .play { background: var(--accent); }
+:global([data-theme='retro']) .controls button[aria-pressed='true'] { background: var(--tint); }
+:global([data-theme='retro']) .track span { border-radius: 0; }
+@media (max-width: 350px) {
+  .chips { padding-inline: 12px; gap: 6px; }
+  .chips button { padding-inline: 10px; }
+  .playback { padding-inline: 12px; }
+  .controlSpace { width: 20px; }
+  .language { max-width: 90px; overflow-wrap: anywhere; }
+}
