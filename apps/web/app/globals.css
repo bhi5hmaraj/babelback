@@ -1,0 +1,115 @@
+/* Tokens from the THEMES table in docs/design/redesign. The shared block comes first so each theme can override it. */
+[data-theme] {
+  --radius: 20px;
+  --pill: 999px;
+  --small: 12px;
+  --raise: none;
+  --sink: none;
+  --boost: 0px;
+  --body: Figtree, 'Noto Sans Devanagari', 'Noto Sans Tamil', system-ui, sans-serif;
+  --display: 'Bricolage Grotesque', Figtree, sans-serif;
+  --lcd: var(--body);
+  --chipFont: var(--body);
+  --chipSize: 14px;
+  --numSize: 13px;
+  --soundStyle: italic;
+  --sheetRadius: 28px 28px 0 0;
+  --ink: var(--accent);
+  --tint: color-mix(in srgb, var(--accent) 14%, transparent);
+  --tintLine: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+[data-theme='night'] {
+  --accent: #F5B83D;
+  --bg: #0E1014;
+  --surface: #171A20;
+  --raised: #20242C;
+  --line: #2A2F38;
+  --edge: #3A404B;
+  --text: #F3F1EC;
+  --soft: #D5D8DE;
+  --muted: #A3A9B4;
+  --faint: #7C8390;
+  --panel: #0E1014;
+  --lyric: #C3C7CF;
+  --lyricNow: #F3F1EC;
+  --onAccent: #1A1408;
+  --scrim: rgba(5, 6, 8, 0.6);
+  --err: #FF9A80;
+  --errBg: #2A1714;
+  color-scheme: dark;
+}
+
+[data-theme='day'] {
+  --accent: #F5B83D;
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --raised: #E9EBEF;
+  --line: #D5D9E0;
+  --edge: #B8BEC8;
+  --text: #15171C;
+  --soft: #2E3239;
+  --muted: #5A606A;
+  --faint: #6A707A;
+  --panel: #F4F5F7;
+  --lyric: #2E3239;
+  --lyricNow: #15171C;
+  --onAccent: #1A1408;
+  --scrim: rgba(20, 22, 28, 0.35);
+  --err: #B3361B;
+  --errBg: #FBE3DC;
+  /* ponytail: the mockup shades by 0.55, which leaves Lemon and Phosphor under 4.5:1 on --raised; 0.45 clears every accent. */
+  --ink: color-mix(in srgb, var(--accent) 45%, black);
+  color-scheme: light;
+}
+
+[data-theme='retro'] {
+  --accent: #F2D13A;
+  --bg: #1B1D2A;
+  --surface: #2A2D3E;
+  --raised: #3A3E54;
+  --line: #0A0B10;
+  --edge: #0A0B10;
+  --text: #E6E8F0;
+  --soft: #C9CCD8;
+  --muted: #9EA3B8;
+  --faint: #1FA33C;
+  --panel: #000000;
+  --lyric: #3CFF5A;
+  --lyricNow: #FFFFFF;
+  --onAccent: #14140A;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --err: #FF6A5A;
+  --errBg: #000000;
+  --radius: 2px;
+  --pill: 2px;
+  --small: 2px;
+  --raise: inset 1px 1px 0 #6E7390, inset -1px -1px 0 #08090E;
+  --sink: inset 1px 1px 0 #08090E, inset -1px -1px 0 #4A4F68;
+  --boost: 4px;
+  --display: VT323, 'Courier New', monospace;
+  --lcd: VT323, 'Noto Sans Devanagari', 'Noto Sans Tamil', monospace;
+  --chipFont: var(--display);
+  --chipSize: 19px;
+  --numSize: 18px;
+  --soundStyle: normal;
+  --sheetRadius: 2px 2px 0 0;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  max-width: 30rem;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 var(--body);
+  -webkit-text-size-adjust: 100%;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+:lang(hi) { font-family: 'Noto Sans Devanagari', var(--body); }
+:lang(ta) { font-family: 'Noto Sans Tamil', var(--body); }

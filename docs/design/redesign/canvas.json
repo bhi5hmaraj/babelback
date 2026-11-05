@@ -1,0 +1,37 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-05T09:00:00Z" },
+  "title": "Babelback Mobile",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "Home", "is_interactive": true, "radius": 32 },
+    "Player.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "Player", "is_interactive": true, "radius": 32 },
+    "Verse.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "Line detail", "is_interactive": true, "radius": 32 },
+    "Library.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "Library", "is_interactive": true, "radius": 32 },
+    "Add.dc.html": { "x": 0, "y": 1200, "w": 390, "h": 844, "title": "Add a song", "is_interactive": true, "radius": 32 },
+    "Processing.dc.html": { "x": 470, "y": 1200, "w": 390, "h": 844, "title": "Preparing the song", "is_interactive": true, "radius": 32 },
+    "Practice.dc.html": { "x": 940, "y": 1200, "w": 390, "h": 844, "title": "Practise a line", "is_interactive": true, "radius": 32 },
+    "SignIn.dc.html": { "x": 1410, "y": 1200, "w": 390, "h": 844, "title": "Sign in", "is_interactive": true, "radius": 32 },
+    "Themes.dc.html": { "x": 0, "y": 2400, "w": 1450, "h": 1260, "title": "Themes", "is_interactive": true },
+    "Appearance.dc.html": { "x": 1530, "y": 2400, "w": 390, "h": 844, "title": "Appearance (in the app)", "is_interactive": true, "radius": 32 }
+  },
+  "order": [
+    "Main.dc.html",
+    "Player.dc.html",
+    "Verse.dc.html",
+    "Library.dc.html",
+    "Add.dc.html",
+    "Processing.dc.html",
+    "Practice.dc.html",
+    "SignIn.dc.html",
+    "Themes.dc.html",
+    "Appearance.dc.html"
+  ],
+  "notes": {
+    "rowListen": { "x": 0, "y": -300, "text": "Listen", "kind": "title1", "maxW": 1800 },
+    "rowAdd": { "x": 0, "y": 900, "text": "Add and practise", "kind": "title1", "maxW": 1800 },
+    "rowThemes": { "x": 0, "y": 2100, "text": "Themes", "kind": "title1", "maxW": 1800 }
+  },
+  "designSystems": []
+}

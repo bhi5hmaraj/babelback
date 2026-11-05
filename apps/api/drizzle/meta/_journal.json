@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793695383532,
+      "tag": "0000_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793702431514,
+      "tag": "0001_seeds",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793868133920,
+      "tag": "0002_accounts_jobs",
+      "breakpoints": true
+    }
+  ]
+}

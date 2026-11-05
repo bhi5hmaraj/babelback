@@ -1,0 +1,154 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  max-width: 42rem;
+  min-height: 100dvh;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 20px 4px;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--display);
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.wordmark span {
+  color: var(--ink);
+}
+
+.appearance {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--pill);
+  background: var(--raised);
+  box-shadow: var(--raise);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 32px;
+  padding: 12px 20px 40px;
+}
+
+.controls { display: flex; align-items: center; gap: 6px; }
+.credits { color: var(--ink); font-family: var(--lcd); font-size: var(--numSize); white-space: nowrap; }
+.signIn { display: flex; align-items: center; min-height: 44px; padding: 0 6px; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+.add { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 14px 20px; border-radius: var(--pill); background: var(--accent); box-shadow: var(--raise); color: var(--onAccent); font-weight: 700; text-decoration: none; }
+
+.content h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.seeds h2 {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--chipFont);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cards {
+  display: flex;
+  gap: 12px;
+  margin: 0 -20px;
+  padding: 4px 20px 12px;
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+}
+
+.cards li {
+  display: flex;
+  flex: 0 0 268px;
+  max-width: 85vw;
+  scroll-snap-align: center;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--raise);
+  text-decoration: none;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.languages {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.listen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--ink);
+  font-family: var(--chipFont);
+  font-size: var(--chipSize);
+}
+
+.play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--pill);
+  color: var(--onAccent);
+  background: var(--accent);
+  box-shadow: var(--raise);
+}
+
+.empty {
+  color: var(--muted);
+}
+
+:global([data-theme='retro']) .wordmark {
+  font-size: 32px;
+}
+
+:global([data-theme='retro']) .content h1 {
+  font-size: 40px;
+}
+
+:global([data-theme='retro']) .seeds h2 {
+  font-size: 19px;
+}

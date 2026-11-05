@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Noto+Sans+Devanagari:wght@400;600&amp;family=Noto+Sans+Tamil:wght@400;600&amp;family=VT323&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+button{font:inherit;color:inherit}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.body}}; display: flex; flex-direction: column; overflow: hidden">
+  <main style="flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 20px 20px 12px; overflow: hidden">
+    <div style="display: flex; align-items: baseline; justify-content: space-between">
+      <h1 style="margin: 0; font-family: {{t.display}}; font-size: {{headSize}}px; font-weight: 700; letter-spacing: -0.02em">Library</h1>
+      <span style="font-family: {{t.lcd}}; font-size: {{t.numSize}}px; color: {{t.muted}}">5 songs</span>
+    </div>
+
+    <div style="position: relative">
+      <label for="library-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search your songs</label>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{t.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 16px; top: 14px"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      <input id="library-search" type="search" placeholder="Search titles or lyrics" style="width: 100%; box-sizing: border-box; height: 48px; padding: 0 16px 0 46px; border-radius: {{t.pill}}px; border: 1px solid {{t.line}}; background: {{t.surface}}; box-shadow: {{t.sink}}; color: {{t.text}}; font-size: 16px; outline-color: {{t.accent}}">
+    </div>
+
+    <div role="group" aria-label="Filter by language" style="display: flex; gap: 8px; overflow-x: auto; margin: 0 -20px; padding: 2px 20px">
+      <button type="button" aria-pressed="true" style="flex: 0 0 auto; height: 36px; padding: 0 14px; border-radius: {{t.pill}}px; border: 0; background: {{t.text}}; color: {{t.bg}}; box-shadow: {{t.sink}}; font-family: {{t.chipFont}}; font-size: {{t.chipSize}}px; font-weight: 600">All</button>
+      <button type="button" aria-pressed="false" style="flex: 0 0 auto; height: 36px; padding: 0 14px; border-radius: {{t.pill}}px; border: 1px solid {{chipBorder}}; background: {{chipBg}}; box-shadow: {{t.raise}}; font-family: {{t.chipFont}}; font-size: {{t.chipSize}}px; font-weight: 600">Hindi</button>
+      <button type="button" aria-pressed="false" style="flex: 0 0 auto; height: 36px; padding: 0 14px; border-radius: {{t.pill}}px; border: 1px solid {{chipBorder}}; background: {{chipBg}}; box-shadow: {{t.raise}}; font-family: {{t.chipFont}}; font-size: {{t.chipSize}}px; font-weight: 600">Tamil</button>
+      <button type="button" aria-pressed="false" style="flex: 0 0 auto; height: 36px; padding: 0 14px; border-radius: {{t.pill}}px; border: 1px solid {{chipBorder}}; background: {{chipBg}}; box-shadow: {{t.raise}}; font-family: {{t.chipFont}}; font-size: {{t.chipSize}}px; font-weight: 600">Spanish</button>
+    </div>
+
+    <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column">
+      <li>
+        <a href="Player.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 10px 0; text-decoration: none">
+          <span lang="hi" aria-hidden="true" style="flex: 0 0 56px; height: 56px; border-radius: {{tileRadius}}px; background: {{tileBg}}; box-shadow: {{t.sink}}; color: {{tileFg}}; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600">सा</span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 16px; font-weight: 600">Saheba</span>
+            <span style="font-size: 14px; color: {{t.muted}}">Hindi to English, Tamil</span>
+          </span>
+          <span style="font-family: {{t.lcd}}; font-size: {{t.numSize}}px; color: {{t.muted}}">Today</span>
+        </a>
+      </li>
+      <li>
+        <a href="Player.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 10px 0; text-decoration: none">
+          <span lang="ta" aria-hidden="true" style="flex: 0 0 56px; height: 56px; border-radius: {{tileRadius}}px; background: {{tileBg}}; box-shadow: {{t.sink}}; color: {{tileFg}}; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600">பு</span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 16px; font-weight: 600">New Human (Enthiran Theme)</span>
+            <span style="font-size: 14px; color: {{t.muted}}">Tamil to English</span>
+          </span>
+          <span style="font-family: {{t.lcd}}; font-size: {{t.numSize}}px; color: {{t.muted}}">Mon</span>
+        </a>
+      </li>
+      <li>
+        <a href="Player.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 10px 0; text-decoration: none">
+          <span lang="es" aria-hidden="true" style="flex: 0 0 56px; height: 56px; border-radius: {{tileRadius}}px; background: {{tileBg}}; box-shadow: {{t.sink}}; color: {{tileFg}}; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600">Ts</span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 16px; font-weight: 600">Waka Waka (Esto es África)</span>
+            <span style="font-size: 14px; color: {{t.muted}}">Spanish to English</span>
+          </span>
+          <span style="font-family: {{t.lcd}}; font-size: {{t.numSize}}px; color: {{t.muted}}">Oct 28</span>
+        </a>
+      </li>
+      <li>
+        <a href="Processing.dc.html" style="display: flex; align-items: center; gap: 14px; padding: 10px 0; text-decoration: none">
+          <span aria-hidden="true" style="flex: 0 0 56px; height: 56px; border-radius: {{tileRadius}}px; background: {{t.surface}}; box-shadow: {{t.raise}}; display: flex; align-items: center; justify-content: center">
+            <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="15" fill="none" stroke="{{t.line}}" stroke-width="4"></circle><circle cx="20" cy="20" r="15" fill="none" stroke="{{t.accent}}" stroke-width="4" stroke-linecap="round" stroke-dasharray="60 95" transform="rotate(-90 20 20)"></circle></svg>
+          </span>
+          <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 16px; font-weight: 600">Kun Faya Kun</span>
+            <span style="font-size: 14px; color: {{t.muted}}">Writing down the lyrics</span>
+          </span>
+        </a>
+      </li>
+      <li style="display: flex; align-items: center; gap: 14px; padding: 10px 0">
+        <span aria-hidden="true" style="flex: 0 0 56px; height: 56px; border-radius: {{tileRadius}}px; background: {{t.errBg}}; box-shadow: {{t.sink}}; color: {{t.err}}; display: flex; align-items: center; justify-content: center">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg>
+        </span>
+        <span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-size: 16px; font-weight: 600">Couldn't add this video</span>
+          <span style="font-size: 14px; color: {{t.muted}}">It is 14 minutes. Songs can be up to 10. Your 8 credits are back.</span>
+        </span>
+        <button type="button" aria-label="Dismiss" style="flex: 0 0 44px; height: 44px; border-radius: {{t.pill}}px; border: 0; background: transparent; color: {{t.muted}}; display: flex; align-items: center; justify-content: center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </li>
+    </ul>
+  </main>
+
+  <nav aria-label="Main" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 6px 12px 22px; border-top: 1px solid {{t.line}}; background: {{t.bg}}">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; text-decoration: none; color: {{t.muted}}; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"></path></svg>
+      Home
+    </a>
+    <a href="Library.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; text-decoration: none; color: {{t.ink}}; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4v16M10 4v16M14.5 5l4.5 15"></path></svg>
+      Library
+    </a>
+    <a href="Practice.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 52px; justify-content: center; text-decoration: none; color: {{t.muted}}; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>
+      Practise
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["night","day","retro"],"default":"night"},"accent":{"editor":"color","default":"#F5B83D","options":["#F5B83D","#7DD3C0","#F28C6B","#F2D13A","#3CFF5A"]},"$preview":{"width":390,"height":844}}'>
+const BODY = "Figtree, 'Noto Sans Devanagari', 'Noto Sans Tamil', system-ui, sans-serif";
+const THEMES = {
+  night: {
+    accent: '#F5B83D', dark: true,
+    bg: '#0E1014', surface: '#171A20', raised: '#20242C', line: '#2A2F38', edge: '#3A404B',
+    text: '#F3F1EC', soft: '#D5D8DE', muted: '#A3A9B4', faint: '#7C8390',
+    panel: '#0E1014', lyric: '#C3C7CF', lyricNow: '#F3F1EC', onAccent: '#1A1408',
+    scrim: 'rgba(5, 6, 8, 0.6)', err: '#FF9A80', errBg: '#2A1714',
+    radius: 20, pill: 999, raise: 'none', sink: 'none',
+    display: "'Bricolage Grotesque', Figtree, sans-serif", body: BODY, lcd: BODY,
+  },
+  day: {
+    accent: '#F5B83D', dark: false,
+    bg: '#F4F5F7', surface: '#FFFFFF', raised: '#E9EBEF', line: '#D5D9E0', edge: '#B8BEC8',
+    text: '#15171C', soft: '#2E3239', muted: '#5A606A', faint: '#6A707A',
+    panel: '#F4F5F7', lyric: '#2E3239', lyricNow: '#15171C', onAccent: '#1A1408',
+    scrim: 'rgba(20, 22, 28, 0.35)', err: '#B3361B', errBg: '#FBE3DC',
+    radius: 20, pill: 999, raise: 'none', sink: 'none',
+    display: "'Bricolage Grotesque', Figtree, sans-serif", body: BODY, lcd: BODY,
+  },
+  retro: {
+    accent: '#F2D13A', dark: true,
+    bg: '#1B1D2A', surface: '#2A2D3E', raised: '#3A3E54', line: '#0A0B10', edge: '#0A0B10',
+    text: '#E6E8F0', soft: '#C9CCD8', muted: '#9EA3B8', faint: '#1FA33C',
+    panel: '#000000', lyric: '#3CFF5A', lyricNow: '#FFFFFF', onAccent: '#14140A',
+    scrim: 'rgba(0, 0, 0, 0.55)', err: '#FF6A5A', errBg: '#000000',
+    radius: 2, pill: 2,
+    raise: 'inset 1px 1px 0 #6E7390, inset -1px -1px 0 #08090E',
+    sink: 'inset 1px 1px 0 #08090E, inset -1px -1px 0 #4A4F68',
+    display: "VT323, 'Courier New', monospace", body: BODY,
+    lcd: "VT323, 'Noto Sans Devanagari', 'Noto Sans Tamil', monospace",
+  },
+};
+
+function soft(hex, alpha) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+function shade(hex, factor) {
+  const n = parseInt(hex.slice(1), 16);
+  const c = (v) => Math.round(v * factor);
+  return `rgb(${c((n >> 16) & 255)}, ${c((n >> 8) & 255)}, ${c(n & 255)})`;
+}
+
+function themeFor(props) {
+  const retro = props.theme === 'retro';
+  const base = THEMES[props.theme] ?? THEMES.night;
+  const accent = props.accent ?? base.accent;
+  return {
+    ...base,
+    accent,
+    retro,
+    modern: !retro,
+    ink: base.dark ? accent : shade(accent, 0.55),
+    tint: soft(accent, 0.14),
+    tintLine: soft(accent, 0.5),
+    small: retro ? 2 : 12,
+    sheetRadius: retro ? '2px 2px 0 0' : '28px 28px 0 0',
+    boost: retro ? 4 : 0,
+    chipFont: retro ? base.display : 'inherit',
+    chipSize: retro ? 19 : 14,
+    numSize: retro ? 18 : 13,
+    soundStyle: retro ? 'normal' : 'italic',
+  };
+}
+
+class Component extends DCLogic {
+  renderVals() {
+    const t = themeFor(this.props);
+    return {
+      t,
+      headSize: t.retro ? 40 : 30,
+      chipBorder: t.retro ? 'transparent' : t.line,
+      chipBg: t.retro ? t.raised : 'transparent',
+      tileRadius: t.retro ? 2 : 16,
+      tileBg: t.retro ? t.panel : t.tint,
+      tileFg: t.retro ? t.lyric : t.ink,
+    };
+  }
+}
+</script>
+</body>
+</html>

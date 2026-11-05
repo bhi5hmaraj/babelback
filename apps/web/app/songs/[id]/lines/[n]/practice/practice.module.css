@@ -1,0 +1,331 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 4px;
+}
+
+.close {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: var(--pill);
+  box-shadow: var(--raise);
+}
+
+.title h1 {
+  margin: 0;
+  font: 700 20px/1.2 var(--display);
+}
+
+.title p, .muted, .price {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.price { font-size: 14px; }
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 20px 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--sink);
+}
+
+.card p { margin: 0; }
+
+.original {
+  color: var(--lyricNow);
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.sound {
+  color: var(--ink);
+  font-family: var(--lcd);
+  font-size: 15px;
+  font-style: var(--soundStyle);
+  line-height: 1.4;
+}
+
+.translation {
+  color: var(--muted);
+  font-family: var(--lcd);
+  font-size: 14px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.hear, .slow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--pill);
+  background: var(--raised);
+  box-shadow: var(--raise);
+  color: var(--text);
+  font: 600 15px/1 var(--chipFont);
+  cursor: pointer;
+}
+
+.slow {
+  border-color: var(--edge);
+  background: transparent;
+}
+
+.slow[aria-pressed='true'] {
+  border-color: var(--tintLine);
+  background: var(--tint);
+  box-shadow: var(--sink);
+  color: var(--ink);
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--small);
+  box-shadow: var(--raise);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.hint svg { flex: 0 0 24px; color: var(--ink); }
+
+.listening {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: var(--muted);
+  font: 16px var(--lcd);
+  font-variant-numeric: tabular-nums;
+}
+
+.levels {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 72px;
+}
+
+.levels span {
+  width: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  animation: level 0.9s ease-in-out infinite alternate;
+}
+
+.levels span:nth-child(3n) { animation-delay: -0.3s; }
+.levels span:nth-child(3n + 1) { animation-delay: -0.6s; }
+
+@keyframes level {
+  from { transform: scaleY(0.35); }
+  to { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .levels span { animation: none; }
+}
+
+.status {
+  margin: 0;
+  color: var(--soft);
+  font-size: 16px;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--raise);
+}
+
+.overall {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.overall > div:last-child {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.overall strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ring {
+  position: relative;
+  width: 76px;
+  height: 76px;
+}
+
+.ring circle:last-child { stroke-linecap: round; }
+
+.ring span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 26px/1 var(--display);
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.bars div {
+  display: grid;
+  grid-template-columns: 110px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bars dt {
+  color: var(--soft);
+  font-size: 14px;
+}
+
+.bars dd {
+  margin: 0;
+  font: 600 14px var(--lcd);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.bars dd[aria-hidden='true'] {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.bars dd span {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.tip {
+  margin: 0;
+  color: var(--soft);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  padding: 14px;
+  border-radius: var(--small);
+  background: var(--errBg);
+  color: var(--err);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px 30px;
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--pill);
+  background: transparent;
+  box-shadow: var(--raise);
+  color: var(--text);
+  font: 600 15px/1.2 var(--body);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border: 6px solid var(--raised);
+  border-radius: var(--pill);
+  background: var(--accent);
+  box-shadow: var(--raise);
+  color: var(--onAccent);
+  cursor: pointer;
+}
+
+.side:disabled, .mic:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.stop {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--onAccent);
+}
+
+:global([data-theme='retro']) .title h1 { font-size: 26px; }
+:global([data-theme='retro']) .card { background: var(--panel); }
+:global([data-theme='retro']) .sound { font-size: 19px; }
+:global([data-theme='retro']) .translation { color: var(--lyric); font-size: 18px; }
+:global([data-theme='retro']) .hear, :global([data-theme='retro']) .slow { border-color: transparent; font-size: 20px; }
+:global([data-theme='retro']) .slow { background: var(--raised); }
+:global([data-theme='retro']) .slow[aria-pressed='true'] { background: var(--tint); }
+:global([data-theme='retro']) .levels span { border-radius: 0; background: var(--lyric); }
+:global([data-theme='retro']) .listening { font-size: 22px; }
+:global([data-theme='retro']) .ring circle:last-child { stroke-linecap: butt; }
+:global([data-theme='retro']) .ring span { font-size: 36px; }
+:global([data-theme='retro']) .bars dd, :global([data-theme='retro']) .bars dd span { border-radius: 0; }
+:global([data-theme='retro']) .bars dd { font-size: 20px; }
+:global([data-theme='retro']) .close, :global([data-theme='retro']) .side { background: var(--raised); }
+:global([data-theme='retro']) .stop { border-radius: 0; }

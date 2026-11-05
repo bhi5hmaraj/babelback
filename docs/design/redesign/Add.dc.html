@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add a song</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&amp;family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Noto+Sans+Devanagari:wght@400;600&amp;family=Noto+Sans+Tamil:wght@400;600&amp;family=VT323&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+button{font:inherit;color:inherit}
+input{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.body}}; position: relative; overflow: hidden">
+  <div aria-hidden="true" style="padding: 76px 20px 0; font-family: {{t.display}}; font-size: 30px; font-weight: 700; line-height: 1.1; color: {{t.muted}}">What are we<br>listening to?</div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: {{t.scrim}}"></div>
+
+  <section role="dialog" aria-label="Add a song" style="position: absolute; left: 0; right: 0; bottom: 0; height: 650px; box-sizing: border-box; background: {{t.surface}}; box-shadow: {{t.raise}}; border-radius: {{t.sheetRadius}}; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 20px">
+    <div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: {{t.edge}}"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: -6px">
+      <h1 style="margin: 0; font-family: {{t.display}}; font-size: {{headSize}}px; font-weight: 700">Add a song</h1>
+      <a href="Main.dc.html" aria-label="Close" style="width: 44px; height: 44px; margin-right: -8px; border-radius: {{t.pill}}px; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </a>
+    </div>
+
+    <div role="group" aria-label="Where the song comes from" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: {{segRadius}}px; background: {{t.bg}}; box-shadow: {{t.sink}}">
+      <sc-for list="{{sources}}" as="s" hint-placeholder-count="2">
+        <button type="button" aria-pressed="{{s.pressed}}" onClick="{{s.pick}}" style="height: 44px; border-radius: {{t.small}}px; border: 0; background: {{s.bg}}; color: {{s.fg}}; box-shadow: {{s.shadow}}; font-family: {{t.chipFont}}; font-size: {{segSize}}px; font-weight: 600; cursor: pointer">{{s.label}}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{isYoutube}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <label for="youtube-link" style="font-size: 14px; font-weight: 600; color: {{t.muted}}">YouTube link</label>
+        <input id="youtube-link" type="url" value="https://youtu.be/[VIDEO_ID]" style="height: 52px; padding: 0 16px; border-radius: {{inputRadius}}px; border: 1px solid {{t.edge}}; background: {{t.bg}}; box-shadow: {{t.sink}}; color: {{t.text}}; font-size: 16px">
+        <div style="display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: {{inputRadius}}px; background: {{t.raised}}; box-shadow: {{t.raise}}">
+          <div style="flex: 0 0 96px; height: 54px; border-radius: {{t.small}}px; background: {{t.line}}; color: {{t.muted}}; font-size: 11px; display: flex; align-items: center; justify-content: center; text-align: center">Video<br>thumbnail</div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-size: 15px; font-weight: 600">Kun Faya Kun</span>
+            <span style="font-size: 13px; color: {{t.muted}}">[Channel name], 7:52</span>
+          </div>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{t.ink}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Under 10 minutes"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{isUpload}}" hint-placeholder-val="{{ false }}">
+      <label for="audio-file" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 154px; border-radius: {{inputRadius}}px; border: 1.5px dashed {{t.edge}}; background: {{t.bg}}; box-shadow: {{t.sink}}; cursor: pointer">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{t.ink}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"></path><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"></path></svg>
+        <span style="font-size: 16px; font-weight: 600">Choose an audio file</span>
+        <span style="font-size: 13px; color: {{t.muted}}">MP3, M4A or WAV, up to 100 MB and 10 minutes</span>
+        <input id="audio-file" type="file" accept="audio/*" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+      </label>
+    </sc-if>
+
+    <div role="group" aria-label="Translate into" style="display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 14px; font-weight: 600; color: {{t.muted}}">Translate into</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{languages}}" as="l" hint-placeholder-count="5">
+          <button type="button" aria-pressed="{{l.pressed}}" onClick="{{l.pick}}" style="height: 44px; padding: 0 16px; border-radius: {{t.pill}}px; border: 1px solid {{l.border}}; background: {{l.bg}}; color: {{l.fg}}; box-shadow: {{l.shadow}}; font-family: {{t.chipFont}}; font-size: {{segSize}}px; font-weight: 600; cursor: pointer">{{l.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+      <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: {{t.muted}}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{t.ink}}" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+        Costs {{cost}} credits. You have 40.
+      </p>
+      <a href="Processing.dc.html" style="height: 56px; border-radius: {{t.pill}}px; background: {{t.accent}}; color: {{t.onAccent}}; box-shadow: {{t.raise}}; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; text-decoration: none">Add song</a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["night","day","retro"],"default":"night"},"accent":{"editor":"color","default":"#F5B83D","options":["#F5B83D","#7DD3C0","#F28C6B","#F2D13A","#3CFF5A"]},"$preview":{"width":390,"height":844}}'>
+const BODY = "Figtree, 'Noto Sans Devanagari', 'Noto Sans Tamil', system-ui, sans-serif";
+const THEMES = {
+  night: {
+    accent: '#F5B83D', dark: true,
+    bg: '#0E1014', surface: '#171A20', raised: '#20242C', line: '#2A2F38', edge: '#3A404B',
+    text: '#F3F1EC', soft: '#D5D8DE', muted: '#A3A9B4', faint: '#7C8390',
+    panel: '#0E1014', lyric: '#C3C7CF', lyricNow: '#F3F1EC', onAccent: '#1A1408',
+    scrim: 'rgba(5, 6, 8, 0.6)', err: '#FF9A80', errBg: '#2A1714',
+    radius: 20, pill: 999, raise: 'none', sink: 'none',
+    display: "'Bricolage Grotesque', Figtree, sans-serif", body: BODY, lcd: BODY,
+  },
+  day: {
+    accent: '#F5B83D', dark: false,
+    bg: '#F4F5F7', surface: '#FFFFFF', raised: '#E9EBEF', line: '#D5D9E0', edge: '#B8BEC8',
+    text: '#15171C', soft: '#2E3239', muted: '#5A606A', faint: '#6A707A',
+    panel: '#F4F5F7', lyric: '#2E3239', lyricNow: '#15171C', onAccent: '#1A1408',
+    scrim: 'rgba(20, 22, 28, 0.35)', err: '#B3361B', errBg: '#FBE3DC',
+    radius: 20, pill: 999, raise: 'none', sink: 'none',
+    display: "'Bricolage Grotesque', Figtree, sans-serif", body: BODY, lcd: BODY,
+  },
+  retro: {
+    accent: '#F2D13A', dark: true,
+    bg: '#1B1D2A', surface: '#2A2D3E', raised: '#3A3E54', line: '#0A0B10', edge: '#0A0B10',
+    text: '#E6E8F0', soft: '#C9CCD8', muted: '#9EA3B8', faint: '#1FA33C',
+    panel: '#000000', lyric: '#3CFF5A', lyricNow: '#FFFFFF', onAccent: '#14140A',
+    scrim: 'rgba(0, 0, 0, 0.55)', err: '#FF6A5A', errBg: '#000000',
+    radius: 2, pill: 2,
+    raise: 'inset 1px 1px 0 #6E7390, inset -1px -1px 0 #08090E',
+    sink: 'inset 1px 1px 0 #08090E, inset -1px -1px 0 #4A4F68',
+    display: "VT323, 'Courier New', monospace", body: BODY,
+    lcd: "VT323, 'Noto Sans Devanagari', 'Noto Sans Tamil', monospace",
+  },
+};
+
+function soft(hex, alpha) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+function shade(hex, factor) {
+  const n = parseInt(hex.slice(1), 16);
+  const c = (v) => Math.round(v * factor);
+  return `rgb(${c((n >> 16) & 255)}, ${c((n >> 8) & 255)}, ${c(n & 255)})`;
+}
+
+function themeFor(props) {
+  const retro = props.theme === 'retro';
+  const base = THEMES[props.theme] ?? THEMES.night;
+  const accent = props.accent ?? base.accent;
+  return {
+    ...base,
+    accent,
+    retro,
+    modern: !retro,
+    ink: base.dark ? accent : shade(accent, 0.55),
+    tint: soft(accent, 0.14),
+    tintLine: soft(accent, 0.5),
+    small: retro ? 2 : 12,
+    sheetRadius: retro ? '2px 2px 0 0' : '28px 28px 0 0',
+    boost: retro ? 4 : 0,
+    chipFont: retro ? base.display : 'inherit',
+    chipSize: retro ? 19 : 14,
+    numSize: retro ? 18 : 13,
+    soundStyle: retro ? 'normal' : 'italic',
+  };
+}
+
+const LANGUAGES = ['English', 'Hindi', 'Tamil', 'Telugu', 'Bengali'];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { source: 'youtube', language: 'English' };
+  }
+
+  renderVals() {
+    const t = themeFor(this.props);
+    const { source, language } = this.state;
+
+    const sources = [
+      { id: 'youtube', label: 'YouTube link' },
+      { id: 'upload', label: 'Upload a file' },
+    ].map((s) => {
+      const on = s.id === source;
+      return {
+        ...s,
+        pressed: on ? 'true' : 'false',
+        pick: () => this.setState({ source: s.id }),
+        bg: on ? t.raised : 'transparent',
+        fg: on ? t.text : t.muted,
+        shadow: on ? t.raise : 'none',
+      };
+    });
+
+    const languages = LANGUAGES.map((label) => {
+      const on = label === language;
+      return {
+        label,
+        pressed: on ? 'true' : 'false',
+        pick: () => this.setState({ language: label }),
+        bg: on ? t.tint : t.retro ? t.raised : 'transparent',
+        fg: on ? t.ink : t.text,
+        border: t.retro ? 'transparent' : on ? t.tintLine : t.edge,
+        shadow: on ? t.sink : t.raise,
+      };
+    });
+
+    return {
+      t,
+      sources,
+      languages,
+      isYoutube: source === 'youtube',
+      isUpload: source === 'upload',
+      cost: source === 'youtube' ? 8 : 5,
+      headSize: t.retro ? 30 : 24,
+      segRadius: t.retro ? 2 : 16,
+      inputRadius: t.retro ? 2 : 16,
+      segSize: t.retro ? 20 : 15,
+    };
+  }
+}
+</script>
+</body>
+</html>
