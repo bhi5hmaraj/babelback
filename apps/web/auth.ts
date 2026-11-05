@@ -22,6 +22,7 @@ export const account = cache(async () => {
   const token = await sessionToken();
   if (!token) return null;
   const response = await api(token).v1.me.$get();
+  if (response.status === 401 || response.status === 503) return null;
   if (!response.ok) throw new Error('Could not load your account. Please try again.');
   return (await response.json()).user;
 });

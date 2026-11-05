@@ -1,4 +1,6 @@
 .home {
+  display: flex;
+  flex-direction: column;
   max-width: 42rem;
   min-height: 100dvh;
   margin: 0 auto;
@@ -8,6 +10,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 16px 20px 4px;
 }
 
@@ -39,10 +43,16 @@
 
 .content {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 32px;
   padding: 12px 20px 40px;
 }
+
+.controls { display: flex; align-items: center; gap: 6px; }
+.credits { color: var(--ink); font-family: var(--lcd); font-size: var(--numSize); white-space: nowrap; }
+.signIn { display: flex; align-items: center; min-height: 44px; padding: 0 6px; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
+.add { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 14px 20px; border-radius: var(--pill); background: var(--accent); box-shadow: var(--raise); color: var(--onAccent); font-weight: 700; text-decoration: none; }
 
 .content h1 {
   margin: 0;

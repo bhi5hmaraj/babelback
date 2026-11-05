@@ -12,7 +12,7 @@ export default async function AddPage() {
   if (!user) redirect('/sign-in');
   const response = await api().v1.config.$get();
   if (!response.ok) throw new Error('Could not load upload prices. Please try again.');
-  const { settings } = await response.json();
+  const settings = await response.json();
   return <main className={styles.backdrop}>
     <section aria-labelledby="add-heading" className={styles.sheet}>
       <div aria-hidden="true" className={styles.handle} />

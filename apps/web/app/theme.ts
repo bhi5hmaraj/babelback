@@ -26,6 +26,6 @@ export function readAppearance(cookies: Cookies): Appearance {
   const accent = cookies.get('accent')?.value;
   return {
     theme: Object.hasOwn(THEMES, theme) ? (theme as Theme) : 'night',
-    accent: ACCENTS.some((a) => a.hex === accent) ? accent : undefined,
+    accent: accent && /^#[0-9a-f]{6}$/i.test(accent) ? accent : undefined,
   };
 }

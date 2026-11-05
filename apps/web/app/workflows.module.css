@@ -150,6 +150,9 @@
 .form { display: flex; flex: 1; flex-direction: column; gap: 20px; }
 .fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .fieldset legend { margin-bottom: 10px; }
+.search { display: flex; flex-wrap: wrap; gap: 8px; }
+.search label { flex: 0 0 100%; }
+.search input { flex: 1; min-width: 0; width: auto; }
 .upload {
   position: relative;
   display: flex;
@@ -248,6 +251,14 @@
   overflow-wrap: anywhere;
 }
 
+.steps { display: flex; flex-direction: column; gap: 24px; margin: 8px 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 16px; color: var(--muted); font-family: var(--lcd); }
+.steps li > span { display: flex; flex: 0 0 32px; justify-content: center; align-items: center; height: 32px; border: 2px solid var(--edge); border-radius: var(--pill); }
+.steps li[data-done='true'], .steps li[aria-current='step'] { color: var(--text); }
+.steps li[data-done='true'] > span { border-color: var(--accent); background: var(--accent); color: var(--onAccent); }
+.steps li[aria-current='step'] > span { border-color: var(--accent); color: var(--ink); }
+.progress { width: 100%; height: 8px; accent-color: var(--accent); }
+
 .nav {
   position: sticky;
   bottom: 0;
@@ -258,7 +269,7 @@
   background: var(--bg);
 }
 
-.nav a {
+.nav a, .nav button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,6 +280,9 @@
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
 }
 
 .nav a[aria-current='page'] {

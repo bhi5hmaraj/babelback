@@ -8,7 +8,7 @@ export const metadata = { title: 'Sign in - Babelback' };
 
 export default async function SignInPage() {
   const response = await api().v1.config.$get();
-  const settings = response.ok ? (await response.json()).settings : null;
+  const settings = response.ok ? await response.json() : null;
   return (
     <main className={styles.backdrop}>
       <section aria-labelledby="sign-in-heading" className={styles.sheet}>
