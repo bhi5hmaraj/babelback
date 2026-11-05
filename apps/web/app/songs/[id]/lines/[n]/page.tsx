@@ -51,12 +51,20 @@ export default async function LinePage({ params }: {
           <h2 id="meaning">What it means</h2>
           <p className={styles.meaning}>{verse.meaning}</p>
         </section>
-        <a href={`${playerUrl}&loop=1`} className={styles.loop}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="m17 2 3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3m13-5v2a4 4 0 0 1-4 4H4" />
-          </svg>
-          Loop line
-        </a>
+        <div className={styles.actions}>
+          <a href={`${playerUrl}&loop=1`} className={styles.loop}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m17 2 3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3m13-5v2a4 4 0 0 1-4 4H4" />
+            </svg>
+            Loop line
+          </a>
+          <a href={`/songs/${id}/lines/${number}/practice`} className={styles.practise}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+            Practise it
+          </a>
+        </div>
       </main>
     </div>
   );

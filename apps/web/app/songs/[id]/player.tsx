@@ -128,7 +128,9 @@ export function Player({ seed, initialLine = -1, initialLoop = false }: { seed: 
           <button type="button" aria-label="Previous line" disabled={!verses.length || active === 0} onClick={() => pickLine(active - 1)}><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5.5v13L9.5 12z" /></svg></button>
           <button className={styles.play} type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={() => { if (playing) audio.current?.pause(); else void play(); }}><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={playing ? 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z' : 'M8 5.5v13l11-6.5z'} /></svg></button>
           <button type="button" aria-label="Next line" disabled={!verses.length || active === verses.length - 1} onClick={() => pickLine(active + 1)}><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5.5v13L14.5 12z" /></svg></button>
-          <span className={styles.controlSpace} aria-hidden="true" />
+          {verses.length ? <a className={styles.practise} href={`/songs/${id}/lines/${active + 1}/practice`} aria-label="Practise this line">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+          </a> : <span className={styles.controlSpace} aria-hidden="true" />}
         </div>
       </section>
     </main>

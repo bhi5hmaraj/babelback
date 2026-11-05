@@ -30,7 +30,7 @@
 .seek:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--small); }
 .times { display: flex; justify-content: space-between; color: var(--muted); font-family: var(--lcd); font-size: var(--numSize); font-variant-numeric: tabular-nums; }
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
-.controls button { display: flex; align-items: center; justify-content: center; flex: 0 0 48px; height: 52px; padding: 0; border: 0; border-radius: var(--pill); background: transparent; color: var(--text); box-shadow: var(--raise); cursor: pointer; }
+.controls button, .controls .practise { display: flex; align-items: center; justify-content: center; flex: 0 0 48px; height: 52px; padding: 0; border: 0; border-radius: var(--pill); background: transparent; color: var(--text); box-shadow: var(--raise); cursor: pointer; }
 .controls button[aria-pressed='true'] { color: var(--ink); background: var(--tint); box-shadow: var(--sink); }
 .controls .play { flex-basis: 72px; height: 72px; background: var(--accent); color: var(--onAccent); }
 .controls button:disabled { cursor: default; opacity: 0.45; }
@@ -54,7 +54,7 @@
 :global([data-theme='retro']) .sound, :global([data-theme='retro']) .meaning { color: var(--lyric); font-size: 18px; }
 :global([data-theme='retro']) .active .sound { color: var(--ink); font-size: 20px; }
 :global([data-theme='retro']) .active .meaning { color: var(--lyricNow); font-size: 20px; }
-:global([data-theme='retro']) .controls button { background: var(--raised); }
+:global([data-theme='retro']) .controls button, :global([data-theme='retro']) .controls .practise { background: var(--raised); }
 :global([data-theme='retro']) .controls .play { background: var(--accent); }
 :global([data-theme='retro']) .controls button[aria-pressed='true'] { background: var(--tint); }
 :global([data-theme='retro']) .track span { border-radius: 0; }

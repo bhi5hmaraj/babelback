@@ -118,8 +118,8 @@ export function practiceRoutes({ db, storage, verifySession, practice }: Practic
       const attempt = id.success ? await findAttempt(c.var.user.id, id.data) : undefined;
       return attempt ? c.json({ attempt }, 200) : c.json({ error: 'Practice attempt not found.' }, 404);
     })
-    .get('/', async (c) => {
-      const analysisId = z.uuid().safeParse(c.req.query('analysisId'));
+    .get('/', validator('query', (value) => ({ analysisId: typeof value.analysisId === 'string' ? value.analysisId : undefined })), async (c) => {
+      const analysisId = z.uuid().safeParse(c.req.valid('query').analysisId);
       const attempts = await db.select(attemptColumns).from(practiceAttempts).leftJoin(jobs, eq(jobs.id, practiceAttempts.jobId))
         .where(and(eq(practiceAttempts.userId, c.var.user.id),
           analysisId.success ? eq(practiceAttempts.analysisId, analysisId.data) : undefined))
