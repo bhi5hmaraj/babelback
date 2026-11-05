@@ -2,7 +2,7 @@ import type { Context } from 'hono';
 import { Inngest } from 'inngest';
 import { serve } from 'inngest/hono';
 import { z } from 'zod';
-import { failJob, runAnalysis } from './analysis.ts';
+import { failJob, redispatchAnalysisJobs, runAnalysis } from './analysis.ts';
 import type { AnalysisService } from './analysis.ts';
 import type { Db } from './db.ts';
 import { ANALYSIS_MODELS, connectSongAnalyzer } from './gemini.ts';
@@ -33,14 +33,19 @@ export function connectWorkflows(db: Db, storage: Storage, config: WorkflowConfi
       console.error('Analysis exhausted retries', { jobId, error });
       await failJob(db, jobId);
     },
-  }, async ({ event, step }) => {
+  }, async ({ event, step, runId }) => {
     const jobId = z.uuid().parse(event.data.jobId);
-    await step.run('analyse-and-save', () => runAnalysis(db, analyze, jobId));
+    await step.run('analyse-and-save', () => runAnalysis(db, analyze, jobId, runId));
     return { jobId };
   });
   const analysis: AnalysisService = { model, analyze,
     send: ({ jobId, userId }) => inngest.send({ id: jobId, name: 'song/analyze.requested', data: { jobId, userId } }),
   };
-  const handler: (c: Context) => Promise<Response> = serve({ client: inngest, functions: [analyzeSong] });
+  const recoverQueued = inngest.createFunction({
+    id: 'recover-queued-analysis', triggers: [{ cron: '* * * * *' }], concurrency: 1,
+  }, async ({ step }) => {
+    await step.run('dispatch-queued', () => redispatchAnalysisJobs(db, analysis.send));
+  });
+  const handler: (c: Context) => Promise<Response> = serve({ client: inngest, functions: [analyzeSong, recoverQueued] });
   return { analysis, inngestHandler: handler };
 }

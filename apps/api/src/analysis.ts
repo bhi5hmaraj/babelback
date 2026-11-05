@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { applyCredits } from './credits.ts';
 import type { Db } from './db.ts';
 import type { AnalyzeSong } from './gemini.ts';
@@ -20,13 +20,13 @@ export type SendAnalysis = (event: { jobId: string; userId: string }) => Promise
 export type AnalysisService = { model: string; analyze: AnalyzeSong; send: SendAnalysis };
 
 // Only this transaction marks success, so replaying a step never creates a second library entry.
-export async function runAnalysis(db: Db, analyze: AnalyzeSong, jobId: string) {
+export async function runAnalysis(db: Db, analyze: AnalyzeSong, jobId: string, runId?: string) {
   const [job] = await db.select().from(jobs).where(eq(jobs.id, jobId));
   if (!job || job.type !== 'analyze' || job.status === 'failed' || job.status === 'succeeded') return;
   const input = analysisInput.parse(job.input);
   const [asset] = await db.select().from(audioAssets).where(eq(audioAssets.id, input.assetId));
   if (!asset?.readyAt) throw new Error('Audio is not ready');
-  await db.update(jobs).set({ status: 'running', progress: 25, updatedAt: new Date() }).where(and(
+  await db.update(jobs).set({ status: 'running', progress: 25, inngestRunId: runId, updatedAt: new Date() }).where(and(
     eq(jobs.id, jobId), eq(jobs.status, 'queued'),
   ));
   const [cached] = await db.select().from(analyses).where(and(
@@ -78,5 +78,15 @@ export async function failJob(db: Db, jobId: string, code = 'analysis_failed') {
     }).where(eq(jobs.id, jobId));
     console.error(JSON.stringify({ event: 'job.failed', jobId, userId: job.userId, code }));
   });
+}
+
+// Recovers a process exit after the charge commits but before the event is sent.
+export async function redispatchAnalysisJobs(db: Db, send: SendAnalysis) {
+  const queued = await db.select({ jobId: jobs.id, userId: jobs.userId }).from(jobs)
+    .where(and(eq(jobs.type, 'analyze'), eq(jobs.status, 'queued'))).orderBy(asc(jobs.updatedAt)).limit(100);
+  await Promise.all(queued.map(async (event) => {
+    await send(event);
+    await db.update(jobs).set({ updatedAt: new Date() }).where(and(eq(jobs.id, event.jobId), eq(jobs.status, 'queued')));
+  }));
 }
 

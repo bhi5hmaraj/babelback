@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, before, test } from 'node:test';
 import { and, eq } from 'drizzle-orm';
-import { failJob, runAnalysis } from './analysis.ts';
+import { failJob, redispatchAnalysisJobs, runAnalysis } from './analysis.ts';
 import type { AnalysisService } from './analysis.ts';
 import { buildApp } from './app.ts';
-import { ensureUser } from './credits.ts';
 import { analyses, audioAssets, creditLedger, jobs, libraryEntries, settings, users } from './schema.ts';
 import type { Storage } from './storage.ts';
 import { freshDatabase } from './test-db.ts';
+import { connectWorkflows } from './workflows.ts';
 
 const song = {
   title: 'Test song', originalLanguage: 'English', summary: 'A greeting', detailedAnalysis: 'A greeting song',
@@ -77,6 +77,7 @@ test('uploads need sign-in and keyless features answer 503', async () => {
   assert.equal((await request('user_no_gemini', '/analyses', { assetId: id, language: 'English' }, noGemini)).status, 503);
   assert.equal((await noKeys.request('/api/inngest')).status, 503);
   assert.equal((await noKeys.request('/v1/seeds')).status, 200);
+  assert.deepEqual(connectWorkflows(database.db, storage, {}, true), {});
 });
 
 test('uploads reject oversized requests and non-audio types before creating assets', async () => {
@@ -170,6 +171,20 @@ test('dispatch errors refund the charge and make the job discoverable as failed'
   assert.equal(await balance(user), 40);
   const library = await (await request(user, '/library', undefined, app, 'GET')).json();
   assert.equal(library.jobs[0].status, 'failed');
+});
+
+test('a charged job survives a process exit before dispatch', async () => {
+  const user = 'user_recovery';
+  const assetId = await upload(user);
+  const { job } = await (await request(user, '/analyses', { assetId, language: 'English' })).json();
+  scheduled.delete(job.id);
+
+  await redispatchAnalysisJobs(database.db, analysis.send);
+  assert.ok(scheduled.has(job.id));
+  await runAnalysis(database.db, analysis.analyze, job.id);
+  const [finished] = await database.db.select().from(jobs).where(eq(jobs.id, job.id));
+  assert.equal(finished.status, 'succeeded');
+  assert.equal(await balance(user), 35);
 });
 
 test('private assets, jobs and analyses cannot be read or changed by another user', async () => {
