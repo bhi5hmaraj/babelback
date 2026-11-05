@@ -1,27 +1,16 @@
 /**
- * yt-audio-basic Actor
+ * yt-audio-basic: downloads the audio of one YouTube video with yt-dlp and ffmpeg.
  *
- * Purpose
- * - Download audio for a single YouTube URL using yt-dlp (+ ffmpeg).
- * - Preferred output is m4a (AAC) for broad browser support.
- *
- * Deployment model (recommended)
- * - Hono (Edge) starts a job and mints a short-lived GCS V4 signed PUT URL.
- * - Hono calls this Actor with { youtubeUrl, uploadUrl, callbackUrl, jobId, ... }.
- * - Actor downloads audio, then PUTs the file directly to the provided GCS uploadUrl.
- * - Actor finally POSTs the callbackUrl with status and metadata (size, contentType),
- *   optionally HMAC-signed with callbackSecret. Hono (Node) records completion and
- *   mints a signed GET URL for the client.
- *
- * Fallbacks
- * - If uploadUrl is missing or the PUT fails, the Actor stores the file in the
- *   run Key-Value Store (key: "audio"). This enables manual retrieval but is
- *   less efficient than direct GCS upload.
+ * The babelback api starts a run with a presigned PUT URL for its bucket and polls the run.
+ * The actor PUTs the audio there or fails the run. Before it refuses a video for length or
+ * size, it writes { reason: 'duration_exceeded' | 'filesize_exceeded' } to the dataset,
+ * which the api reads to tell the user why.
+ * Without uploadUrl (a manual run from the console) the audio goes to the key-value store.
+ * callbackUrl serves the old Vercel app until it is retired.
  */
 
 import { Actor, log } from 'apify';
 import { promises as fs } from 'node:fs';
-import { createReadStream } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import crypto from 'node:crypto';
@@ -36,7 +25,6 @@ function parseJsonLines(stdout) {
 }
 
 function extractApproximateBytes(metadata) {
-  if (!metadata || typeof metadata !== 'object') return undefined;
   const requested = Array.isArray(metadata.requested_downloads) ? metadata.requested_downloads[0] : undefined;
   const formats = Array.isArray(metadata.formats) ? metadata.formats : [];
   const requestedFormat = requested?.format_id ? formats.find((fmt) => fmt.format_id === requested.format_id) : undefined;
@@ -90,6 +78,12 @@ await Actor.main(async () => {
 
   if (!youtubeUrl) throw new Error('youtubeUrl is required');
 
+  const refuse = async (reason, details) => {
+    log.warning('Refusing video', { jobId, reason, ...details });
+    await Actor.pushData({ status: 'skipped', reason, jobId, ...details });
+    throw new Error(`${reason}: ${JSON.stringify(details)}`);
+  };
+
   // Proxy
   let proxyUrl;
   if (proxyConfiguration && (proxyConfiguration.useApifyProxy || (proxyConfiguration.proxyUrls && proxyConfiguration.proxyUrls.length))) {
@@ -127,29 +121,19 @@ await Actor.main(async () => {
     return execFileAsync('yt-dlp', fullArgs, { maxBuffer: 1024 * 1024 * 64 });
   };
 
-  // --- Preflight metadata (same constraints you added) ---
-  try {
-    const metaArgs = ['-f', formatExpr, '--skip-download', '--no-playlist', '--no-progress', '--dump-json', '--force-ipv4'];
-    const { stdout } = await runYtDlp(metaArgs, true);
-    const metadata = parseJsonLines(stdout);
-    const estimatedDuration = typeof metadata?.duration === 'number' ? metadata.duration : undefined;
-    const estimatedBytes = extractApproximateBytes(metadata);
+  // --- Preflight: the limits hold only if this check runs, so its failure fails the run ---
+  const metaArgs = ['-f', formatExpr, '--skip-download', '--no-playlist', '--no-progress', '--dump-json', '--force-ipv4'];
+  const metadata = parseJsonLines((await runYtDlp(metaArgs, true)).stdout);
+  const duration = typeof metadata.duration === 'number' ? metadata.duration : undefined;
+  const estimatedBytes = extractApproximateBytes(metadata);
+  log.info('yt-dlp metadata', { jobId, duration, approxBytes: estimatedBytes, isLive: metadata.is_live, title: metadata.title });
 
-    log.info('yt-dlp metadata', { jobId, duration: estimatedDuration, approxBytes: estimatedBytes, title: metadata?.title });
-
-    if (maxDurationSeconds > 0 && estimatedDuration && estimatedDuration > maxDurationSeconds) {
-      log.warning('Skipping download due to duration limit', { jobId, duration: estimatedDuration, maxDurationSeconds });
-      await Actor.pushData({ status: 'skipped', reason: 'duration_exceeded', jobId, duration: estimatedDuration, maxDurationSeconds });
-      throw new Error(`MEDIA_TOO_LONG: duration ${estimatedDuration}s > ${maxDurationSeconds}s`);
-    }
-    if (maxFileSizeBytes > 0 && estimatedBytes && estimatedBytes > maxFileSizeBytes) {
-      log.warning('Skipping download due to size limit', { jobId, estimatedBytes, maxFileSizeBytes });
-      await Actor.pushData({ status: 'skipped', reason: 'filesize_exceeded', jobId, estimatedBytes, maxFileSizeBytes });
-      throw new Error(`MEDIA_TOO_LARGE: estimated ${estimatedBytes} bytes > ${maxFileSizeBytes} bytes`);
-    }
-  } catch (err) {
-    if (err instanceof Error && (err.message.startsWith('MEDIA_TOO_LONG') || err.message.startsWith('MEDIA_TOO_LARGE'))) throw err;
-    log.warning('Metadata preflight failed; continuing', { jobId, error: err instanceof Error ? err.message : String(err) });
+  // A live stream has no duration and would download until the run times out.
+  if (metadata.is_live || duration === undefined || duration > maxDurationSeconds) {
+    await refuse('duration_exceeded', { duration: duration ?? null, isLive: Boolean(metadata.is_live), maxDurationSeconds });
+  }
+  if (estimatedBytes && estimatedBytes > maxFileSizeBytes) {
+    await refuse('filesize_exceeded', { estimatedBytes, maxFileSizeBytes });
   }
 
   // --- Download ---
@@ -181,36 +165,21 @@ await Actor.main(async () => {
 
   const contentType = detectContentType(filePath);
   const { size } = await fs.stat(filePath);
+  if (size > maxFileSizeBytes) await refuse('filesize_exceeded', { bytes: size, maxFileSizeBytes });
 
-  // --- Upload to GCS (preferred) ---
-  let uploadedToGcs = false;
+  // A Buffer body sends Content-Length; S3-style buckets refuse a chunked upload.
+  const audio = await fs.readFile(filePath);
   if (uploadUrl) {
-    try {
-      log.info('Uploading to GCS via signed PUT', { jobId });
-      const body = createReadStream(filePath);
-      const resp = await fetch(uploadUrl, { method: 'PUT', duplex: 'half', headers: { 'Content-Type': contentType, 'Content-Length': String(size) }, body });
-      if (!resp.ok) {
-        const text = await resp.text().catch(() => '');
-        throw new Error(`GCS PUT failed: ${resp.status} ${text?.slice(0, 300)}`);
-      }
-      uploadedToGcs = true;
-    } catch (e) {
-      log.warning('GCS PUT failed, will fall back to KVS storage', { err: String(e) });
-    }
-  }
-
-  // --- Fallback: KVS ---
-  let kvsDownloadUrl;
-  if (!uploadedToGcs) {
-    const buf = await fs.readFile(filePath);
-    await Actor.setValue('audio', buf, { contentType });
-    const env = Actor.getEnv();
-    kvsDownloadUrl = `https://api.apify.com/v2/key-value-stores/${env.defaultKeyValueStoreId}/records/audio?token=${env.token}`;
+    log.info('Uploading via presigned PUT', { jobId, bytes: size });
+    const resp = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': contentType }, body: audio });
+    if (!resp.ok) throw new Error(`Upload failed: ${resp.status} ${(await resp.text().catch(() => '')).slice(0, 300)}`);
+  } else {
+    await Actor.setValue('audio', audio, { contentType });
   }
 
   // --- Optional callback ---
   if (callbackUrl) {
-    const payload = { jobId, status: 'completed', bytes: size, contentType, fallbackKvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl };
+    const payload = { jobId, status: 'completed', bytes: size, contentType };
     const raw = JSON.stringify(payload);
     const headers = { 'Content-Type': 'application/json' };
     if (callbackSecret) {
@@ -225,8 +194,7 @@ await Actor.main(async () => {
     }
   }
 
-  const result = { status: 'completed', jobId, uploadedToGcs, contentType, bytes: size, kvsUrl: uploadedToGcs ? undefined : kvsDownloadUrl };
+  const result = { status: 'completed', jobId, uploaded: Boolean(uploadUrl), contentType, bytes: size };
   await Actor.pushData(result);
   log.info('Done', result);
 });
-

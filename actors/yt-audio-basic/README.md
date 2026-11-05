@@ -20,7 +20,7 @@ Output
 Direct‑to‑GCS (recommended)
 - Provide `uploadUrl` (a V4 signed PUT minted by your backend) and the Actor will upload directly to GCS.
 - Optionally set `callbackUrl` (+ `callbackSecret`) and the Actor will POST `{ jobId, status, bytes, contentType }` when done.
-- If `uploadUrl` is absent or fails, the Actor falls back to saving in KVS (key `audio`).
+- If the upload fails, the run fails. Without `uploadUrl` the Actor saves the audio in the key-value store (key `audio`).
 
 Build and run locally
 ```bash

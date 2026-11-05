@@ -1,4 +1,4 @@
-FROM apify/actor-node:20
+FROM apify/actor-node:22
 
 USER root
 RUN set -eux; \
@@ -11,16 +11,17 @@ RUN set -eux; \
     # Pull simdutf and deno from edge to satisfy libsimdutf.so.27
     apk add --no-cache simdutf@edge deno@edge; \
     deno --version; \
-    # yt-dlp: use official Python zipapp (no pip → no PEP 668 issues)
+    # yt-dlp: use official Python zipapp (no pip, so no PEP 668 issues)
     curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
       -o /usr/local/bin/yt-dlp; \
     chmod a+rx /usr/local/bin/yt-dlp; \
     yt-dlp --version; \
     ffmpeg -version
 
+# The base image's node_modules belongs to root.
+COPY package.json ./
+RUN npm install --omit=dev --no-audit --no-fund
 USER myuser
-COPY --chown=myuser:myuser package.json package-lock.json* ./
-RUN npm ci --omit=dev || true
 COPY --chown=myuser:myuser main.js ./
 CMD ["node", "main.js"]
 

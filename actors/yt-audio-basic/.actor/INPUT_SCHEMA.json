@@ -12,8 +12,14 @@
     },
     "audioFormat": {
       "type": "string",
-      "enum": ["m4a", "mp3"],
-      "enumTitles": ["m4a (AAC)", "mp3"],
+      "enum": [
+        "m4a",
+        "mp3"
+      ],
+      "enumTitles": [
+        "m4a (AAC)",
+        "mp3"
+      ],
       "default": "m4a",
       "title": "Output format",
       "description": "Preferred output format. m4a (AAC) recommended for browser playback; mp3 for legacy compatibility.",
@@ -21,8 +27,8 @@
     },
     "userAgent": {
       "type": "string",
-      "title": "User‑Agent",
-      "description": "Optional browser User‑Agent string to mimic your browser session.",
+      "title": "User-Agent",
+      "description": "Optional browser User-Agent string to mimic your browser session.",
       "editor": "textfield"
     },
     "cookiesTxt": {
@@ -36,25 +42,27 @@
       "title": "Proxy configuration",
       "description": "Select Apify Proxy or provide custom proxies. Optional.",
       "editor": "proxy",
-      "prefill": { "useApifyProxy": false }
+      "prefill": {
+        "useApifyProxy": false
+      }
     },
     "formatExpr": {
       "type": "string",
       "default": "bestaudio[ext=m4a]/140/234/bestaudio",
-      "title": "yt‑dlp format expression",
-      "description": "Advanced: override yt‑dlp format selection expression.",
+      "title": "yt-dlp format expression",
+      "description": "Advanced: override yt-dlp format selection expression.",
       "editor": "textfield"
     },
     "uploadUrl": {
       "type": "string",
-      "title": "GCS signed PUT URL (optional)",
-      "description": "If provided, the Actor will PUT the audio directly to this URL instead of storing in KVS.",
+      "title": "Presigned PUT URL (optional)",
+      "description": "The Actor PUTs the audio to this URL and fails the run if the upload fails. Without it the audio is saved in the key-value store under \"audio\".",
       "editor": "textfield"
     },
     "callbackUrl": {
       "type": "string",
       "title": "Callback URL (optional)",
-      "description": "Hono webhook to call on completion. The Actor POSTs status + metadata as JSON.",
+      "description": "Optional URL the Actor POSTs { jobId, status, bytes, contentType } to when done.",
       "editor": "textfield"
     },
     "callbackSecret": {
@@ -69,7 +77,25 @@
       "title": "Job ID (optional)",
       "description": "Correlation ID echoed to logs and callback payload for easier tracing.",
       "editor": "textfield"
+    },
+    "maxDurationSeconds": {
+      "type": "integer",
+      "title": "Max duration (seconds)",
+      "description": "Refuse longer videos and live streams. Writes reason duration_exceeded to the dataset.",
+      "minimum": 1,
+      "default": 600,
+      "editor": "number"
+    },
+    "maxFileSizeBytes": {
+      "type": "integer",
+      "title": "Max file size (bytes)",
+      "description": "Refuse larger files. Writes reason filesize_exceeded to the dataset.",
+      "minimum": 1,
+      "default": 104857600,
+      "editor": "number"
     }
   },
-  "required": ["youtubeUrl"]
+  "required": [
+    "youtubeUrl"
+  ]
 }
