@@ -13,13 +13,17 @@
 .verses li { margin: 0 0 4px; }
 .verses button { display: flex; flex-direction: column; gap: 2px; min-height: 44px; width: 100%; padding: 8px 18px; text-align: left; border: 0; border-radius: var(--radius); background: transparent; color: var(--lyric); font: inherit; cursor: pointer; }
 .verses span { white-space: pre-line; overflow-wrap: anywhere; }
-.script { font-size: 18px; line-height: 1.45; }
-.sound, .meaning { font-family: var(--lcd); font-size: 14px; line-height: 1.35; color: var(--muted); }
-.sound { font-style: var(--soundStyle); }
+.verseLabel { display: block; padding: 12px 18px 2px; font-family: var(--chipFont); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.script { font-size: 15px; line-height: 1.4; color: var(--lyric); }
+.sound { font-family: var(--lcd); font-size: 17px; font-style: var(--soundStyle); font-weight: 500; line-height: 1.25; color: var(--muted); }
+.meaning { font-family: var(--lcd); font-size: 13px; line-height: 1.35; color: var(--faint); }
+.past .sound { color: var(--faint); }
 .active button { gap: 6px; padding: 16px 18px; background: var(--tint); }
-.active .script { font-size: 25px; color: var(--lyricNow); }
-.active .sound { font-size: 16px; color: var(--ink); }
-.active .meaning { font-size: 16px; color: var(--soft); }
+.active .script { font-size: 18px; color: var(--lyricNow); }
+.active .sound { font-size: 24px; font-weight: 600; }
+.active .meaning { font-size: 15px; color: var(--soft); }
+/* The fill runs across wrapped lines in reading order because the span is inline. */
+.sung { color: transparent; background: linear-gradient(90deg, var(--ink) var(--sung), var(--lyricNow) calc(var(--sung) + 2%)); -webkit-background-clip: text; background-clip: text; }
 .detail { display: flex; align-items: center; gap: 6px; width: fit-content; min-height: 44px; padding: 0 18px; color: var(--ink); font-family: var(--chipFont); font-size: var(--chipSize); font-weight: 600; text-decoration: none; }
 .playback { flex-shrink: 0; margin-top: 12px; padding: 0 20px max(26px, env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--raise); }
 .seek { position: relative; height: 44px; }
@@ -51,9 +55,12 @@
 .lcdTitle small { font-size: 19px; }
 :global([data-theme='retro']) .chips button { text-transform: uppercase; }
 :global([data-theme='retro']) .verses { padding: 8px 0; }
-:global([data-theme='retro']) .sound, :global([data-theme='retro']) .meaning { color: var(--lyric); font-size: 18px; }
-:global([data-theme='retro']) .active .sound { color: var(--ink); font-size: 20px; }
-:global([data-theme='retro']) .active .meaning { color: var(--lyricNow); font-size: 20px; }
+:global([data-theme='retro']) .verseLabel { font-size: 17px; }
+:global([data-theme='retro']) .sound { color: var(--lyric); font-size: 21px; }
+:global([data-theme='retro']) .past .sound { color: var(--faint); }
+:global([data-theme='retro']) .meaning { font-size: 16px; }
+:global([data-theme='retro']) .active .sound { font-size: 28px; }
+:global([data-theme='retro']) .active .meaning { color: var(--lyricNow); font-size: 18px; }
 :global([data-theme='retro']) .controls button, :global([data-theme='retro']) .controls .practise { background: var(--raised); }
 :global([data-theme='retro']) .controls .play { background: var(--accent); }
 :global([data-theme='retro']) .controls button[aria-pressed='true'] { background: var(--tint); }

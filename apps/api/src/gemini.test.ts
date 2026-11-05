@@ -6,8 +6,10 @@ import type { GeminiClient } from './gemini.ts';
 const song = {
   title: 'Test song', originalLanguage: 'English', summary: 'A greeting', detailedAnalysis: 'A greeting song',
   verses: [{ verseNumber: 1, original: 'Hello', translation: 'Hello', transliteration: 'Heh-loh',
+    lines: [{ original: 'Hello', translation: 'Hello', transliteration: 'Heh-loh', startTime: 0, endTime: 2 }],
     meaning: 'A greeting', startTime: 0, endTime: 2 }],
 };
+const { lines: _, ...untimedVerse } = song.verses[0];
 const input = {
   storageKey: 'uploads/test', title: 'Test song', contentType: 'audio/mpeg', language: 'English',
   model: 'gemini-2.5-flash', karaoke: false,
@@ -47,7 +49,7 @@ test('analysis returns validated lyrics after the uploaded audio is ready', asyn
 });
 
 test('malformed model output fails and releases its uploaded audio', async () => {
-  for (const text of ['not json', JSON.stringify({ title: 'Missing lyrics' })]) {
+  for (const text of ['not json', JSON.stringify({ title: 'Missing lyrics' }), JSON.stringify({ ...song, verses: [untimedVerse] })]) {
     const fake = fakeGemini(text);
     await assert.rejects(createSongAnalyzer(fake.client, storage)(input));
     assert.equal(fake.uploaded.size, 0);

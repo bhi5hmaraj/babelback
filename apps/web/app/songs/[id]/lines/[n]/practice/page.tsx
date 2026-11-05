@@ -26,7 +26,7 @@ export default async function PracticePage({ params }: { params: Promise<{ id: s
   const originalLanguage = song.originalLanguage.toLowerCase();
   const lang = originalLanguage.includes('hindi') ? 'hi' : originalLanguage.includes('tamil') ? 'ta' : undefined;
 
-  return <Practice key={`${id}-${number}`} analysisId={id} title={song.title} line={number} lines={song.verses.length}
+  return <Practice key={`${id}-${number}`} analysisId={id} title={song.title} verseNumber={number} verseCount={song.verses.length}
     verse={verse} lang={lang} audioUrl={audioUrl} credits={user.creditBalance}
     price={config.practiceScoreCredits} best={scores.length ? Math.max(...scores) : null} />;
 }

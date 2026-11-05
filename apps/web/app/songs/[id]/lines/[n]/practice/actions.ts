@@ -3,11 +3,11 @@
 import { authenticatedApi } from '../../../../../../auth.ts';
 import { audioContentType } from '../../../../../add/upload.ts';
 
-export async function startAttempt(input: { analysisId: string; line: number; contentType: string; bytes: number }) {
+export async function startAttempt(input: { analysisId: string; verse: number; contentType: string; bytes: number }) {
   const contentType = audioContentType(input.contentType);
   if (!contentType) return { error: 'This browser records in a format we cannot score yet.' };
   const response = await (await authenticatedApi()).v1['practice-attempts'].$post({ json: {
-    analysisId: input.analysisId, firstVerse: input.line, lastVerse: input.line, contentType, bytes: input.bytes,
+    analysisId: input.analysisId, firstVerse: input.verse, lastVerse: input.verse, contentType, bytes: input.bytes,
   } });
   return response.json();
 }

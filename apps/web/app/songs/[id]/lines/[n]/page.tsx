@@ -29,7 +29,7 @@ export default async function LinePage({ params }: {
       <main className={styles.sheet}>
         <div className={styles.handle} aria-hidden="true" />
         <header className={styles.header}>
-          <span>Line {number} of {song.verses.length}, at {time}</span>
+          <span>Verse {number} of {song.verses.length}, at {time}</span>
           <a href={playerUrl} className={styles.close} aria-label="Close line detail">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="m6 6 12 12M18 6 6 18" />
@@ -56,7 +56,7 @@ export default async function LinePage({ params }: {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="m17 2 3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3m13-5v2a4 4 0 0 1-4 4H4" />
             </svg>
-            Loop line
+            Loop verse
           </a>
           <a href={`/songs/${id}/lines/${number}/practice`} className={styles.practise}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">

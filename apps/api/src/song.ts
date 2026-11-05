@@ -6,6 +6,15 @@ const timedText = z.object({
   endTime: z.number(),
 });
 
+export const line = z.object({
+  original: z.string(),
+  translation: z.string(),
+  transliteration: z.string(),
+  startTime: z.number(),
+  endTime: z.number(),
+});
+
+// New fields stay optional so analyses saved before them still parse.
 export const verse = z.object({
   verseNumber: z.number().int(),
   original: z.string(),
@@ -13,6 +22,7 @@ export const verse = z.object({
   transliteration: z.string(),
   transliterationSegments: z.array(timedText).optional(),
   translationSegments: z.array(timedText).optional(),
+  lines: z.array(line).optional(),
   meaning: z.string(),
   startTime: z.number(),
   endTime: z.number(),

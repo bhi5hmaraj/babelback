@@ -2,12 +2,15 @@ import { GoogleGenAI } from '@google/genai';
 import type { GenerateContentParameters, GetFileParameters, UploadFileParameters } from '@google/genai';
 import { setTimeout } from 'node:timers/promises';
 import { z } from 'zod';
-import { singingScore, songData } from './song.ts';
+import { line, singingScore, songData, verse } from './song.ts';
 import type { SingingScore, SongData } from './song.ts';
 import type { Storage } from './storage.ts';
 
 export const ANALYSIS_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'] as const;
-export const ANALYSIS_PROMPT_VERSION = 'v1';
+export const ANALYSIS_PROMPT_VERSION = 'v2';
+
+// The stored schema keeps lines optional for older analyses; Gemini must always return them.
+const analysisResponse = songData.extend({ verses: z.array(verse.extend({ lines: z.array(line) })) });
 
 type GeminiFile = { name?: string; uri?: string; mimeType?: string; state?: string };
 export type GeminiClient = {
@@ -67,16 +70,23 @@ const clock = (seconds: number) => {
   return `${String(Math.floor(ms / 60000)).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}.${String(ms % 1000).padStart(3, '0')}`;
 };
 
+const phrases = (verse: SongData['verses'][number]) => verse.lines?.length
+  ? verse.lines.map((line) => ({ text: line.transliteration, startTime: line.startTime, endTime: line.endTime }))
+  : verse.transliterationSegments;
+
 // Ported from the singing-feedback route (app/api/_lib/prompts.ts) of the old app.
 export function singingFeedbackPrompt(language: string, verses: SongData['verses']) {
   const start = verses[0]?.startTime ?? 0;
   const references = verses.map((verse) => `Verse ${verse.verseNumber}: "${
-    verse.transliterationSegments?.length ? verse.transliterationSegments.map((s) => s.text).join(' ') : verse.transliteration
+    phrases(verse)?.map((s) => s.text).join(' ') || verse.transliteration
   }"`).join('\n');
-  const timings = verses.flatMap((verse) => verse.transliterationSegments?.length
-    ? verse.transliterationSegments.map((s) => ({ text: s.text, startTime: clock(s.startTime - start), endTime: clock(s.endTime - start) }))
-    : [{ text: `(Full transliteration V${verse.verseNumber}) ${verse.transliteration.slice(0, 30)}...`,
-      startTime: clock(verse.startTime - start), endTime: clock(verse.endTime - start) }]);
+  const timings = verses.flatMap((verse) => {
+    const timed = phrases(verse);
+    return timed?.length
+      ? timed.map((s) => ({ text: s.text, startTime: clock(s.startTime - start), endTime: clock(s.endTime - start) }))
+      : [{ text: `(Full transliteration V${verse.verseNumber}) ${verse.transliteration.slice(0, 30)}...`,
+        startTime: clock(verse.startTime - start), endTime: clock(verse.endTime - start) }];
+  });
   const guide = language === 'English'
     ? "the English-readable phonetic guide provided in each reference verse's transliterated text"
     : `the phonetic guide provided in each reference verse's transliterated text (which uses ${language} script)`;
@@ -138,11 +148,11 @@ export function createSongAnalyzer(
         ] }],
         config: {
           responseMimeType: 'application/json',
-          responseSchema: z.toJSONSchema(songData, { target: 'openapi-3.0' }),
+          responseSchema: z.toJSONSchema(analysisResponse, { target: 'openapi-3.0' }),
           systemInstruction: analysisPrompt(language, karaoke),
         },
       });
-      return songData.parse(JSON.parse(response.text ?? ''));
+      return analysisResponse.parse(JSON.parse(response.text ?? ''));
     } finally {
       await client.files.delete({ name }).catch((error: unknown) => {
         console.error('Gemini file cleanup failed', { name, error });
@@ -158,6 +168,7 @@ All startTime and endTime values are numbers in seconds from the start of the au
 Provide translation, meaning, summary and detailedAnalysis in contemporary, natural ${language}.
 Provide transliteration as a phonetic guide using ${language === 'English' ? 'English-readable Latin spellings, including when the original uses Latin script' : `the native script of ${language}`}.
 ${karaoke ? 'Include transliterationSegments and translationSegments in sung phrases of about 3-5 words, with matching timing.' : 'Include the original lyrics, translation, transliteration and meaning for each verse.'}
+Split each verse into its sung lines, in order, in lines. Give every line its own original, translation and transliteration, a startTime when the singer starts it and an endTime when they finish it. Lines must not overlap and must fall inside their verse's startTime and endTime.
 Infer the title when possible; otherwise use the filename.
 For instrumental audio, use originalLanguage "Instrumental" and an empty verses array.
 Return only JSON matching the supplied schema.`;
