@@ -1,0 +1,93 @@
+.screen { display: flex; flex-direction: column; min-height: 100dvh; }
+
+.header { display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px; }
+.round {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--pill); box-shadow: var(--raise);
+}
+.title { margin: 0; font: 700 22px/1.2 var(--display); letter-spacing: -0.01em; }
+
+.main { flex: 1; display: flex; flex-direction: column; gap: 22px; padding: 10px 20px 24px; }
+
+.preview {
+  display: flex; flex-direction: column; gap: 12px; padding: 14px;
+  border-radius: var(--radius); background: var(--surface); box-shadow: var(--raise);
+}
+.panel {
+  display: flex; flex-direction: column; gap: 4px; padding: 4px 0;
+  border-radius: var(--small); background: var(--panel); box-shadow: var(--sink);
+}
+.before, .after { padding: 0 12px; font-size: 15px; }
+.before { color: var(--faint); }
+.after { color: var(--lyric); }
+.now {
+  display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
+  border-radius: var(--small); background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.lyric { font-size: 20px; line-height: 1.4; font-weight: 600; color: var(--lyricNow); }
+.sound { font-family: var(--lcd); font-size: 14px; font-style: var(--soundStyle); color: var(--ink); }
+
+.seek { display: flex; align-items: center; gap: 2px; height: 10px; }
+.seek span { flex: 1 1 0; height: 5px; border-radius: 3px; background: var(--edge); }
+.seek .played { background: var(--accent); }
+.seek [data-now] { height: 10px; }
+
+.transport { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.nav, .play {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--pill); box-shadow: var(--raise);
+}
+.nav { width: 40px; height: 40px; color: var(--text); }
+.play { width: 56px; height: 56px; background: var(--accent); color: var(--onAccent); }
+
+.group { display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; align-items: baseline; justify-content: space-between; }
+.label {
+  margin: 0; font-family: var(--chipFont); font-size: 13px; font-weight: 600;
+  color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.chosen { font-size: 14px; color: var(--soft); }
+
+.themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.card {
+  display: flex; flex-direction: column; gap: 8px; padding: 8px;
+  border-radius: min(16px, var(--radius)); border: 1px solid var(--line);
+  background: var(--surface); box-shadow: var(--raise); cursor: pointer;
+}
+/* An inset ring thickens the border without moving the layout. */
+.card[aria-pressed='true'] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink), var(--sink); }
+.name { font-size: 14px; font-weight: 600; text-align: left; }
+
+/* The swatch carries its own data-theme, so these tokens are that theme's. */
+.swatch {
+  height: 58px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 8px;
+  border-radius: calc(var(--small) - 2px); background: var(--bg);
+}
+.swatch > span:first-child { height: 8px; width: 70%; border-radius: 4px; background: var(--line); }
+.swatch > span:last-child { display: flex; align-items: center; justify-content: space-between; }
+.swatch > span:last-child > span:first-child { height: 8px; width: 45%; border-radius: 4px; background: var(--surface); }
+.swatch > span:last-child > span:last-child { width: 18px; height: 18px; border-radius: calc(var(--small) - 2px); background: var(--accent); }
+
+.accents { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; justify-items: center; }
+.accent {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: var(--pill); color: var(--onAccent); box-shadow: var(--raise); cursor: pointer;
+}
+.accent[aria-pressed='true'] { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--text); }
+
+.reset {
+  align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: transparent;
+  color: var(--ink); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+
+.note { margin: auto 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); text-align: center; }
+
+:global([data-theme='retro']) .round,
+:global([data-theme='retro']) .nav { background: var(--raised); }
+:global([data-theme='retro']) .title { font-size: 28px; }
+:global([data-theme='retro']) .label { font-size: 18px; }
+:global([data-theme='retro']) .panel { padding: 8px 0; }
+:global([data-theme='retro']) .now { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+:global([data-theme='retro']) .sound { font-size: 18px; }
+:global([data-theme='retro']) .seek span { border-radius: 0; background: #4A4F68; }
+:global([data-theme='retro']) .seek .played { background: var(--accent); }
