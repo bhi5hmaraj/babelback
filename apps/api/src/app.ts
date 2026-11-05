@@ -7,6 +7,7 @@ import type { AnalysisService } from './analysis.ts';
 import { audioRoutes } from './audio.ts';
 import { handleClerkWebhook, requireUser, type VerifySession } from './auth.ts';
 import type { Db } from './db.ts';
+import { practiceRoutes, type PracticeService } from './practice.ts';
 import { findSeed, listSeeds } from './seeds.ts';
 import { getSettings } from './settings.ts';
 import { users } from './schema.ts';
@@ -28,10 +29,13 @@ type AppDeps = {
   verifySession?: VerifySession;
   clerkWebhookSecret?: string;
   analysis?: AnalysisService;
+  practice?: PracticeService;
   inngestHandler?: (c: Context) => Promise<Response>;
 };
 
-export function buildApp({ db, storage, adminPassword, verifySession, clerkWebhookSecret, analysis, inngestHandler }: AppDeps) {
+export function buildApp({
+  db, storage, adminPassword, verifySession, clerkWebhookSecret, analysis, practice, inngestHandler,
+}: AppDeps) {
   const auth = requireUser(db, verifySession);
   return new Hono()
     .get('/v1/health', async (c) => {
@@ -60,6 +64,7 @@ export function buildApp({ db, storage, adminPassword, verifySession, clerkWebho
       const verified = await handleClerkWebhook(db, c.req.raw, clerkWebhookSecret);
       return verified ? c.json({ ok: true }, 200) : c.json({ error: 'Invalid webhook signature' }, 400);
     })
+    .route('/v1/practice-attempts', practiceRoutes({ db, storage, verifySession, practice }))
     .route('/v1', audioRoutes({ db, storage, verifySession, analysis }))
     .all('/api/inngest', async (c) => inngestHandler ? inngestHandler(c) : c.json({ error: 'Song workflows are not configured. Set Gemini and Inngest keys.' }, 503))
     .route('/admin', adminRoutes(db, adminPassword));

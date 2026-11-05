@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createSongAnalyzer } from './gemini.ts';
+import { createSingingScorer, createSongAnalyzer } from './gemini.ts';
 import type { GeminiClient } from './gemini.ts';
 
 const song = {
@@ -68,4 +68,27 @@ test('models outside the server allowlist are rejected before accessing audio', 
   });
 
   await assert.rejects(analyze({ ...input, model: 'untrusted-model' }), /Unsupported analysis model/);
+});
+
+test('singing feedback sends the recording inline with the reference line and validates scores', async () => {
+  const feedback = { positive: ['Clear'], improvementAreas: ['Later entry'] };
+  const scores = { pronunciationAccuracyScore: 82, timingAlignmentScore: 71, vocalClarityScore: 80, feedback };
+  const prompts: string[] = [];
+  const reply = (overallScore: number) => {
+    const client = fakeGemini('').client;
+    client.models.generateContent = async ({ contents, config }) => {
+      const text = JSON.stringify(contents);
+      assert.ok(text.includes(Buffer.from('audio').toString('base64')));
+      assert.ok(config?.responseSchema);
+      prompts.push(text);
+      return { text: JSON.stringify({ overallScore, ...scores, verseScores: [{ verseNumber: 1, ...scores }] }) };
+    };
+    return createSingingScorer(client, storage);
+  };
+  const practice = { recordingKey: 'recordings/test', contentType: 'audio/webm', language: 'English',
+    model: 'gemini-2.5-flash', verses: song.verses };
+
+  assert.equal((await reply(78)(practice)).overallScore, 78);
+  assert.match(prompts[0], /Verse 1: \\"Heh-loh\\"/);
+  await assert.rejects(reply(150)(practice));
 });

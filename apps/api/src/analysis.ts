@@ -63,7 +63,8 @@ export async function runAnalysis(db: Db, analyze: AnalyzeSong, jobId: string, r
   console.info(JSON.stringify({ event: 'analysis.succeeded', jobId, userId: job.userId }));
 }
 
-export async function failJob(db: Db, jobId: string, code = 'analysis_failed') {
+export async function failJob(db: Db, jobId: string, code = 'analysis_failed',
+  message = 'We could not prepare this song. Your credits have been returned. Please try again.') {
   await db.transaction(async (tx) => {
     const [job] = await tx.select().from(jobs).where(eq(jobs.id, jobId)).for('update');
     if (!job || job.status === 'succeeded') return;
@@ -73,7 +74,7 @@ export async function failJob(db: Db, jobId: string, code = 'analysis_failed') {
     if (spend) await applyCredits(tx, { userId: job.userId, jobId, reason: 'refund', delta: -spend.delta });
     await tx.update(jobs).set({
       status: 'failed', errorCode: code,
-      errorMessage: 'We could not prepare this song. Your credits have been returned. Please try again.',
+      errorMessage: message,
       updatedAt: new Date(),
     }).where(eq(jobs.id, jobId));
     console.error(JSON.stringify({ event: 'job.failed', jobId, userId: job.userId, code }));
@@ -81,9 +82,9 @@ export async function failJob(db: Db, jobId: string, code = 'analysis_failed') {
 }
 
 // Recovers a process exit after the charge commits but before the event is sent.
-export async function redispatchAnalysisJobs(db: Db, send: SendAnalysis) {
+export async function redispatchAnalysisJobs(db: Db, send: SendAnalysis, type: 'analyze' | 'practice_score' = 'analyze') {
   const queued = await db.select({ jobId: jobs.id, userId: jobs.userId }).from(jobs)
-    .where(and(eq(jobs.type, 'analyze'), eq(jobs.status, 'queued'))).orderBy(asc(jobs.updatedAt)).limit(100);
+    .where(and(eq(jobs.type, type), eq(jobs.status, 'queued'))).orderBy(asc(jobs.updatedAt)).limit(100);
   await Promise.all(queued.map(async (event) => {
     await send(event);
     await db.update(jobs).set({ updatedAt: new Date() }).where(and(eq(jobs.id, event.jobId), eq(jobs.status, 'queued')));

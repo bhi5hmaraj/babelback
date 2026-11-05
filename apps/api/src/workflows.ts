@@ -5,7 +5,9 @@ import { z } from 'zod';
 import { failJob, redispatchAnalysisJobs, runAnalysis } from './analysis.ts';
 import type { AnalysisService } from './analysis.ts';
 import type { Db } from './db.ts';
-import { ANALYSIS_MODELS, connectSongAnalyzer } from './gemini.ts';
+import { ANALYSIS_MODELS, connectSingingScorer, connectSongAnalyzer } from './gemini.ts';
+import { failPractice, runPractice } from './practice.ts';
+import type { PracticeService } from './practice.ts';
 import type { Storage } from './storage.ts';
 
 type WorkflowConfig = {
@@ -41,11 +43,32 @@ export function connectWorkflows(db: Db, storage: Storage, config: WorkflowConfi
   const analysis: AnalysisService = { model, analyze,
     send: ({ jobId, userId }) => inngest.send({ id: jobId, name: 'song/analyze.requested', data: { jobId, userId } }),
   };
+  const score = connectSingingScorer(config.GEMINI_API_KEY, storage);
+  const scorePractice = inngest.createFunction({
+    id: 'practice-score', triggers: [{ event: 'practice/score.requested' }], retries: 2,
+    concurrency: { limit: 2, key: 'event.data.userId' },
+    throttle: { limit: 20, period: '1m', key: 'event.data.userId' },
+    onFailure: async ({ event, error }) => {
+      const jobId = z.uuid().parse(event.data.event.data.jobId);
+      console.error('Practice scoring exhausted retries', { jobId, error });
+      await failPractice(db, jobId);
+    },
+  }, async ({ event, step, runId }) => {
+    const jobId = z.uuid().parse(event.data.jobId);
+    await step.run('score-and-save', () => runPractice(db, score, jobId, runId));
+    return { jobId };
+  });
+  const practice: PracticeService = { model, score,
+    send: ({ jobId, userId }) => inngest.send({ id: jobId, name: 'practice/score.requested', data: { jobId, userId } }),
+  };
   const recoverQueued = inngest.createFunction({
     id: 'recover-queued-analysis', triggers: [{ cron: '* * * * *' }], concurrency: 1,
   }, async ({ step }) => {
     await step.run('dispatch-queued', () => redispatchAnalysisJobs(db, analysis.send));
+    await step.run('dispatch-queued-practice', () => redispatchAnalysisJobs(db, practice.send, 'practice_score'));
   });
-  const handler: (c: Context) => Promise<Response> = serve({ client: inngest, functions: [analyzeSong, recoverQueued] });
-  return { analysis, inngestHandler: handler };
+  const handler: (c: Context) => Promise<Response> = serve({
+    client: inngest, functions: [analyzeSong, scorePractice, recoverQueued],
+  });
+  return { analysis, practice, inngestHandler: handler };
 }
