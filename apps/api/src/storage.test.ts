@@ -14,4 +14,5 @@ test('upload signatures bind the object key, declared size and audio type', asyn
   const headers = url.searchParams.get('X-Amz-SignedHeaders')?.split(';');
   assert.ok(headers?.includes('content-length'));
   assert.ok(headers?.includes('content-type'));
+  assert.equal(url.searchParams.has('x-amz-checksum-crc32'), false);
 });
