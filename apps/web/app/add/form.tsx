@@ -40,7 +40,7 @@ export function UploadForm({ credits, price, maxUploadMb, maxSongSeconds }: {
       setBusy('Starting analysis...');
       requestKey.current ??= crypto.randomUUID();
       const result = await analyzeUpload(asset.current, language, requestKey.current);
-      if ('error' in result) throw new Error(result.error);
+      if ('error' in result) { requestKey.current = null; throw new Error(result.error); }
       router.push(`/processing/${result.job.id}`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Could not add the song. Please try again.');
