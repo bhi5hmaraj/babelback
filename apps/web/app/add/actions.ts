@@ -23,3 +23,8 @@ export async function analyzeUpload(assetId: string, language: AnalysisInput['la
   const response = await (await authenticatedApi()).v1.analyses.$post({ json: { assetId, language, karaoke: false, idempotencyKey } });
   return response.json();
 }
+
+export async function importYoutube(url: string, language: AnalysisInput['language'], idempotencyKey: string) {
+  const response = await (await authenticatedApi()).v1.jobs.youtube.$post({ json: { url, language, idempotencyKey } });
+  return response.json();
+}

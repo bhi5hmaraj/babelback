@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { account } from '../../auth.ts';
 import { api } from '../../api.ts';
-import { UploadForm } from './form.tsx';
+import { AddSong } from './source.tsx';
 import styles from '../workflows.module.css';
 
 export const metadata = { title: 'Add a song - Babelback' };
@@ -20,7 +20,8 @@ export default async function AddPage() {
         <h1 id="add-heading" className={styles.heading}>Add a song</h1>
         <Link href="/" aria-label="Close add song" className={styles.close}>X</Link>
       </div>
-      <UploadForm credits={user.creditBalance} price={settings.analysisCredits} maxUploadMb={settings.maxUploadMb} maxSongSeconds={settings.maxSongSeconds} />
+      <AddSong credits={user.creditBalance} price={settings.analysisCredits} maxUploadMb={settings.maxUploadMb} maxSongSeconds={settings.maxSongSeconds}
+        youtubePrice={settings.youtubeImportCredits} youtubeImport={settings.youtubeImport} />
     </section>
   </main>;
 }

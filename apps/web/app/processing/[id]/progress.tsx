@@ -48,7 +48,7 @@ export function Progress({ initial }: { initial: Job }) {
     <div>
       <p className={styles.eyebrow}>{failed ? 'Could not prepare this song' : ready ? 'Ready to listen' : 'Getting it ready'}</p>
       <h1 className={styles.heading}>{typeof job.input.title === 'string' ? job.input.title : 'Your song'}</h1>
-      <p role="status" className={styles.muted}>{job.status === 'queued' ? 'Waiting to start' : job.status === 'running' ? 'Listening and writing the lyrics' : ready ? 'Saved to your Library' : 'Analysis stopped'}</p>
+      <p role="status" className={styles.muted}>{job.status === 'queued' ? 'Waiting to start' : job.status === 'running' ? (job.assetId ? 'Listening and writing the lyrics' : 'Getting the audio from YouTube') : ready ? 'Saved to your Library' : 'Analysis stopped'}</p>
     </div>
     {failed ? <p role="alert" className={styles.error}>{job.errorMessage || 'Could not analyse the song. Your credits have been returned.'}</p> : <>
       <ol className={styles.steps} aria-label="Progress">

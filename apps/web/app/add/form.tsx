@@ -6,7 +6,7 @@ import { analyzeUpload, completeUpload, createUpload } from './actions.ts';
 import { uploadError } from './upload.ts';
 import styles from '../workflows.module.css';
 
-const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Bengali'] as const;
+export const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Bengali'] as const;
 
 export function UploadForm({ credits, price, maxUploadMb, maxSongSeconds }: {
   credits: number; price: number; maxUploadMb: number; maxSongSeconds: number;

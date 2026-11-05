@@ -56,16 +56,14 @@ export function youtubeId(link: string) {
   return id && /^[\w-]{11}$/.test(id) ? id : undefined;
 }
 
+const INVALID_LINK = 'Paste a YouTube video link and pick a language.';
 const youtubeBody = validator('json', (value, c) => {
   const parsed = z.object({
     url: z.string().max(2000),
     language: analysisInput.shape.language,
     idempotencyKey: z.string().min(1).max(100).optional(),
   }).safeParse(value);
-  const videoId = parsed.success ? youtubeId(parsed.data.url) : undefined;
-  return parsed.success && videoId
-    ? { ...parsed.data, videoId }
-    : c.json({ error: 'Paste a YouTube video link and pick a language.' }, 400);
+  return parsed.success ? parsed.data : c.json({ error: INVALID_LINK }, 400);
 });
 
 type YoutubeDeps = { db: Db; verifySession?: VerifySession; analysis?: AnalysisService; youtube?: YoutubeService };
@@ -83,7 +81,9 @@ export function youtubeRoutes({ db, verifySession, analysis, youtube }: YoutubeD
       if (!analysis || !youtube) {
         return c.json({ error: 'YouTube import is unavailable. Configure APIFY_TOKEN, APIFY_ACTOR_ID, Gemini and Inngest.' }, 503);
       }
-      const { videoId, language, idempotencyKey: key } = c.req.valid('json');
+      const { url, language, idempotencyKey: key } = c.req.valid('json');
+      const videoId = youtubeId(url);
+      if (!videoId) return c.json({ error: INVALID_LINK }, 400);
       const userId = c.var.user.id;
       const idempotencyKey = JSON.stringify([userId, key ?? randomUUID()]);
       const job = await db.transaction(async (tx) => {
