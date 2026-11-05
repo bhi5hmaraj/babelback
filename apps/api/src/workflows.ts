@@ -22,7 +22,8 @@ type WorkflowConfig = {
 
 export function connectWorkflows(db: Db, storage: Storage, config: WorkflowConfig, production: boolean) {
   const model = config.GEMINI_MODEL_ID;
-  if (!config.GEMINI_API_KEY || !model || !ANALYSIS_MODELS.some((allowed) => allowed === model)) return {};
+  if (!config.GEMINI_API_KEY || !model) return {};
+  if (!ANALYSIS_MODELS.some((allowed) => allowed === model)) throw new Error(`GEMINI_MODEL_ID ${model} is not in ANALYSIS_MODELS`);
   if (production && (!config.INNGEST_EVENT_KEY || !config.INNGEST_SIGNING_KEY)) return {};
   const analyze = connectSongAnalyzer(config.GEMINI_API_KEY, storage);
   const inngest = new Inngest({

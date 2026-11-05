@@ -6,7 +6,7 @@ import { singingScore, songData } from './song.ts';
 import type { SingingScore, SongData } from './song.ts';
 import type { Storage } from './storage.ts';
 
-export const ANALYSIS_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro'] as const;
+export const ANALYSIS_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'] as const;
 export const ANALYSIS_PROMPT_VERSION = 'v1';
 
 type GeminiFile = { name?: string; uri?: string; mimeType?: string; state?: string };
