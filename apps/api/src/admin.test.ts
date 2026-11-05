@@ -15,9 +15,7 @@ const VALID_FORM = {
   practiceScoreCredits: '2',
   analysisCredits: '6',
   youtubeImportCredits: '9',
-  trialGrantCredits: '0',
   signupGrantCredits: '50',
-  anonymousUsersPerIpPerDay: '4',
   maxSongSeconds: '480',
   maxUploadMb: '80',
 };
@@ -55,9 +53,7 @@ test('saved settings are what the API reads back', async () => {
     practiceScoreCredits: 2,
     analysisCredits: 6,
     youtubeImportCredits: 9,
-    trialGrantCredits: 0,
     signupGrantCredits: 50,
-    anonymousUsersPerIpPerDay: 4,
     maxSongSeconds: 480,
     maxUploadMb: 80,
   });

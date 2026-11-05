@@ -40,7 +40,7 @@ export function connectStorage(env: StorageEnv): Storage {
     read: async (key) => {
       const found = await client.send(new GetObjectCommand({ ...object, Key: key }));
       if (!found.Body) throw new Error('Audio object has no body');
-      return new Blob([await found.Body.transformToByteArray()], { type: found.ContentType });
+      return new Blob([new Uint8Array(await found.Body.transformToByteArray())], { type: found.ContentType });
     },
   };
 }
