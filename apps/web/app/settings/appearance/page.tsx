@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { account } from '../../../auth.ts';
 import { readAppearance } from '../../theme.ts';
 import { Picker } from './picker.tsx';
 import styles from './appearance.module.css';
@@ -7,7 +8,9 @@ import styles from './appearance.module.css';
 export const metadata = { title: 'Appearance - Babelback' };
 
 export default async function AppearancePage() {
-  const appearance = readAppearance(await cookies());
+  const jar = await cookies();
+  const user = await account();
+  const appearance = readAppearance(user?.theme ? { get: (name) => ({ value: (name === 'theme' ? user.theme : user.accent) ?? '' }) } : jar);
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
@@ -49,7 +52,7 @@ export default async function AppearancePage() {
 
         <Picker {...appearance} />
 
-        <p className={styles.note}>Saved on this device.</p>
+        <p className={styles.note}>{user ? 'Saved to your account.' : 'Saved on this device.'}</p>
       </main>
     </div>
   );

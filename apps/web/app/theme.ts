@@ -1,4 +1,3 @@
-// The theme and accent live in cookies until they move to the users table.
 export const THEMES = {
   night: { name: 'Night', accent: '#F5B83D' },
   day: { name: 'Day', accent: '#F5B83D' },
@@ -27,6 +26,6 @@ export function readAppearance(cookies: Cookies): Appearance {
   const accent = cookies.get('accent')?.value;
   return {
     theme: Object.hasOwn(THEMES, theme) ? (theme as Theme) : 'night',
-    accent: ACCENTS.some((a) => a.hex === accent) ? accent : undefined,
+    accent: accent && /^#[0-9a-f]{6}$/i.test(accent) ? accent : undefined,
   };
 }

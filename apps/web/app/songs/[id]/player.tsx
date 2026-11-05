@@ -6,7 +6,7 @@ import type { api } from '../../../api.ts';
 import { clock, currentLine, lineLoopStart } from './playback.ts';
 import styles from './player.module.css';
 
-type Seed = InferResponseType<ReturnType<typeof api>['v1']['seeds'][':id']['$get'], 200>;
+type Seed = Pick<InferResponseType<ReturnType<typeof api>['v1']['seeds'][':id']['$get'], 200>, 'id' | 'song' | 'audioUrl' | 'language'>;
 const spectrum = [8, 14, 20, 16, 11, 18, 20, 13, 9, 15, 12, 7, 10, 5];
 
 export function Player({ seed, initialLine = -1, initialLoop = false }: { seed: Seed; initialLine?: number; initialLoop?: boolean }) {

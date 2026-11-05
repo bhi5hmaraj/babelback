@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { api } from '../../../../../api.ts';
+import { loadSong } from '../../../song.ts';
 import styles from './line.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -10,10 +10,7 @@ export default async function LinePage({ params }: {
   const { id, n } = await params;
   const number = Number(n);
   if (!/^\d+$/.test(n) || !Number.isSafeInteger(number) || number < 1) notFound();
-  const response = await api().v1.seeds[':id'].$get({ param: { id } });
-  if (response.status === 404) notFound();
-  if (!response.ok) throw new Error('Could not load this line');
-  const { song, language } = await response.json();
+  const { song, language } = await loadSong(id);
   const verse = song.verses[number - 1];
   if (!verse) notFound();
   const originalLanguage = song.originalLanguage.toLowerCase();

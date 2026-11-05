@@ -32,9 +32,29 @@
 }
 
 .eyebrow {
+  margin: 0;
   color: var(--ink);
   font: 600 var(--chipSize)/1.5 var(--chipFont);
 }
+
+.prices {
+  margin: 0;
+  padding: 4px 16px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: var(--sink);
+  font: 400 15px/1.5 var(--lcd);
+}
+
+.prices div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.prices div + div { border-top: 1px solid var(--line); }
+.prices dd { margin: 0; font-weight: 600; }
 
 .button, .secondary, .close {
   display: flex;
@@ -127,6 +147,31 @@
   font-weight: 600;
 }
 
+.form { display: flex; flex: 1; flex-direction: column; gap: 20px; }
+.fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.fieldset legend { margin-bottom: 10px; }
+.search { display: flex; flex-wrap: wrap; gap: 8px; }
+.search label { flex: 0 0 100%; }
+.search input { flex: 1; min-width: 0; width: auto; }
+.upload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 154px;
+  padding: 16px;
+  border: 1px dashed var(--edge);
+  border-radius: var(--small);
+  background: var(--bg);
+  box-shadow: var(--sink);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.upload svg { color: var(--ink); }
+.upload input { max-width: 100%; font: inherit; font-size: 14px; }
+
 .input {
   width: 100%;
   min-height: 52px;
@@ -206,6 +251,14 @@
   overflow-wrap: anywhere;
 }
 
+.steps { display: flex; flex-direction: column; gap: 24px; margin: 8px 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 16px; color: var(--muted); font-family: var(--lcd); }
+.steps li > span { display: flex; flex: 0 0 32px; justify-content: center; align-items: center; height: 32px; border: 2px solid var(--edge); border-radius: var(--pill); }
+.steps li[data-done='true'], .steps li[aria-current='step'] { color: var(--text); }
+.steps li[data-done='true'] > span { border-color: var(--accent); background: var(--accent); color: var(--onAccent); }
+.steps li[aria-current='step'] > span { border-color: var(--accent); color: var(--ink); }
+.progress { width: 100%; height: 8px; accent-color: var(--accent); }
+
 .nav {
   position: sticky;
   bottom: 0;
@@ -216,7 +269,7 @@
   background: var(--bg);
 }
 
-.nav a {
+.nav a, .nav button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,6 +280,9 @@
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
 }
 
 .nav a[aria-current='page'] {
