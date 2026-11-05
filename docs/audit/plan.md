@@ -147,7 +147,7 @@ The current app stays in production on Vercel until P2 cutover, so P0 keeps it h
 Build the new backend beside the old app. Nothing user-facing switches until P2.
 
 1. **Repo layout.** npm workspaces: `apps/api` (Hono), `apps/web` (P2), `packages/contract` (zod schemas, inferred types, API client). Done when `apps/api` serves `GET /v1/health` locally.
-2. **Railway project.** `api` service, Postgres, staging and production environments. Env vars by name: `DATABASE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL_ID`, `APIFY_TOKEN`, `APIFY_ACTOR_ID`, `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`, storage credentials, auth secret, `GA_MEASUREMENT_ID`, `GA_API_SECRET`. Done when staging deploys from `main` and `/v1/health` checks the database.
+2. **Railway project.** `api` and `web` services, Postgres and a bucket, in one production environment. No staging (decided 2026-11-05): keep it simple. Env vars by name: `DATABASE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL_ID`, `APIFY_TOKEN`, `APIFY_ACTOR_ID`, `INNGEST_EVENT_KEY`, `INNGEST_SIGNING_KEY`, storage credentials, auth secret, `GA_MEASUREMENT_ID`, `GA_API_SECRET`. Done when production deploys and `/v1/health` checks the database.
 3. **Schema (Drizzle) and migrations.** Anyone who triggers paid work is a signed-in `users` row, so every table keys on the user the same way.
    - **`users`:** id is the Clerk user id (decision 4.5), plus `credit_balance integer not null default 0 check (credit_balance >= 0)`. Clerk keeps sessions and accounts, so there are no session tables.
    - **`audio_assets`:** owner (set for uploads, null for YouTube and seed audio), source (`upload`, `youtube`, `seed`), `youtube_id`, title, artist, storage key, content type, bytes, `duration_ms`. Unique on `youtube_id`, so each video is downloaded once and shared by everyone who adds it. Title and artist live here, which removes the separate `songs` table.
@@ -156,7 +156,7 @@ Build the new backend beside the old app. Nothing user-facing switches until P2.
    - **`jobs`:** user, type (`youtube_ingest`, `analyze`, `practice_score`), status (`queued`, `running`, `succeeded`, `failed`), progress, error code and user-safe message, input `jsonb`, result ids, Inngest run id, unique idempotency key. Partial unique index on (user, youtube_id) while queued or running, so a double click starts one job.
    - **`practice_attempts`:** user, asset, analysis, verse range, recording storage key, status, `score jsonb` (the zod `SingingScore`).
    - **`credit_ledger`:** user, delta (positive for grants and refunds, negative for spends), reason (`signup_grant`, `trial_grant`, `purchase`, `spend`, `refund`, `admin`), job id, payment event id, created time. Unique on (job, reason), so a job is charged once and refunded at most once. Unique on payment event id, so a replayed webhook never grants twice.
-   - Done when migrations run on staging and the seed import has loaded the 3 seeds.
+   - Done when migrations run on deploy and the seed import has loaded the 3 seeds.
 4. **Auth and credits** (decisions 4.5 and 4.6).
    - Cookie sessions for web and bearer tokens for native, on the same `/v1` routes.
    - Every query is scoped by user. Credits limit paid work. Per-user Inngest throttle and concurrency keys stop bursts. There is no separate daily quota.
@@ -180,7 +180,7 @@ Build the new backend beside the old app. Nothing user-facing switches until P2.
    - `song/analyze`: upload to the Gemini Files API, then call with `responseMimeType: application/json` and a `responseSchema`. Validate with zod and write `analyses`. Uses the fixed prompt call signatures.
    - `practice/score`: port the singing-feedback prompt and schema from git history.
    - Use Inngest `concurrency` and `throttle` keyed by user id to cap spend.
-   - Done when a YouTube link goes from request to stored analysis on staging with the Inngest dashboard showing each step.
+   - Done when a YouTube link goes from request to stored analysis in production with the Inngest dashboard showing each step.
 8. **API v1 endpoints:**
    - `POST /v1/uploads`, `POST /v1/uploads/:id/complete`;
    - `POST /v1/jobs/youtube`, `GET /v1/jobs/:id` (SSE later);
@@ -190,7 +190,7 @@ Build the new backend beside the old app. Nothing user-facing switches until P2.
    - `POST /v1/practice-attempts`, `GET /v1/practice-attempts`;
    - `GET /v1/seeds`, `GET /v1/seeds/:id`.
    - Model ids come from a server allowlist.
-   - Done when an integration test per endpoint passes against a staging database.
+   - Done when an integration test per endpoint passes against a test database.
 9. **Minimum observability.** JSON logs with job id and user id on every line, an Inngest failure alert, and Railway health checks. Done when a forced Gemini failure shows up as a failed job, a log line and an alert.
 
 ### P2: UI rewrite (weeks)
@@ -201,8 +201,8 @@ Build the new backend beside the old app. Nothing user-facing switches until P2.
    - Permission states (microphone, earphones) and empty states.
    - Mobile-first, because the native apps will mirror it.
    - Done when the flows are reviewed and agreed.
-2. **Web scaffold.** `apps/web` on the Next.js App Router with the contract client and auth screens, deployed as the Railway `web` service on a staging domain. Done when sign-in and the seed flow work on staging.
-3. **Build the screens** in this order: seed song (no upload, fastest path to the player), upload, YouTube with job progress, library, language switch (new `analyses` row on the same asset), practice. Done when every flow in Appendix B works against staging.
+2. **Web scaffold.** `apps/web` on the Next.js App Router with the contract client and auth screens, deployed as the Railway `web` service. Done when sign-in and the seed flow work in production.
+3. **Build the screens** in this order: seed song (no upload, fastest path to the player), upload, YouTube with job progress, library, language switch (new `analyses` row on the same asset), practice. Done when every flow in Appendix B works in production.
 4. **Local library import.** On first sign-in on the production origin, read the old `BabelbackLibraryDB`. Upload entries that have audio, and skip and report the 0-byte ones. Done when an exported test library imports without loss.
 5. **Cutover.**
    - Point the production domain at Railway `web` and `api`.
