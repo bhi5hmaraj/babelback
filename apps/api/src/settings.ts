@@ -10,16 +10,14 @@ export const settingsForm = z.object({
   practiceScoreCredits: count('Credits to score a practice attempt'),
   analysisCredits: count('Credits to analyse an upload or add a language'),
   youtubeImportCredits: count('Credits to add a YouTube song'),
-  trialGrantCredits: count('Credits for an anonymous trial (0 turns trials off)'),
   signupGrantCredits: count('Credits granted on sign-up'),
-  anonymousUsersPerIpPerDay: count('New anonymous users allowed per IP per day'),
   maxSongSeconds: count('Longest song accepted, in seconds'),
   maxUploadMb: count('Largest upload accepted, in MB'),
 });
 
 export type Settings = z.infer<typeof settingsForm>;
 
-export async function getSettings(db: Db): Promise<Settings> {
+export async function getSettings(db: Pick<Db, 'select'>): Promise<Settings> {
   const [row] = await db.select().from(settings).where(eq(settings.id, 1));
   if (!row) throw new Error('The settings row is missing. Run the migrations.');
   return row;

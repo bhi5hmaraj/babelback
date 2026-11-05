@@ -1,31 +1,35 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useState, useTransition, type CSSProperties } from 'react';
 import { ACCENTS, THEMES, type Appearance, type Theme } from '../../theme.ts';
+import { saveAppearance } from './actions.ts';
 import styles from './appearance.module.css';
-
-const year = 60 * 60 * 24 * 365;
-
-function save(name: string, value: string | undefined) {
-  document.cookie = `${name}=${value ?? ''}; path=/; max-age=${value ? year : 0}; samesite=lax`;
-}
 
 export function Picker(initial: Appearance) {
   const [theme, setTheme] = useState(initial.theme);
   const [accent, setAccent] = useState(initial.accent);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const chosen = accent ?? THEMES[theme].accent;
+
+  function persist(value: Appearance) {
+    startTransition(async () => {
+      try { setError((await saveAppearance(value)).error); }
+      catch { setError('Your appearance could not be saved. Please try again.'); }
+    });
+  }
 
   function pickTheme(id: Theme) {
     setTheme(id);
-    save('theme', id);
     document.documentElement.dataset.theme = id;
+    persist({ theme: id, accent });
   }
 
   function pickAccent(hex: string | undefined) {
     setAccent(hex);
-    save('accent', hex);
     if (hex) document.documentElement.style.setProperty('--accent', hex);
     else document.documentElement.style.removeProperty('--accent');
+    persist({ theme, accent: hex });
   }
 
   return (
@@ -34,7 +38,7 @@ export function Picker(initial: Appearance) {
         <h2 id="theme-label" className={styles.label}>Theme</h2>
         <div className={styles.themes}>
           {(Object.keys(THEMES) as Theme[]).map((id) => (
-            <button key={id} type="button" aria-pressed={id === theme} onClick={() => pickTheme(id)} className={styles.card}>
+            <button key={id} type="button" disabled={pending} aria-pressed={id === theme} onClick={() => pickTheme(id)} className={styles.card}>
               <span
                 aria-hidden="true"
                 data-theme={id}
@@ -63,6 +67,7 @@ export function Picker(initial: Appearance) {
             <button
               key={a.hex}
               type="button"
+              disabled={pending}
               aria-label={a.name}
               aria-pressed={a.hex === chosen}
               onClick={() => pickAccent(a.hex)}
@@ -77,10 +82,11 @@ export function Picker(initial: Appearance) {
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => pickAccent(undefined)} className={styles.reset}>
+        <button type="button" disabled={pending} onClick={() => pickAccent(undefined)} className={styles.reset}>
           Use the theme&apos;s own colour
         </button>
       </section>
+      {error && <p role="alert">{error}</p>}
     </>
   );
 }

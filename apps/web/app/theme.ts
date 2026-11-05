@@ -1,4 +1,3 @@
-// The theme and accent live in cookies until they move to the users table.
 export const THEMES = {
   night: { name: 'Night', accent: '#F5B83D' },
   day: { name: 'Day', accent: '#F5B83D' },

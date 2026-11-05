@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@babelback/api": "*",
+    "@clerk/nextjs": "^7.9.24",
     "hono": "^4.13.16",
     "next": "^16.4.4",
     "react": "^19.3.1",
