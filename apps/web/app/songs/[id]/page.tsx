@@ -4,16 +4,16 @@ import { Player } from './player.tsx';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SongPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SongPage({ params, searchParams }: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ line?: string }>;
+}) {
   const { id } = await params;
   const response = await api().v1.seeds[':id'].$get({ param: { id } });
   if (response.status === 404) notFound();
-  const { song, audioUrl } = await response.json();
-  return (
-    <>
-      <h1>{song.title}</h1>
-      <p>{song.summary}</p>
-      <Player audioUrl={audioUrl} verses={song.verses} />
-    </>
-  );
+  if (!response.ok) throw new Error('Could not load this song');
+  const seed = await response.json();
+  const line = Number((await searchParams).line);
+  const initialLine = Number.isInteger(line) && line > 0 && line <= seed.song.verses.length ? line - 1 : -1;
+  return <Player key={id} seed={seed} initialLine={initialLine} />;
 }
