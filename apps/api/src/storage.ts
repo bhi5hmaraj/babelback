@@ -1,4 +1,4 @@
-import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const SIGNED_URL_SECONDS = 2 * 60 * 60;
@@ -13,7 +13,9 @@ type StorageEnv = {
 
 export type Storage = {
   signedUrl(key: string): Promise<string>;
+  signedPutUrl(key: string, contentType: string, bytes: number): Promise<string>;
   head(key: string): Promise<{ bytes: number; contentType: string }>;
+  read(key: string): Promise<Blob>;
 };
 
 export function connectStorage(env: StorageEnv): Storage {
@@ -27,9 +29,18 @@ export function connectStorage(env: StorageEnv): Storage {
   return {
     signedUrl: (key) =>
       getSignedUrl(client, new GetObjectCommand({ ...object, Key: key }), { expiresIn: SIGNED_URL_SECONDS }),
+    signedPutUrl: (key, contentType, bytes) =>
+      getSignedUrl(client, new PutObjectCommand({
+        ...object, Key: key, ContentType: contentType, ContentLength: bytes,
+      }), { expiresIn: 15 * 60, signableHeaders: new Set(['content-type', 'content-length']) }),
     head: async (key) => {
       const found = await client.send(new HeadObjectCommand({ ...object, Key: key }));
       return { bytes: found.ContentLength ?? 0, contentType: found.ContentType ?? 'application/octet-stream' };
+    },
+    read: async (key) => {
+      const found = await client.send(new GetObjectCommand({ ...object, Key: key }));
+      if (!found.Body) throw new Error('Audio object has no body');
+      return new Blob([await found.Body.transformToByteArray()], { type: found.ContentType });
     },
   };
 }
