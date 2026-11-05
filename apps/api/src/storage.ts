@@ -22,6 +22,8 @@ export function connectStorage(env: StorageEnv): Storage {
   const client = new S3Client({
     endpoint: env.S3_ENDPOINT,
     region: env.S3_REGION,
+    // The browser supplies the body after signing, so its checksum is not known here.
+    requestChecksumCalculation: 'WHEN_REQUIRED',
     credentials: { accessKeyId: env.S3_ACCESS_KEY_ID, secretAccessKey: env.S3_SECRET_ACCESS_KEY },
   });
   const object = { Bucket: env.S3_BUCKET };
