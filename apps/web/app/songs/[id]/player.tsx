@@ -9,7 +9,7 @@ import styles from './player.module.css';
 type Seed = InferResponseType<ReturnType<typeof api>['v1']['seeds'][':id']['$get'], 200>;
 const spectrum = [8, 14, 20, 16, 11, 18, 20, 13, 9, 15, 12, 7, 10, 5];
 
-export function Player({ seed, initialLine = -1 }: { seed: Seed; initialLine?: number }) {
+export function Player({ seed, initialLine = -1, initialLoop = false }: { seed: Seed; initialLine?: number; initialLoop?: boolean }) {
   const { song, audioUrl, id, language } = seed;
   const { verses } = song;
   const audio = useRef<HTMLAudioElement>(null);
@@ -17,7 +17,7 @@ export function Player({ seed, initialLine = -1 }: { seed: Seed; initialLine?: n
   const [time, setTime] = useState(initialLine >= 0 ? verses[initialLine].startTime : 0);
   const [duration, setDuration] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [loop, setLoop] = useState<number | null>(null);
+  const [loop, setLoop] = useState<number | null>(initialLoop && initialLine >= 0 ? initialLine : null);
   const [visible, setVisible] = useState({ script: true, sound: true, meaning: true });
   const [error, setError] = useState('');
   const active = currentLine(verses, time);
@@ -59,7 +59,7 @@ export function Player({ seed, initialLine = -1 }: { seed: Seed; initialLine?: n
   }
 
   return (
-    <div className={styles.player}>
+    <main className={styles.player}>
       <audio ref={audio} src={audioUrl} preload="metadata"
         onLoadedMetadata={(event) => {
           const media = event.currentTarget;
@@ -131,6 +131,6 @@ export function Player({ seed, initialLine = -1 }: { seed: Seed; initialLine?: n
           <span className={styles.controlSpace} aria-hidden="true" />
         </div>
       </section>
-    </div>
+    </main>
   );
 }
