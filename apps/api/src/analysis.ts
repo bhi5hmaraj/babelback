@@ -16,13 +16,15 @@ export const analysisInput = z.object({
   title: z.string(),
 });
 
+type Job = typeof jobs.$inferSelect;
 export type SendAnalysis = (event: { jobId: string; userId: string }) => Promise<unknown>;
 export type AnalysisService = { model: string; analyze: AnalyzeSong; send: SendAnalysis };
 
 // Only this transaction marks success, so replaying a step never creates a second library entry.
 export async function runAnalysis(db: Db, analyze: AnalyzeSong, jobId: string, runId?: string) {
   const [job] = await db.select().from(jobs).where(eq(jobs.id, jobId));
-  if (!job || job.type !== 'analyze' || job.status === 'failed' || job.status === 'succeeded') return;
+  // A YouTube job runs this once its download has saved the asset.
+  if (!job || job.type === 'practice_score' || job.status === 'failed' || job.status === 'succeeded') return;
   const input = analysisInput.parse(job.input);
   const [asset] = await db.select().from(audioAssets).where(eq(audioAssets.id, input.assetId));
   if (!asset?.readyAt) throw new Error('Audio is not ready');
@@ -82,7 +84,7 @@ export async function failJob(db: Db, jobId: string, code = 'analysis_failed',
 }
 
 // Recovers a process exit after the charge commits but before the event is sent.
-export async function redispatchAnalysisJobs(db: Db, send: SendAnalysis, type: 'analyze' | 'practice_score' = 'analyze') {
+export async function redispatchAnalysisJobs(db: Db, send: SendAnalysis, type: Job['type'] = 'analyze') {
   const queued = await db.select({ jobId: jobs.id, userId: jobs.userId }).from(jobs)
     .where(and(eq(jobs.type, type), eq(jobs.status, 'queued'))).orderBy(asc(jobs.updatedAt)).limit(100);
   await Promise.all(queued.map(async (event) => {

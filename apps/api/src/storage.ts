@@ -13,7 +13,8 @@ type StorageEnv = {
 
 export type Storage = {
   signedUrl(key: string): Promise<string>;
-  signedPutUrl(key: string, contentType: string, bytes: number): Promise<string>;
+  // Without bytes the size is unsigned, for a downloader that learns it while writing; check it with head.
+  signedPutUrl(key: string, contentType: string, bytes?: number): Promise<string>;
   head(key: string): Promise<{ bytes: number; contentType: string }>;
   read(key: string): Promise<Blob>;
 };
@@ -34,7 +35,7 @@ export function connectStorage(env: StorageEnv): Storage {
     signedPutUrl: (key, contentType, bytes) =>
       getSignedUrl(client, new PutObjectCommand({
         ...object, Key: key, ContentType: contentType, ContentLength: bytes,
-      }), { expiresIn: 15 * 60, signableHeaders: new Set(['content-type', 'content-length']) }),
+      }), { expiresIn: 15 * 60, signableHeaders: new Set(bytes === undefined ? ['content-type'] : ['content-type', 'content-length']) }),
     head: async (key) => {
       const found = await client.send(new HeadObjectCommand({ ...object, Key: key }));
       return { bytes: found.ContentLength ?? 0, contentType: found.ContentType ?? 'application/octet-stream' };

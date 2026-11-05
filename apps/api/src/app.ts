@@ -12,6 +12,7 @@ import { findSeed, listSeeds } from './seeds.ts';
 import { getSettings } from './settings.ts';
 import { users } from './schema.ts';
 import type { Storage } from './storage.ts';
+import { youtubeRoutes, type YoutubeService } from './youtube.ts';
 
 const appearance = z.object({
   theme: z.enum(['night', 'day', 'retro']),
@@ -30,11 +31,12 @@ type AppDeps = {
   clerkWebhookSecret?: string;
   analysis?: AnalysisService;
   practice?: PracticeService;
+  youtube?: YoutubeService;
   inngestHandler?: (c: Context) => Promise<Response>;
 };
 
 export function buildApp({
-  db, storage, adminPassword, verifySession, clerkWebhookSecret, analysis, practice, inngestHandler,
+  db, storage, adminPassword, verifySession, clerkWebhookSecret, analysis, practice, youtube, inngestHandler,
 }: AppDeps) {
   const auth = requireUser(db, verifySession);
   return new Hono()
@@ -51,7 +53,7 @@ export function buildApp({
       return c.json({ ...rest, audioUrl: await storage.signedUrl(storageKey) }, 200);
     })
     // Prices and limits are public so the client can show a price before the user confirms.
-    .get('/v1/config', async (c) => c.json(await getSettings(db)))
+    .get('/v1/config', async (c) => c.json({ ...(await getSettings(db)), youtubeImport: Boolean(analysis && youtube) }))
     .get('/v1/me', auth, (c) => c.json({ user: c.var.user }))
     .patch('/v1/me/appearance', auth, async (c) => {
       const body = appearance.safeParse(await c.req.json().catch(() => null));
@@ -64,6 +66,7 @@ export function buildApp({
       const verified = await handleClerkWebhook(db, c.req.raw, clerkWebhookSecret);
       return verified ? c.json({ ok: true }, 200) : c.json({ error: 'Invalid webhook signature' }, 400);
     })
+    .route('/v1/jobs/youtube', youtubeRoutes({ db, verifySession, analysis, youtube }))
     .route('/v1/practice-attempts', practiceRoutes({ db, storage, verifySession, practice }))
     .route('/v1', audioRoutes({ db, storage, verifySession, analysis }))
     .all('/api/inngest', async (c) => inngestHandler ? inngestHandler(c) : c.json({ error: 'Song workflows are not configured. Set Gemini and Inngest keys.' }, 503))
