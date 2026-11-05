@@ -1,16 +1,24 @@
 import postgres from 'postgres';
 import { connect, runMigrations } from './db.ts';
 
-// Each test file passes its own name, because node --test runs files in parallel.
+// node --test runs each file in its own process, and other checkouts share the
+// server, so the pid keeps every database name unique.
 export async function freshDatabase(name: string) {
+  const unique = `${name}_${process.pid}`;
   const maintenance = postgres(databaseUrl('postgres'), { onnotice: () => {} });
-  await maintenance.unsafe(`drop database if exists ${name} with (force)`);
-  await maintenance.unsafe(`create database ${name}`);
-  await maintenance.end();
+  await maintenance.unsafe(`drop database if exists ${unique} with (force)`);
+  await maintenance.unsafe(`create database ${unique}`);
 
-  const database = connect(databaseUrl(name));
+  const database = connect(databaseUrl(unique));
   await runMigrations(database.db);
-  return database;
+  return {
+    db: database.db,
+    close: async () => {
+      await database.close();
+      await maintenance.unsafe(`drop database if exists ${unique} with (force)`);
+      await maintenance.end();
+    },
+  };
 }
 
 function databaseUrl(name: string) {
