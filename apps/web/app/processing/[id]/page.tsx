@@ -14,7 +14,7 @@ export default async function ProcessingPage({ params }: { params: Promise<{ id:
   return <div className={styles.screen}>
     <header className={styles.row}><Link href="/" className={styles.close} aria-label="Back to home">&lt;</Link></header>
     <main className={styles.main}>
-      {'error' in result ? <p role="alert" className={styles.error}>{result.error}</p> : <Progress initial={result.job} />}
+      {'error' in result ? <p role="alert" className={styles.error}>{typeof result.error === 'string' ? result.error : 'Could not load this job.'}</p> : <Progress initial={result.job} />}
     </main>
   </div>;
 }

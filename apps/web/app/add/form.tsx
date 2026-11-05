@@ -6,14 +6,14 @@ import { analyzeUpload, completeUpload, createUpload } from './actions.ts';
 import { uploadError } from './upload.ts';
 import styles from '../workflows.module.css';
 
-const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Bengali'];
+const languages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Bengali'] as const;
 
 export function UploadForm({ credits, price, maxUploadMb, maxSongSeconds }: {
   credits: number; price: number; maxUploadMb: number; maxSongSeconds: number;
 }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] = useState<Parameters<typeof analyzeUpload>[1]>('English');
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const asset = useRef<string | null>(null);

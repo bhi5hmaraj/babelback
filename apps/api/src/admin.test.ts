@@ -25,7 +25,12 @@ let app: ReturnType<typeof buildApp>;
 
 before(async () => {
   database = await freshDatabase('babelback_test_admin');
-  const storage = { signedUrl: async () => '', head: async () => ({ bytes: 0, contentType: '' }) };
+  const storage = {
+    signedUrl: async () => '',
+    signedPutUrl: async () => { throw new Error('Admin tests do not upload'); },
+    head: async () => ({ bytes: 0, contentType: '' }),
+    read: async () => { throw new Error('Admin tests do not download'); },
+  };
   app = buildApp({ db: database.db, storage, adminPassword: PASSWORD });
 });
 

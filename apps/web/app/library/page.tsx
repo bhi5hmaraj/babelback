@@ -12,10 +12,10 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const query = await searchParams;
   const q = typeof query.q === 'string' ? query.q : '';
   const language = typeof query.language === 'string' ? query.language : '';
-  if ('error' in result) return <main className={styles.main}><h1 className={styles.heading}>Library</h1><p role="alert" className={styles.error}>{result.error}</p></main>;
+  if ('error' in result) return <main className={styles.main}><h1 className={styles.heading}>Library</h1><p role="alert" className={styles.error}>{typeof result.error === 'string' ? result.error : 'Could not load your Library.'}</p></main>;
   const { entries, jobs } = result;
   const languages = [...new Set(entries.map((entry) => entry.language).filter(Boolean))];
-  const matching = entries.filter((entry) => entry.title.toLowerCase().includes(q.toLowerCase()) && (!language || entry.language === language));
+  const matching = entries.filter((entry) => entry.analysisId && entry.title.toLowerCase().includes(q.toLowerCase()) && (!language || entry.language === language));
   return <div className={styles.screen}>
     <main className={styles.main}>
       <div className={styles.row}><h1 className={styles.heading}>Library</h1><span className={styles.muted}>{entries.length} {entries.length === 1 ? 'song' : 'songs'}</span></div>
@@ -33,7 +33,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
         {jobs.map((job) => <li key={job.id}>
           <Link href={`/processing/${job.id}`} className={styles.song}>
             <span aria-hidden="true" className={styles.tile}>{job.status === 'failed' ? '!' : '...'}</span>
-            <span className={styles.songText}><strong>{job.status === 'failed' ? 'Could not add your song' : 'Preparing your song'}</strong><span className={styles.muted}>{job.errorMessage || 'Lyrics and translations are on their way'}</span></span>
+            <span className={styles.songText}><strong>{typeof job.input.title === 'string' ? job.input.title : 'Your song'}</strong><span className={styles.muted}>{job.errorMessage || 'Lyrics and translations are on their way'}</span></span>
           </Link>
         </li>)}
         {matching.map((entry) => <li key={entry.id} className={styles.row}>
@@ -47,7 +47,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
           </form>
         </li>)}
       </ul>
-      {!matching.length && <p className={styles.muted}>{entries.length ? 'No songs match this search.' : 'Your songs will wait here. Add one to get started.'}</p>}
+      {!matching.length && <p className={styles.muted}>{q || language ? 'No songs match this search.' : jobs.length ? 'Your songs are being prepared above.' : 'Your songs will wait here. Add one to get started.'}</p>}
       <Link href="/add" className={styles.button}>Add a song</Link>
     </main>
     <Navigation active="library" />

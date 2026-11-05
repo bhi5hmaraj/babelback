@@ -9,6 +9,6 @@ export async function loadSong(id: string) {
   const response = await (await authenticatedApi()).v1.analyses[':id'].$get({ param: { id } });
   if (response.status === 404) notFound();
   const result = await response.json();
-  if ('error' in result) throw new Error(result.error);
+  if ('error' in result) throw new Error(typeof result.error === 'string' ? result.error : 'Could not load this song.');
   return result;
 }
