@@ -8,4 +8,5 @@ export default function proxy(request: NextRequest, event: NextFetchEvent) {
   return clerk(request, event);
 }
 
-export const config = { matcher: ['/((?!_next|.*\\..*).*)'] };
+// Every page renders the layout, which calls Clerk, so paths with a dot (a missing icon) need the middleware too.
+export const config = { matcher: ['/((?!_next/static|_next/image).*)'] };

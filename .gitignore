@@ -26,9 +26,6 @@ apify_storage/
 *.jpeg
 *.jpg
 *.png
-# The web app's install icons.
-!apps/web/public/*.png
-!apps/web/app/apple-icon.png
 *.gif
 *.webp
 *.bmp

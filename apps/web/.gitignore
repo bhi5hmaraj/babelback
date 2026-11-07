@@ -1,3 +1,6 @@
 .next/
 next-env.d.ts
 *.tsbuildinfo
+# The install icons, against the repo-wide *.png rule.
+!public/*.png
+!app/apple-icon.png
